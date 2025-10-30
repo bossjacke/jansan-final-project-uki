@@ -1,7 +1,7 @@
 import express from "express";
 import { registerUser, loginUser } from "../controllers/user.controller.js";
 //get user
-import { getUserProfile } from "../controllers/user.controller.js";
+import { getUserProfile,updateUserProfile,deleteUser } from "../controllers/user.controller.js";
 import { authMiddleware } from "../middleware/auth.js";
 
 
@@ -19,8 +19,8 @@ router.post("/login", loginUser);
 
 // GET /api/users/profile
 router.get("/profile", authMiddleware, getUserProfile);
-router.put("/profile", authMiddleware, updateUserProfile);
-router.delete("/:userId", authMiddleware, deleteUser);
+router.put("/profile", authMiddleware,    updateUserProfile);
+router.delete("/:userId", authMiddleware, deleteUser   );
 
 
 
