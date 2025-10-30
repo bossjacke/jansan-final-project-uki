@@ -4,6 +4,9 @@ import User from "../models/user.model.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_super_secret";
 
+
+
+
 // ✅ Register
 export const registerUser = async (req, res) => {
   try {
@@ -40,6 +43,10 @@ export const registerUser = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+
+
+
 
 // ✅ Login
 export const loginUser = async (req, res) => {
@@ -81,7 +88,6 @@ export const loginUser = async (req, res) => {
 
 
 
-//get 
 // Get User Profile
 export const getUserProfile = async (req, res) => {
     try {
@@ -96,3 +102,41 @@ export const getUserProfile = async (req, res) => {
     }
   };
   
+
+
+
+  // Update Profile
+export const updateUserProfile = async (req, res) => {
+  try {
+    const updates = req.body;
+    if (updates.password) {
+      updates.password = await bcrypt.hash(updates.password, 10);
+    }
+    const user = await User.findByIdAndUpdate(req.user.id, updates, {
+      new: true,
+    }).select("-password");
+
+    res.json({ message: "Profile updated successfully", user });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating profile", error: error.message });
+  }
+};
+
+
+
+
+
+// Delete User (Admin only)
+export const deleteUser = async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Access denied. Admin only." });
+    }
+
+    const { userId } = req.params;
+    await User.findByIdAndDelete(userId);
+    res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting user", error: error.message });
+  }
+};

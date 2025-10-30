@@ -7,7 +7,7 @@ import userRoutes from "./routes/user.routes.js";
 dotenv.config();
 const app = express();
 
-// ✅ Enable CORS
+// Enable CORS
 app.use(
   cors({
     origin: "http://localhost:3003", // For development, allows all. Change to frontend URL in production.
