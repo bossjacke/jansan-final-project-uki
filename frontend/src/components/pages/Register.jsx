@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 // import { registerUser } from "../../services/api.js";
-import { registerUser } from "../../api";
+import { RegisterUser } from "../../api";
 
 
 
@@ -11,7 +11,7 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await registerUser(form);
+      const res = await RegisterUser(form);
       alert(res.message || "User Registered Successfully");
     } catch {
       alert("Registration failed");
