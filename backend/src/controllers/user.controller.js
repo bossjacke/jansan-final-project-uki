@@ -17,6 +17,12 @@ export const registerUser = async (req, res) => {
     if (existingUser)
       return res.status(400).json({ message: "Email already registered" });
 
+    // Validate required fields for customer role
+    const effectiveRole = role || "customer";
+    if (effectiveRole === "customer" && !locationId) {
+      return res.status(400).json({ message: "locationId is required for customers" });
+    }
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -26,7 +32,7 @@ export const registerUser = async (req, res) => {
       email,
       phone,
       password: hashedPassword,
-      role,
+      role: effectiveRole,
       locationId,
     });
 

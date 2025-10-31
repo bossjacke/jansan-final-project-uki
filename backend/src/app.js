@@ -23,7 +23,8 @@ app.use(express.json());
 // Routes
 app.use("/api/users", userRoutes);
 
-app.use("api/products", router);
+// NOTE: products route must include a leading slash — otherwise Express won't match the path.
+app.use("/api/products", router);
 
 
 // Database connection
