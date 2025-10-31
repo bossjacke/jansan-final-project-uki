@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 // import { loginUser } from "../../services/api";
-import { loginUser } from "../../api";
+import { LoginUser } from "../../api";
 
 
 
@@ -10,7 +10,7 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await loginUser(form);
+      const res = await LoginUser(form);
       alert("Login successful");
       console.log(res.user);
     } catch {
