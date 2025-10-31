@@ -9,14 +9,13 @@ import Login from './components/pages/Login';
 
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
       <Register></Register>    
         <Login></Login>
 
-      <GoogleOAuthProvider clientId="367194647798-uvhfpnr75e2k686anuceku02idqifukq.apps.googleusercontent.com">
+      <GoogleOAuthProvider clientId="367194647798-0qjrumukncrmjj543lv31q5gop97elfk.apps.googleusercontent.com">
       <div style={{ textAlign: 'center', marginTop: '50px' }}>
         <h2>Login with Google</h2>
         <GoogleLogin

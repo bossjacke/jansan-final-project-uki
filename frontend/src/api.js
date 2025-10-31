@@ -1,7 +1,9 @@
 import axios from "axios";
-// const API_URL = "http://localhost:3003/api";
-const API_URL = "http://localhost:5173/api";
 
+// Prefer a Vite environment variable (VITE_API_URL). Fall back to backend default.
+// In development the backend runs on port 3003 by default.
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3003/api";
+console.log("Using API URL:", API_URL);
 
 export const RegisterUser = async (userData) => {
   try {
@@ -9,7 +11,8 @@ export const RegisterUser = async (userData) => {
     return res.data;
   } catch (err) {
     console.error("Register Error:", err.response?.data || err.message);
-    throw err;
+    console.log(err.message);
+    throw (API_URL);
   }
 };
 
