@@ -101,9 +101,11 @@
 
 
 import React, { useState } from "react";
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
-const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'
 import { LoginUser } from "../../api";
+import Register from "./Register";
+
+const RegisterPath = "./Register";
 
 function Login({ onLogin, onClose }) {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -159,7 +161,7 @@ function Login({ onLogin, onClose }) {
           >
             submit
           </button>
-          <GoogleOAuthProvider clientId={clientId}>
+          <GoogleOAuthProvider clientId="367194647798-0qjrumukncrmjj543lv31q5gop97elfk.apps.googleusercontent.com">
         <div style={{ textAlign: 'center', marginTop: '50px' }}>
           <h2>Login with Google</h2>
           <GoogleLogin
@@ -177,7 +179,7 @@ function Login({ onLogin, onClose }) {
         {/* Bottom Link */}
         <button
           className="absolute bottom-3 right-3 text-white bg-green-600 hover:bg-green-700 rounded-md text-xs px-3 py-1"
-        >
+          onClick={RegisterPath}>
           Goto sign up
         </button>
       </div>

@@ -37,13 +37,18 @@
 
 import React, { useState } from "react";
 import { RegisterUser } from "../../api";
+import Login from "./Login";
 
 function Register({ onRegister, onClose }) {
+  // fallback navigation without react-router: use window.location
+
+  // include locationId because backend requires it for customer role
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
+    locationId: "",
   });
 
   const handleSubmit = async (e) => {
@@ -58,6 +63,13 @@ function Register({ onRegister, onClose }) {
       alert(res.message || "User Registered Successfully");
       if (onRegister) onRegister(res);
       if (onClose) onClose();
+      // after successful registration, send user to login page
+      try {
+        // if react-router is available this will be handled by parent; otherwise use full reload
+        window.location.href = '/login';
+      } catch (e) {
+        /* ignore */
+      }
     } catch {
       alert("Registration failed");
     }
@@ -84,6 +96,13 @@ function Register({ onRegister, onClose }) {
             placeholder="G-mail"
             className="bg-green-500 text-white placeholder-white rounded-lg py-2 text-center focus:ring-2 focus:ring-green-600 focus:outline-none"
             onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+
+          <input
+            type="text"
+            placeholder="Location ID"
+            className="bg-green-500 text-white placeholder-white rounded-lg py-2 text-center focus:ring-2 focus:ring-green-600 focus:outline-none"
+            onChange={(e) => setForm({ ...form, locationId: e.target.value })}
           />
 
           <input
@@ -115,7 +134,7 @@ function Register({ onRegister, onClose }) {
         </form>
 
         {/* Bottom Button */}
-        <button className="absolute bottom-3 left-3 text-white bg-green-600 hover:bg-green-700 rounded-md text-xs px-3 py-1">
+        <button className="absolute bottom-3 left-3 text-white bg-green-600 hover:bg-green-700 rounded-md text-xs px-3 py-1" >
           Goto sign in
         </button>
       </div>

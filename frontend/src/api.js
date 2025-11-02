@@ -12,7 +12,7 @@ export const RegisterUser = async (userData) => {
   } catch (err) {
     console.error("Register Error:", err.response?.data || err.message);
     console.log(err.message);
-    throw (API_URL);
+    throw err;
   }
 };
 
