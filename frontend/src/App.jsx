@@ -13,6 +13,8 @@ function App() {
     <>
       <Register></Register>    
         <Login></Login>
+
+
     </>
   )
 }
