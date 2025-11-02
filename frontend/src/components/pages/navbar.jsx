@@ -1,53 +1,65 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 
-
-
-const MyNavbar = ({ activeLink = 'Home', onLinkClick = () => {}, isAuthenticated = false, onSignIn = () => {}, onSignOut = () => {} }) => {
+function MyNavbar({
+  activeLink = 'Home',
+  onLinkClick = () => {},
+  isAuthenticated = false,
+  onSignIn = () => {},
+  onSignOut = () => {},
+}) {
   const links = ['Home', 'About', 'Products', 'Cart'];
 
   return (
-    <nav className="bg-[#2ecc71] py-4 px-6 flex items-center justify-between">
+    <nav className="bg-green-500 px-6 py-4 flex items-center justify-between font-sans">
       {/* Left: Logo */}
-      <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-[#2ecc71]">J</div>
-        <span className="text-white font-semibold">Jansan</span>
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-white text-green-500 font-bold rounded-full flex items-center justify-center">
+          J
+        </div>
+        <span className="text-white font-semibold text-lg">Jansan</span>
       </div>
 
       {/* Center: Links */}
       <div className="flex-grow flex justify-center">
-        <div className="flex items-center space-x-4 bg-white rounded-full p-2">
-          {links.map((name) => {
-            const active = activeLink === name;
+        <div className="bg-white rounded-full px-4 py-2 flex gap-4">
+          {links.map(function (name) {
+            const to = name === 'Home' ? '/' : `/${name.toLowerCase()}`;
             return (
-              <a
+              <NavLink
                 key={name}
-                href="#"
-                onClick={(e) => { e.preventDefault(); onLinkClick(name); }}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onLinkClick(name); } }}
-                aria-current={active ? 'page' : undefined}
-                className={`px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-green-300 ${active ? 'text-[#2ecc71] font-bold' : 'text-black'}`}
+                to={to}
+                onClick={() => onLinkClick(name)}
+                className={({ isActive }) =>
+                  `text-black px-3 py-1 rounded-md outline-none focus:ring-2 focus:ring-green-200 ${isActive ? 'text-green-500 font-bold' : ''}`
+                }
+                end={name === 'Home'}
               >
                 {name}
-              </a>
+              </NavLink>
             );
           })}
         </div>
       </div>
 
       {/* Right: Auth */}
-      <div className="flex items-center space-x-4">
+      <div>
         {isAuthenticated ? (
-          <button onClick={onSignOut} className="text-white font-bold">
+          <button onClick={onSignOut} className="bg-transparent border-none text-white font-bold cursor-pointer">
             Sign Out
           </button>
         ) : (
-          <button onClick={onSignIn} className="text-white font-bold">
+          <button onClick={onSignIn} className="bg-transparent border-none text-white font-bold cursor-pointer">
             Sign In
           </button>
         )}
       </div>
     </nav>
   );
-};
+}
 
 export default MyNavbar;
+
+
+
+

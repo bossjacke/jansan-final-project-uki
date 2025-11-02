@@ -101,6 +101,8 @@
 
 
 import React, { useState } from "react";
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 import { LoginUser } from "../../api";
 
 function Login({ onLogin, onClose }) {
@@ -157,6 +159,19 @@ function Login({ onLogin, onClose }) {
           >
             submit
           </button>
+          <GoogleOAuthProvider clientId={clientId}>
+        <div style={{ textAlign: 'center', marginTop: '50px' }}>
+          <h2>Login with Google</h2>
+          <GoogleLogin
+            onSuccess={credentialResponse => {
+              console.log("Login Success:", credentialResponse);
+            }}
+            onError={() => {
+              console.log("Login Failed");
+            }}
+          />
+        </div>
+      </GoogleOAuthProvider>
         </form>
 
         {/* Bottom Link */}
