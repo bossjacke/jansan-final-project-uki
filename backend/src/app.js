@@ -4,6 +4,7 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/user.routes.js";
 import router from "./routes/product.routes.js";
+import passwordRoutes from "./routes/password.routes.js";
 
 dotenv.config();
 const app = express();
@@ -25,6 +26,8 @@ app.use("/api/users", userRoutes);
 
 // NOTE: products route must include a leading slash — otherwise Express won't match the path.
 app.use("/api/products", router);
+// Auth / password routes
+app.use("/api/auth", passwordRoutes);
 
 
 // Database connection
