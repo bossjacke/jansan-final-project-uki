@@ -25,7 +25,7 @@ export const forgotPassword = async (req, res) => {
     const resetUrl = `${FRONTEND_URL}/reset-password/${token}`;
 
     // Send email
-    const subject = 'Reset your Jansan password';
+    const subject = 'Reset your password';
     const text = `You requested a password reset. Click the link to reset your password:\n\n${resetUrl}\n\nIf you did not request this, ignore this email.`;
 
     await sendEmail({ to: user.email, subject, text });

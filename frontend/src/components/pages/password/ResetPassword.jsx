@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ResetPassword } from '../../api';
+import { ResetPassword } from '../../../api';
 import { useParams, useNavigate } from 'react-router-dom';
 
 function ResetPasswordPage() {

@@ -150,6 +150,23 @@ function Login({ onLogin, onClose }) {
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
 
+
+
+
+          {/* Forgot Password Link */}
+          <div className="text-right">
+            <Link
+              to="/forgot-password"
+              className="text-green-600 text-sm hover:text-green-700 hover:underline"
+            >
+              Forgot Password?
+            </Link>
+          </div>
+
+
+
+
+
           {/* Dashed Line */}
           <div className="border-t-4 border-dashed border-black w-3/4 mx-auto my-1"></div>
 
@@ -161,9 +178,9 @@ function Login({ onLogin, onClose }) {
           >
             submit
           </button>
-        </form>
 
-        {/* Google Login - Outside the form */}
+
+          {/* Google Login - Outside the form */}
         <GoogleOAuthProvider clientId="367194647798-0qjrumukncrmjj543lv31q5gop97elfk.apps.googleusercontent.com">
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
             <GoogleLogin
@@ -178,7 +195,7 @@ function Login({ onLogin, onClose }) {
             />
           </div>
         </GoogleOAuthProvider>
-
+        <br /><br />
         {/* sign up path Link */}
         <Link
           to="/register"
@@ -186,8 +203,7 @@ function Login({ onLogin, onClose }) {
         >
           Goto sign up
         </Link>
-
-
+        </form>
       </div>
     </div>
   );

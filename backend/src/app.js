@@ -27,7 +27,7 @@ app.use("/api/users", userRoutes);
 // NOTE: products route must include a leading slash — otherwise Express won't match the path.
 app.use("/api/products", router);
 // Auth / password routes
-app.use("/api/auth", passwordRoutes);
+app.use("/api/user", passwordRoutes);
 
 
 // Database connection

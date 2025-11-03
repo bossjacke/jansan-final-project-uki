@@ -30,7 +30,7 @@ export const LoginUser = async (credentials) => {
 
 export const ForgotPassword = async (email) => {
   try {
-    const res = await axios.post(`${API_URL}/auth/forgot-password`, { email });
+    const res = await axios.post(`${API_URL}/user/forgot-password`, { email });
     return res.data;
   } catch (err) {
     console.error('Forgot password error:', err.response?.data || err.message);
@@ -40,7 +40,7 @@ export const ForgotPassword = async (email) => {
 
 export const ResetPassword = async (token, password) => {
   try {
-    const res = await axios.post(`${API_URL}/auth/reset-password/${token}`, { password });
+    const res = await axios.post(`${API_URL}/user/reset-password/${token}`, { password });
     return res.data;
   } catch (err) {
     console.error('Reset password error:', err.response?.data || err.message);
