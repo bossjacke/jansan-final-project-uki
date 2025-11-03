@@ -103,9 +103,7 @@
 import React, { useState } from "react";
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'
 import { LoginUser } from "../../api";
-import Register from "./Register";
-
-const RegisterPath = "./Register";
+import { Link } from 'react-router-dom';
 
 function Login({ onLogin, onClose }) {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -162,26 +160,28 @@ function Login({ onLogin, onClose }) {
             submit
           </button>
           <GoogleOAuthProvider clientId="367194647798-0qjrumukncrmjj543lv31q5gop97elfk.apps.googleusercontent.com">
-        <div style={{ textAlign: 'center', marginTop: '50px' }}>
-          <h2>Login with Google</h2>
-          <GoogleLogin
-            onSuccess={credentialResponse => {
-              console.log("Login Success:", credentialResponse);
-            }}
-            onError={() => {
-              console.log("Login Failed");
-            }}
-          />
-        </div>
-      </GoogleOAuthProvider>
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+              <GoogleLogin
+                onSuccess={credentialResponse => {
+                  console.log("Login Success:", credentialResponse);
+                }}
+                onError={() => {
+                  console.log("Login Failed");
+                }}
+              />
+            </div>
+          </GoogleOAuthProvider>
+          <br />
+          {/* sign up path Link */}
+          <Link
+            to="/register"
+            className="absolute bottom-3 right-3 text-white bg-green-600 hover:bg-green-700 rounded-md text-xs px-3 py-1"
+          >
+            Goto sign up
+          </Link>
         </form>
 
-        {/* Bottom Link */}
-        <button
-          className="absolute bottom-3 right-3 text-white bg-green-600 hover:bg-green-700 rounded-md text-xs px-3 py-1"
-          onClick={RegisterPath}>
-          Goto sign up
-        </button>
+        
       </div>
     </div>
   );

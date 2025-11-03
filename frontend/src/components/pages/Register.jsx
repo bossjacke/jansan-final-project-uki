@@ -37,7 +37,7 @@
 
 import React, { useState } from "react";
 import { RegisterUser } from "../../api";
-import Login from "./Login";
+import { Link } from 'react-router-dom';
 
 function Register({ onRegister, onClose }) {
   // fallback navigation without react-router: use window.location
@@ -131,12 +131,13 @@ function Register({ onRegister, onClose }) {
           >
             submit
           </button>
+          <br />
+          <br />
+          {/* Bottom Button -> navigate to login */}
+          <Link to="/login" className="absolute bottom-3 left-3 text-white bg-green-600 hover:bg-green-700 rounded-md text-xs px-3 py-1" >
+            Goto sign in
+          </Link>
         </form>
-
-        {/* Bottom Button */}
-        <button className="absolute bottom-3 left-3 text-white bg-green-600 hover:bg-green-700 rounded-md text-xs px-3 py-1" >
-          Goto sign in
-        </button>
       </div>
     </div>
   );
