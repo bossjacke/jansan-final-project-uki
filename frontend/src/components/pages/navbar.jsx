@@ -1,65 +1,67 @@
+// import React from 'react';
+// import { Link } from 'react-router-dom';
+
+
+// function Navbar() {
+//   return (
+//     <nav className="navbar">
+//       <div className="nav-left">
+//         {/* Logo */}
+//         <img src="/logo.png" alt="Logo" className="logo" />
+
+//         {/* Navigation Links */}
+//         <Link to="/Home" className="nav-item">Home</Link>
+//         <Link to="/about" className="nav-item">About</Link>
+//         <Link to="/products" className="nav-item">Products</Link>
+//         <Link to="/cart" className="nav-item">Cart</Link>
+//         <Link to="/login" className="nav-item">Login</Link>
+//         <Link to="/register" className="nav-item">Register</Link>
+        
+//       </div>
+
+//       <div className="nav-right">
+//         <button className="close-btn">X</button>
+//         <Link to="/signin" className="signin-link">Sign In</Link>
+//       </div>
+//     </nav>
+//   );
+// }
+
+// export default Navbar;
+
+
+
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
-function MyNavbar({
-  activeLink = 'Home',
-  onLinkClick = () => {},
-  isAuthenticated = false,
-  onSignIn = () => {},
-  onSignOut = () => {},
-}) {
-  const links = ['Home', 'About', 'Products', 'Cart'];
-
+function Navbar() {
   return (
-    <nav className="bg-green-500 px-6 py-4 flex items-center justify-between font-sans">
-      {/* Left: Logo */}
+    <nav className="bg-green-600 px-6 py-4 flex items-center justify-between font-sans">
+      {/* Logo Section */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-white text-green-500 font-bold rounded-full flex items-center justify-center">
-          J
+        <div className="w-10 h-10 bg-white text-green-600 font-bold rounded-full flex items-center justify-center">
+          JS
         </div>
         <span className="text-white font-semibold text-lg">Jansan</span>
       </div>
 
-      {/* Center: Links */}
-      <div className="flex-grow flex justify-center">
-        <div className="bg-white rounded-full px-4 py-2 flex gap-4">
-          {links.map(function (name) {
-            const to = name === 'Home' ? '/' : `/${name.toLowerCase()}`;
-            return (
-              <NavLink
-                key={name}
-                to={to}
-                onClick={() => onLinkClick(name)}
-                className={({ isActive }) =>
-                  `text-black px-3 py-1 rounded-md outline-none focus:ring-2 focus:ring-green-200 ${isActive ? 'text-green-500 font-bold' : ''}`
-                }
-                end={name === 'Home'}
-              >
-                {name}
-              </NavLink>
-            );
-          })}
-        </div>
+      {/* Navigation Links */}
+      <div className="flex gap-4">
+        <Link to="/home" className="text-white px-3 py-1 rounded-md hover:bg-green-700 focus:bg-green-700">Home</Link>
+        <Link to="/about" className="text-white px-3 py-1 rounded-md hover:bg-green-700 focus:bg-green-700">About</Link>
+        <Link to="/products" className="text-white px-3 py-1 rounded-md hover:bg-green-700 focus:bg-green-700">Products</Link>
+        <Link to="/cart" className="text-white px-3 py-1 rounded-md hover:bg-green-700 focus:bg-green-700">Cart</Link>
+        {/* <Link to="/login" className="text-white px-3 py-1 rounded-md hover:bg-green-700 focus:bg-green-700">Login</Link>
+        <Link to="/register" className="text-white px-3 py-1 rounded-md hover:bg-green-700 focus:bg-green-700">Register</Link> */}
       </div>
 
-      {/* Right: Auth */}
-      <div>
-        {isAuthenticated ? (
-          <button onClick={onSignOut} className="bg-transparent border-none text-white font-bold cursor-pointer">
-            Sign Out
-          </button>
-        ) : (
-          <button onClick={onSignIn} className="bg-transparent border-none text-white font-bold cursor-pointer">
-            Sign In
-          </button>
-        )}
+      {/* Right Side Actions */}
+      <div className="flex items-center gap-4">
+        <button className="text-white font-bold text-lg hover:text-red-300">X</button>
+        <Link to="/register" className="text-white px-3 py-1 rounded-md hover:bg-green-700 focus:bg-green-700"> Register</Link>
       </div>
     </nav>
   );
 }
 
-export default MyNavbar;
-
-
-
-
+export default Navbar;
