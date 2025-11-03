@@ -157,6 +157,7 @@ function Login({ onLogin, onClose }) {
           <button
             type="submit"
             className="bg-green-600 text-white rounded-md py-2 w-24 mx-auto hover:bg-green-700 focus:ring-2 focus:ring-green-400"
+            onClick={handleLogin}
           >
             submit
           </button>
