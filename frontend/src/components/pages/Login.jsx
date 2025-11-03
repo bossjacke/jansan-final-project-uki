@@ -186,7 +186,7 @@ function Login({ onLogin, onClose }) {
           Goto sign up
         </Link>
 
-        
+
       </div>
     </div>
   );
