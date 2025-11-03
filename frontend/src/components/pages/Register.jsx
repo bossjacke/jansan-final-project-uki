@@ -37,7 +37,7 @@
 
 import React, { useState } from "react";
 import { RegisterUser } from "../../api";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Register({ onRegister, onClose }) {
   // fallback navigation without react-router: use window.location
@@ -46,10 +46,13 @@ function Register({ onRegister, onClose }) {
   const [form, setForm] = useState({
     name: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
     locationId: "",
   });
+  const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -58,20 +61,27 @@ function Register({ onRegister, onClose }) {
       return;
     }
 
+    // Remove confirmPassword before sending to backend
+    const { confirmPassword, ...formData } = form;
+
     try {
-      const res = await RegisterUser(form);
-      alert(res.message || "User Registered Successfully");
+      const res = await RegisterUser(formData);
+      // show an inline success message and navigate via react-router
+      setSuccessMessage(res.message || "User Registered Successfully");
       if (onRegister) onRegister(res);
       if (onClose) onClose();
-      // after successful registration, send user to login page
-      try {
-        // if react-router is available this will be handled by parent; otherwise use full reload
-        window.location.href = '/login';
-      } catch (e) {
-        /* ignore */
-      }
-    } catch {
-      alert("Registration failed");
+      // auto-redirect after a short delay so the user sees the success message
+      setTimeout(() => {
+        try {
+          navigate('/login');
+        } catch (e) {
+          // fallback to full reload if navigate isn't available
+          window.location.href = '/login';
+        }
+      }, 1500);
+    } catch (error) {
+      console.error("Registration error:", error);
+      alert(error.response?.data?.message || "Registration failed");
     }
   };
 
@@ -96,6 +106,13 @@ function Register({ onRegister, onClose }) {
             placeholder="G-mail"
             className="bg-green-500 text-white placeholder-white rounded-lg py-2 text-center focus:ring-2 focus:ring-green-600 focus:outline-none"
             onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+
+          <input
+            type="tel"
+            placeholder="Phone"
+            className="bg-green-500 text-white placeholder-white rounded-lg py-2 text-center focus:ring-2 focus:ring-green-600 focus:outline-none"
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
           />
 
           <input
@@ -131,6 +148,9 @@ function Register({ onRegister, onClose }) {
           >
             submit
           </button>
+            {successMessage && (
+              <div style={{ marginTop: 12, color: 'green', fontWeight: '600' }}>{successMessage}</div>
+            )}
           <br />
           <br />
           {/* Bottom Button -> navigate to login */}

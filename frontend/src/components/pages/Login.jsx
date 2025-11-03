@@ -116,8 +116,9 @@ function Login({ onLogin, onClose }) {
       console.log(res.user);
       if (onLogin) onLogin(res);
       if (onClose) onClose();
-    } catch {
-      alert("Invalid email or password");
+    } catch (error) {
+      console.error("Login error:", error);
+      alert(error.response?.data?.message || "Invalid email or password");
     }
   };
 
@@ -159,27 +160,31 @@ function Login({ onLogin, onClose }) {
           >
             submit
           </button>
-          <GoogleOAuthProvider clientId="367194647798-0qjrumukncrmjj543lv31q5gop97elfk.apps.googleusercontent.com">
-            <div style={{ textAlign: 'center', marginTop: '20px' }}>
-              <GoogleLogin
-                onSuccess={credentialResponse => {
-                  console.log("Login Success:", credentialResponse);
-                }}
-                onError={() => {
-                  console.log("Login Failed");
-                }}
-              />
-            </div>
-          </GoogleOAuthProvider>
-          <br />
-          {/* sign up path Link */}
-          <Link
-            to="/register"
-            className="absolute bottom-3 right-3 text-white bg-green-600 hover:bg-green-700 rounded-md text-xs px-3 py-1"
-          >
-            Goto sign up
-          </Link>
         </form>
+
+        {/* Google Login - Outside the form */}
+        <GoogleOAuthProvider clientId="367194647798-0qjrumukncrmjj543lv31q5gop97elfk.apps.googleusercontent.com">
+          <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <GoogleLogin
+              onSuccess={credentialResponse => {
+                console.log("Login Success:", credentialResponse);
+                // TODO: Handle Google login success
+              }}
+              onError={() => {
+                console.log("Login Failed");
+                alert("Google login failed");
+              }}
+            />
+          </div>
+        </GoogleOAuthProvider>
+
+        {/* sign up path Link */}
+        <Link
+          to="/register"
+          className="absolute bottom-3 right-3 text-white bg-green-600 hover:bg-green-700 rounded-md text-xs px-3 py-1"
+        >
+          Goto sign up
+        </Link>
 
         
       </div>
@@ -188,4 +193,3 @@ function Login({ onLogin, onClose }) {
 }
 
 export default Login;
-
