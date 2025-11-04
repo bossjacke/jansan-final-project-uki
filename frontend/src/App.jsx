@@ -33,8 +33,8 @@ import Products from './components/pages/Products.jsx';
 import Cart from './components/pages/Cart.jsx';
 import Login from './components/pages/Login.jsx';
 import Register from './components/pages/Register.jsx';
-import ForgotPassword from './components/pages/ForgotPassword.jsx';
-import ResetPassword from './components/pages/ResetPassword.jsx';
+import ForgotPassword from './components/pages/password/ForgotPassword.jsx';
+import ResetPassword from './components/pages/password/ResetPassword.jsx';
 
 function App() {
   return (
@@ -55,4 +55,3 @@ function App() {
 }
 
 export default App;
-
