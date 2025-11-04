@@ -1,39 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ResetPassword } from '../../../api';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 function ResetPasswordPage() {
-  const { token } = useParams();
   const navigate = useNavigate();
-  const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
+  const location = useLocation();
+  const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+  const [messageType, setMessageType] = useState('');
+
+  // Pre-fill email if coming from ForgotPassword page
+  useEffect(() => {
+    if (location.state?.email) {
+      setEmail(location.state.email);
+    }
+  }, [location.state]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage(null);
     
-    // Password validation
-    if (password.length < 6) {
-      return setMessage('Password must be at least 6 characters long');
+    // Input validation
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setMessage('Please enter a valid email address');
+      setMessageType('error');
+      return;
     }
-    
-    if (password !== confirm) {
-      return setMessage('Passwords do not match');
+
+    if (!/^\d{6}$/.test(otp)) {
+      setMessage('Please enter a valid 6-digit OTP');
+      setMessageType('error');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setMessage('Password must be at least 6 characters long');
+      setMessageType('error');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setMessage('Passwords do not match');
+      setMessageType('error');
+      return;
     }
     
     setLoading(true);
-    setMessage(null);
     try {
-      const res = await ResetPassword(token, password);
+      const res = await ResetPassword(email, otp, newPassword);
       setMessage(res.message || 'Password reset successfully! You can now log in.');
+      setMessageType('success');
       // Redirect to login after successful reset
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
       setMessage(err.response?.data?.message || 'Could not reset password. Please try again.');
+      setMessageType('error');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleOtpChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    setOtp(value);
   };
 
   return (
@@ -46,33 +79,61 @@ function ResetPasswordPage() {
         </div>
 
         {/* Title */}
-        <h2 className="text-green-600 font-semibold text-lg mb-5">Reset Password</h2>
+        <h2 className="text-green-600 font-semibold text-lg mb-3">Reset Password</h2>
+        
+        {/* Description */}
+        <p className="text-sm text-gray-600 mb-4">
+          Enter your email, OTP, and new password
+        </p>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <input
+            type="email"
+            placeholder="Email address"
+            className="bg-green-500 text-white placeholder-white rounded-lg py-2 text-center focus:ring-2 focus:ring-green-600 focus:outline-none"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={loading}
+          />
+
+          <input
+            type="text"
+            placeholder="6-digit OTP"
+            className="bg-green-500 text-white placeholder-white rounded-lg py-2 text-center focus:ring-2 focus:ring-green-600 focus:outline-none"
+            value={otp}
+            onChange={handleOtpChange}
+            maxLength="6"
+            required
+            disabled={loading}
+          />
+
           <input
             type="password"
             placeholder="New password"
             className="bg-green-500 text-white placeholder-white rounded-lg py-2 text-center focus:ring-2 focus:ring-green-600 focus:outline-none"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
             required
             minLength="6"
+            disabled={loading}
           />
 
           <input
             type="password"
             placeholder="Confirm new password"
             className="bg-green-500 text-white placeholder-white rounded-lg py-2 text-center focus:ring-2 focus:ring-green-600 focus:outline-none"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             required
             minLength="6"
+            disabled={loading}
           />
 
           {/* Message Display */}
           {message && (
-            <div className={`text-sm ${message.includes('success') || message.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`text-sm ${messageType === 'success' ? 'text-green-600' : 'text-red-600'}`}>
               {message}
             </div>
           )}
@@ -90,12 +151,26 @@ function ResetPasswordPage() {
           </button>
         </form>
 
+        {/* Help Text */}
+        <div className="text-xs text-gray-500 mt-3">
+          • OTP expires in 10 minutes<br/>
+          • Check your email for the 6-digit code
+        </div>
+
         {/* Back to Login Link */}
         <Link
           to="/login"
           className="absolute bottom-3 left-3 text-white bg-green-600 hover:bg-green-700 rounded-md text-xs px-3 py-1"
         >
           Back to Login
+        </Link>
+
+        {/* Request OTP Link */}
+        <Link
+          to="/forgot-password"
+          className="absolute bottom-3 right-3 text-white bg-blue-600 hover:bg-blue-700 rounded-md text-xs px-3 py-1"
+        >
+          Request OTP
         </Link>
       </div>
     </div>
