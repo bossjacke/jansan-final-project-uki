@@ -1,76 +1,126 @@
-import Joi from 'joi';
-import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import User from '../models/user.model.js';
 import sendEmail from '../utils/email.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret';
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+// Rate limiting map (in production, use Redis or database)
+const otpRequests = new Map();
 
 export const forgotPassword = async (req, res) => {
-  // Validate email
-  const schema = Joi.object({ email: Joi.string().email().required() });
-  const { error } = schema.validate(req.body);
-  if (error) return res.status(400).json({ message: 'Invalid email', error: error.details });
-
   const { email } = req.body;
+  
+  // Input validation
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ message: 'Valid email required' });
+  }
+
+  // Rate limiting: max 3 requests per 15 minutes per email
+  const now = Date.now();
+  const userRequests = otpRequests.get(email) || [];
+  const recentRequests = userRequests.filter(time => now - time < 15 * 60 * 1000);
+  
+  if (recentRequests.length >= 3) {
+    return res.status(429).json({ 
+      message: 'Too many requests. Please try again later.' 
+    });
+  }
+
   try {
     const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) return res.status(200).json({ message: 'If that email exists, a reset link was sent.' });
+    
+    // Always return success to prevent email enumeration
+    if (!user) {
+      return res.json({ message: 'If email exists, OTP sent successfully' });
+    }
 
-    // Create a short-lived token (e.g., 1 hour)
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
+    // Generate 6-digit OTP
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Build reset URL (frontend will use this token)
-    const resetUrl = `${FRONTEND_URL}/reset-password/${token}`;
+    // Save OTP to database
+    user.otp = otp;
+    user.otpExpires = otpExpires;
+    await user.save();
+
+    // Update rate limiting
+    recentRequests.push(now);
+    otpRequests.set(email, recentRequests);
 
     // Send email
-    const subject = 'Reset your password';
-    const text = `You requested a password reset. Click the link to reset your password:\n\n${resetUrl}\n\nIf you did not request this, ignore this email.`;
+    const subject = 'Password Reset OTP';
+    const text = `Your password reset OTP is: ${otp}\n\nThis OTP expires in 10 minutes.\n\nIf you didn't request this, please ignore this email.`;
 
     try {
       await sendEmail({ to: user.email, subject, text });
+      console.log('OTP sent successfully to:', user.email);
     } catch (emailError) {
       console.error('Email send failed:', emailError);
-      // Still return success to prevent email enumeration attacks
-      // But log the reset URL for development
-      console.log('=== DEVELOPMENT: Reset URL ===');
-      console.log('Email would be sent to:', user.email);
-      console.log('Reset URL:', resetUrl);
-      console.log('=============================');
+      // Log OTP for development
+      console.log('=== DEVELOPMENT MODE ===');
+      console.log('Email:', user.email);
+      console.log('OTP:', otp);
+      console.log('Expires:', otpExpires);
+      console.log('========================');
     }
 
-    return res.json({ message: 'If that email exists, a reset link was sent.' });
-  } catch (err) {
-    console.error('forgotPassword error', err);
-    return res.status(500).json({ message: 'Server error', error: err.message });
+    res.json({ message: 'If email exists, OTP sent successfully' });
+    
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
 export const resetPassword = async (req, res) => {
-  const { token } = req.params;
-  // Validate password
-  const schema = Joi.object({ password: Joi.string().min(6).required() });
-  const { error } = schema.validate(req.body);
-  if (error) return res.status(400).json({ message: 'Invalid password', error: error.details });
+  const { email, otp, newPassword } = req.body;
 
-  const { password } = req.body;
+  // Input validation
+  if (!email || !otp || !newPassword) {
+    return res.status(400).json({ 
+      message: 'Email, OTP, and new password are required' 
+    });
+  }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ message: 'Valid email required' });
+  }
+
+  if (!/^\d{6}$/.test(otp)) {
+    return res.status(400).json({ message: 'Invalid OTP format' });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ 
+      message: 'Password must be at least 6 characters' 
+    });
+  }
+
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const userId = decoded.id;
-    const user = await User.findById(userId);
-    if (!user) return res.status(400).json({ message: 'Invalid token or user not found' });
+    const user = await User.findOne({ 
+      email: email.toLowerCase(),
+      otp: otp,
+      otpExpires: { $gt: new Date() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ 
+        message: 'Invalid or expired OTP' 
+      });
+    }
 
     // Hash password and save
     const salt = await bcrypt.genSalt(10);
-    const hashed = await bcrypt.hash(password, salt);
+    const hashed = await bcrypt.hash(newPassword, salt);
     user.password = hashed;
+    user.otp = null;
+    user.otpExpires = null;
     await user.save();
 
-    return res.json({ message: 'Password has been reset successfully' });
-  } catch (err) {
-    console.error('resetPassword error', err);
-    return res.status(400).json({ message: 'Invalid or expired token', error: err.message });
+    res.json({ message: 'Password reset successfully' });
+
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
