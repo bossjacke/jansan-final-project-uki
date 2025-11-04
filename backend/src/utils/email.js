@@ -14,11 +14,18 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendEmail = async ({ to, subject, text, html }) => {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || 
+      process.env.EMAIL_USER === 'your-email@gmail.com' || 
+      process.env.EMAIL_PASS === 'your-email-app-password') {
     console.warn('Email credentials not configured (EMAIL_USER/EMAIL_PASS). Skipping email send.');
     // In development, we don't throw — log the message so developer can copy the reset link from logs.
-    console.log('Email payload:', { to, subject, text, html });
-    return;
+    console.log('=== EMAIL NOT CONFIGURED ===');
+    console.log('To:', to);
+    console.log('Subject:', subject);
+    console.log('Message:', text);
+    console.log('===========================');
+    // Return success to avoid breaking the password reset flow
+    return { messageId: 'dev-mode-no-email' };
   }
 
   const mailOptions = {
