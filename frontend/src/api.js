@@ -38,13 +38,16 @@ export const ForgotPassword = async (email) => {
   }
 };
 
-export const ResetPassword = async (token, password) => {
+export const ResetPassword = async (email, otp, newPassword) => {
   try {
-    const res = await axios.post(`${API_URL}/user/reset-password/${token}`, { password });
+    const res = await axios.post(`${API_URL}/user/reset-password`, { 
+      email, 
+      otp, 
+      newPassword 
+    });
     return res.data;
   } catch (err) {
     console.error('Reset password error:', err.response?.data || err.message);
     throw err;
   }
 };
-  
