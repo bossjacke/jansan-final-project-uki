@@ -28,7 +28,17 @@ export const forgotPassword = async (req, res) => {
     const subject = 'Reset your password';
     const text = `You requested a password reset. Click the link to reset your password:\n\n${resetUrl}\n\nIf you did not request this, ignore this email.`;
 
-    await sendEmail({ to: user.email, subject, text });
+    try {
+      await sendEmail({ to: user.email, subject, text });
+    } catch (emailError) {
+      console.error('Email send failed:', emailError);
+      // Still return success to prevent email enumeration attacks
+      // But log the reset URL for development
+      console.log('=== DEVELOPMENT: Reset URL ===');
+      console.log('Email would be sent to:', user.email);
+      console.log('Reset URL:', resetUrl);
+      console.log('=============================');
+    }
 
     return res.json({ message: 'If that email exists, a reset link was sent.' });
   } catch (err) {
