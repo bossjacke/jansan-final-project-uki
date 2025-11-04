@@ -3,10 +3,10 @@ import { forgotPassword, resetPassword } from '../controllers/password.controlle
 
 const router = express.Router();
 
-// POST /api/auth/forgot-password
+// POST /api/user/forgot-password - Send OTP to email
 router.post('/forgot-password', forgotPassword);
 
-// POST /api/auth/reset-password/:token
-router.post('/reset-password/:token', resetPassword);
+// POST /api/user/reset-password - Reset password with OTP
+router.post('/reset-password', resetPassword);
 
 export default router;
