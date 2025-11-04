@@ -63,7 +63,7 @@ function ForgotPasswordPage() {
             {loading ? 'Sending...' : 'Send Reset Link'}
           </button>
         </form>
-
+          <br/><br/>
         {/* Back to Login Link */}
         <Link
           to="/login"
