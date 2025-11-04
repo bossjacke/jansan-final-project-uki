@@ -4,9 +4,6 @@ import User from "../models/user.model.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_super_secret";
 
-
-
-
 // ✅ Register
 export const registerUser = async (req, res) => {
   try {
@@ -50,10 +47,6 @@ export const registerUser = async (req, res) => {
   }
 };
 
-
-
-
-
 // ✅ Login
 export const loginUser = async (req, res) => {
   try {
@@ -91,9 +84,6 @@ export const loginUser = async (req, res) => {
   }
 };
 
-
-
-
 // Get User Profile
 export const getUserProfile = async (req, res) => {
     try {
@@ -107,11 +97,8 @@ export const getUserProfile = async (req, res) => {
       res.status(500).json({ message: "Server error", error: error.message });
     }
   };
-  
 
-
-
-  // Update Profile
+// Update Profile
 export const updateUserProfile = async (req, res) => {
   try {
     const updates = req.body;
@@ -128,21 +115,63 @@ export const updateUserProfile = async (req, res) => {
   }
 };
 
-
-
-
-
-// Delete User (Admin only)
+// Delete User (Admin only) - Enhanced Version
 export const deleteUser = async (req, res) => {
   try {
+    // Check if user is admin
     if (req.user.role !== "admin") {
-      return res.status(403).json({ message: "Access denied. Admin only." });
+      return res.status(403).json({ 
+        success: false,
+        message: "Access denied. Admin only." 
+      });
     }
 
     const { userId } = req.params;
+    
+    // Validate userId
+    if (!userId || !userId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ 
+        success: false,
+        message: "Invalid user ID format" 
+      });
+    }
+
+    // Check if user exists
+    const userToDelete = await User.findById(userId);
+    if (!userToDelete) {
+      return res.status(404).json({ 
+        success: false,
+        message: "User not found" 
+      });
+    }
+
+    // Prevent admin from deleting themselves
+    if (userId === req.user.id) {
+      return res.status(400).json({ 
+        success: false,
+        message: "Cannot delete your own account" 
+      });
+    }
+
+    // Delete the user
     await User.findByIdAndDelete(userId);
-    res.json({ message: "User deleted successfully" });
+    
+    res.status(200).json({ 
+      success: true,
+      message: "User deleted successfully",
+      deletedUser: {
+        id: userToDelete._id,
+        name: userToDelete.name,
+        email: userToDelete.email,
+        role: userToDelete.role
+      }
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting user", error: error.message });
+    console.error("Delete user error:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Error deleting user", 
+      error: error.message 
+    });
   }
 };
