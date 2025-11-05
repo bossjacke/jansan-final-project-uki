@@ -6,23 +6,20 @@ import {
   updateProduct,
   deleteProduct,
   placeOrder,
-  getCustomerOrders,
-  updateOrderStatus,
 } from "../controllers/product.controller.js";
 import { authMiddleware } from "../middleware/auth.js";
+import { adminOnly } from "../middleware/roleCheck.js";
 
 const router = express.Router();
 
 // Product CRUD
-router.post("/", authMiddleware, createProduct); // Admin
-router.get("/", getAllProducts);
-router.get("/:id", getProductById);
-router.put("/:id", authMiddleware, updateProduct); // Admin
-router.delete("/:id", authMiddleware, deleteProduct); // Admin
+router.post("/", authMiddleware, adminOnly, createProduct); // Admin only
+router.get("/", getAllProducts); // Public
+router.get("/:id", getProductById); // Public
+router.put("/:id", authMiddleware, adminOnly, updateProduct); // Admin only
+router.delete("/:id", authMiddleware, adminOnly, deleteProduct); // Admin only
 
 // Orders
-router.post("/order", authMiddleware, placeOrder);
-router.get("/orders", authMiddleware, getCustomerOrders);
-router.put("/orders/:orderId", authMiddleware, updateOrderStatus); // Admin
+router.post("/order", authMiddleware, placeOrder); // Authenticated users
 
 export default router;
