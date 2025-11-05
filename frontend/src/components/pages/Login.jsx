@@ -102,23 +102,33 @@
 
 import React, { useState } from "react";
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'
-import { LoginUser } from "../../api";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext.jsx';
 
 function Login({ onLogin, onClose }) {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      const res = await LoginUser(form);
-      alert("Login successful");
-      console.log(res.user);
-      if (onLogin) onLogin(res);
-      if (onClose) onClose();
+      const result = await login(form);
+      if (result.success) {
+        alert("Login successful");
+        if (onLogin) onLogin();
+        if (onClose) onClose();
+        navigate('/');
+      } else {
+        alert(result.error);
+      }
     } catch (error) {
       console.error("Login error:", error);
-      alert(error.response?.data?.message || "Invalid email or password");
+      alert("Login failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
