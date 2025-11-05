@@ -115,6 +115,34 @@ export const updateUserProfile = async (req, res) => {
   }
 };
 
+// Get All Users (Admin only)
+export const getAllUsers = async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ 
+        success: false,
+        message: "Access denied. Admin only." 
+      });
+    }
+
+    const users = await User.find().select("-password").sort({ createdAt: -1 });
+    
+    res.status(200).json({ 
+      success: true,
+      users,
+      count: users.length
+    });
+  } catch (error) {
+    console.error("Get all users error:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Error fetching users", 
+      error: error.message 
+    });
+  }
+};
+
 // Delete User (Admin only) - Enhanced Version
 export const deleteUser = async (req, res) => {
   try {
