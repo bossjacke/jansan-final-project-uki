@@ -1,5 +1,5 @@
-# Postman Testing Guide - Password Reset (Port 3003)
-
+# Postman Testing Guide - Complete API Testing (Port 3003)
+itha ui la fertilizer and biogas  endu product page la kaddura mari code tha
 ## 🚀 Server Setup
 Make sure your backend server is running on port 3003:
 ```bash
@@ -7,6 +7,50 @@ cd backend
 npm start
 ```
 Server should be running at: `http://localhost:3003`
+
+## 🔐 Authentication Setup (Required for Admin Operations)
+
+Before testing product operations, you need to get an authentication token:
+
+### **1. Register User (if not already registered)**
+- **Method**: POST
+- **URL**: `http://localhost:3003/api/user/register`
+- **Headers**: `Content-Type: application/json`
+- **Body**:
+```json
+{
+    "name": "Admin User",
+    "email": "admin@example.com",
+    "password": "admin123",
+    "role": "admin"
+}
+```
+
+### **2. Login to Get Token**
+- **Method**: POST
+- **URL**: `http://localhost:3003/api/user/login`
+- **Headers**: `Content-Type: application/json`
+- **Body**:
+```json
+{
+    "email": "admin@example.com",
+    "password": "admin123"
+}
+```
+
+### **3. Copy the Token**
+From the login response, copy the token value. You'll need it for admin operations.
+```json
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": { "id": "...", "name": "Admin User", "role": "admin" }
+}
+```
+
+**For all admin operations (POST, PUT, DELETE), add this header:**
+```
+Authorization: Bearer YOUR_TOKEN_HERE
+```
 
 ## 📧 Test 1: Forgot Password (Send OTP)
 
@@ -209,3 +253,365 @@ curl -X POST http://localhost:3003/api/user/reset-password \
 - **Rate Limiting**: After 3 requests, get 429 status
 
 Test both endpoints sequentially to verify complete password reset flow! 🎯
+
+---
+
+## 🛍️ Product CRUD Testing (Complete Guide)
+
+### **Product Model Structure:**
+```json
+{
+    "name": "string (required)",
+    "type": "biogas|fertilizer (required)",
+    "capacity": "string (optional, for biogas)",
+    "price": "number (required)",
+    "warrantyPeriod": "string (optional, for biogas)",
+    "description": "string (optional)"
+}
+```
+
+---
+
+## 📦 Product Operations
+
+### **1. Create Product (POST) - Admin Only**
+- **Method**: POST
+- **URL**: `http://localhost:3003/api/products`
+- **Headers**:
+  ```
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ADMIN_TOKEN
+  ```
+
+#### **Example 1: Create Biogas Product**
+**Body**:
+```json
+{
+    "name": "Biogas Unit Premium",
+    "type": "biogas",
+    "capacity": "500L",
+    "price": 25000,
+    "warrantyPeriod": "2 years",
+    "description": "High-quality biogas unit for domestic use"
+}
+```
+
+#### **Example 2: Create Fertilizer Product**
+**Body**:
+```json
+{
+    "name": "Organic Fertilizer Premium",
+    "type": "fertilizer",
+    "price": 500,
+    "description": "Premium organic fertilizer for agriculture"
+}
+```
+
+**Expected Response (Status 201)**:
+```json
+{
+    "message": "Product created successfully",
+    "product": {
+        "_id": "64a7b8c9d1e2f3g4h5i6j7k8",
+        "name": "Biogas Unit Premium",
+        "type": "biogas",
+        "capacity": "500L",
+        "price": 25000,
+        "warrantyPeriod": "2 years",
+        "description": "High-quality biogas unit for domestic use",
+        "createdAt": "2024-01-15T10:30:00.000Z",
+        "updatedAt": "2024-01-15T10:30:00.000Z",
+        "__v": 0
+    }
+}
+```
+
+---
+
+### **2. Get All Products (GET) - Public**
+- **Method**: GET
+- **URL**: `http://localhost:3003/api/products`
+- **Headers**: `Content-Type: application/json`
+
+**Expected Response (Status 200)**:
+```json
+{
+    "products": [
+        {
+            "_id": "64a7b8c9d1e2f3g4h5i6j7k8",
+            "name": "Biogas Unit Premium",
+            "type": "biogas",
+            "capacity": "500L",
+            "price": 25000,
+            "warrantyPeriod": "2 years",
+            "description": "High-quality biogas unit for domestic use",
+            "createdAt": "2024-01-15T10:30:00.000Z",
+            "updatedAt": "2024-01-15T10:30:00.000Z"
+        },
+        {
+            "_id": "64a7b8c9d1e2f3g4h5i6j7k9",
+            "name": "Organic Fertilizer Premium",
+            "type": "fertilizer",
+            "price": 500,
+            "description": "Premium organic fertilizer for agriculture",
+            "createdAt": "2024-01-15T10:35:00.000Z",
+            "updatedAt": "2024-01-15T10:35:00.000Z"
+        }
+    ]
+}
+```
+
+---
+
+### **3. Get Single Product by ID (GET) - Public**
+- **Method**: GET
+- **URL**: `http://localhost:3003/api/products/PRODUCT_ID_HERE`
+- **Headers**: `Content-Type: application/json`
+
+**Example URL**: `http://localhost:3003/api/products/64a7b8c9d1e2f3g4h5i6j7k8`
+
+**Expected Response (Status 200)**:
+```json
+{
+    "product": {
+        "_id": "64a7b8c9d1e2f3g4h5i6j7k8",
+        "name": "Biogas Unit Premium",
+        "type": "biogas",
+        "capacity": "500L",
+        "price": 25000,
+        "warrantyPeriod": "2 years",
+        "description": "High-quality biogas unit for domestic use",
+        "createdAt": "2024-01-15T10:30:00.000Z",
+        "updatedAt": "2024-01-15T10:30:00.000Z"
+    }
+}
+```
+
+**Error Response (Status 404)**:
+```json
+{
+    "message": "Product not found"
+}
+```
+
+---
+
+### **4. Update Product (PUT) - Admin Only**
+- **Method**: PUT
+- **URL**: `http://localhost:3003/api/products/PRODUCT_ID_HERE`
+- **Headers**:
+  ```
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ADMIN_TOKEN
+  ```
+
+**Example URL**: `http://localhost:3003/api/products/64a7b8c9d1e2f3g4h5i6j7k8`
+
+**Body**:
+```json
+{
+    "price": 28000,
+    "description": "Updated: High-quality biogas unit with enhanced features",
+    "warrantyPeriod": "3 years"
+}
+```
+
+**Expected Response (Status 200)**:
+```json
+{
+    "message": "Product updated successfully",
+    "updated": {
+        "_id": "64a7b8c9d1e2f3g4h5i6j7k8",
+        "name": "Biogas Unit Premium",
+        "type": "biogas",
+        "capacity": "500L",
+        "price": 28000,
+        "warrantyPeriod": "3 years",
+        "description": "Updated: High-quality biogas unit with enhanced features",
+        "createdAt": "2024-01-15T10:30:00.000Z",
+        "updatedAt": "2024-01-15T11:00:00.000Z"
+    }
+}
+```
+
+---
+
+### **5. Delete Product (DELETE) - Admin Only**
+- **Method**: DELETE
+- **URL**: `http://localhost:3003/api/products/PRODUCT_ID_HERE`
+- **Headers**:
+  ```
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ADMIN_TOKEN
+  ```
+
+**Example URL**: `http://localhost:3003/api/products/64a7b8c9d1e2f3g4h5i6j7k9`
+
+**Expected Response (Status 200)**:
+```json
+{
+    "message": "Product deleted successfully"
+}
+```
+
+---
+
+## 🧪 Product Testing Scenarios
+
+### **✅ Valid Test Cases:**
+
+#### **Test 1: Create Biogas Product**
+```json
+{
+    "name": "Compact Biogas Unit",
+    "type": "biogas",
+    "capacity": "200L",
+    "price": 15000,
+    "warrantyPeriod": "1 year",
+    "description": "Compact biogas unit for small households"
+}
+```
+
+#### **Test 2: Create Fertilizer Product**
+```json
+{
+    "name": "Bio-Compost Fertilizer",
+    "type": "fertilizer",
+    "price": 300,
+    "description": "Natural compost fertilizer for organic farming"
+}
+```
+
+#### **Test 3: Update Product Price Only**
+```json
+{
+    "price": 17500
+}
+```
+
+### **❌ Error Test Cases:**
+
+#### **Test 4: Missing Required Fields**
+```json
+{
+    "type": "biogas",
+    "price": 25000
+}
+```
+**Expected Error**: `{"message": "Product validation failed"}`
+
+#### **Test 5: Invalid Product Type**
+```json
+{
+    "name": "Invalid Product",
+    "type": "invalid_type",
+    "price": 1000
+}
+```
+**Expected Error**: `{"message": "Product validation failed"}`
+
+#### **Test 6: Negative Price**
+```json
+{
+    "name": "Invalid Price Product",
+    "type": "fertilizer",
+    "price": -500
+}
+```
+**Expected Error**: `{"message": "Product validation failed"}`
+
+#### **Test 7: Unauthorized Access (No Token)**
+Try to create/update/delete product without Authorization header.
+**Expected Error**: `{"message": "No token, authorization denied"}`
+
+#### **Test 8: Invalid Token**
+Use invalid token in Authorization header.
+**Expected Error**: `{"message": "Token is not valid"}`
+
+---
+
+## 📋 Complete Product Testing Workflow
+
+### **Step 1: Authentication**
+1. Login as admin user
+2. Copy the authentication token
+3. Set Authorization header for admin operations
+
+### **Step 2: Create Products**
+1. Create a biogas product
+2. Create a fertilizer product
+3. Verify both products are created successfully
+
+### **Step 3: Read Operations**
+1. Get all products list
+2. Get single product by ID
+3. Verify product details
+
+### **Step 4: Update Operations**
+1. Update product price
+2. Update product description
+3. Verify changes are applied
+
+### **Step 5: Delete Operations**
+1. Delete a test product
+2. Verify product is removed
+3. Try to get deleted product (should return 404)
+
+---
+
+## 🚀 Quick Test Commands (curl)
+
+### **Create Product (Admin)**:
+```bash
+curl -X POST http://localhost:3003/api/products \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  -d '{
+    "name": "Test Biogas Unit",
+    "type": "biogas",
+    "capacity": "300L",
+    "price": 20000,
+    "warrantyPeriod": "2 years"
+  }'
+```
+
+### **Get All Products**:
+```bash
+curl -X GET http://localhost:3003/api/products \
+  -H "Content-Type: application/json"
+```
+
+### **Get Single Product**:
+```bash
+curl -X GET http://localhost:3003/api/products/PRODUCT_ID_HERE \
+  -H "Content-Type: application/json"
+```
+
+### **Update Product (Admin)**:
+```bash
+curl -X PUT http://localhost:3003/api/products/PRODUCT_ID_HERE \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  -d '{"price": 22000, "description": "Updated description"}'
+```
+
+### **Delete Product (Admin)**:
+```bash
+curl -X DELETE http://localhost:3003/api/products/PRODUCT_ID_HERE \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"
+```
+
+---
+
+## ✅ Product Testing Success Indicators
+
+- **Create**: Status 201 + Product object in response
+- **Get All**: Status 200 + Array of products
+- **Get Single**: Status 200 + Single product object
+- **Update**: Status 200 + Updated product object
+- **Delete**: Status 200 + Success message
+- **Auth Errors**: Status 401 for missing/invalid tokens
+- **Validation Errors**: Status 500 for invalid data
+
+Test all CRUD operations to ensure complete product management functionality! 🎯
