@@ -52,10 +52,13 @@ export const ResetPassword = async (email, otp, newPassword) => {
 // Product API functions
 export const getAllProducts = async () => {
   try {
+    console.log('Fetching products from:', `${API_URL}/products`);
     const res = await axios.get(`${API_URL}/products`);
+    console.log('Products response:', res.data);
     return res.data;
   } catch (err) {
     console.error('Get products error:', err.response?.data || err.message);
+    console.error('Full error:', err);
     throw err;
   }
 };
