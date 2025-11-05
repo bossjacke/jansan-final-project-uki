@@ -31,7 +31,7 @@ import './App.css';
 import Navbar from './components/pages/navbar.jsx';
 import Home from './components/pages/Home.jsx';
 import About from './components/pages/About.jsx';
-import Products from './components/Products.jsx';
+import Products from './components/pages/Products.jsx';
 import EcommerceProducts from './components/pages/EcommerceProducts.jsx';
 import Cart from './components/pages/Cart.jsx';
 import Login from './components/pages/Login.jsx';
