@@ -51,3 +51,24 @@ export const ResetPassword = async (email, otp, newPassword) => {
     throw err;
   }
 };
+
+// Product API functions
+export const getAllProducts = async () => {
+  try {
+    const res = await axios.get(`${API_URL}/products`);
+    return res.data;
+  } catch (err) {
+    console.error('Get products error:', err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export const getProductById = async (productId) => {
+  try {
+    const res = await axios.get(`${API_URL}/products/${productId}`);
+    return res.data;
+  } catch (err) {
+    console.error('Get product error:', err.response?.data || err.message);
+    throw err;
+  }
+};
