@@ -1,6 +1,18 @@
 import Stripe from "stripe";
-// Minimal payment controller stub. Expand with real payment flows later.
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
+
+// Initialize Stripe with proper error handling
+let stripe;
+try {
+	if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_your_stripe_secret_key_here') {
+		console.warn('Stripe secret key is not configured or using placeholder value. Payment features will be limited.');
+		stripe = null;
+	} else {
+		stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+	}
+} catch (error) {
+	console.error('Failed to initialize Stripe:', error.message);
+	stripe = null;
+}
 
 export const createPaymentIntent = async (req, res) => {
 	try {
