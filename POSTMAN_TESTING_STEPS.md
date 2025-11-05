@@ -1,5 +1,5 @@
 # Postman Testing Guide - Complete API Testing (Port 3003)
-itha ui la fertilizer and biogas  endu product page la kaddura mari code tha
+
 ## 🚀 Server Setup
 Make sure your backend server is running on port 3003:
 ```bash
