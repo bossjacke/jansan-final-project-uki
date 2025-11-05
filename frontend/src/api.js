@@ -10,7 +10,6 @@ export const RegisterUser = async (userData) => {
     return res.data;
   } catch (err) {
     console.error("Register Error:", err.response?.data || err.message);
-    console.log(err.message);
     throw err;
   }
 };
@@ -19,11 +18,9 @@ export const RegisterUser = async (userData) => {
 export const LoginUser = async (credentials) => {
     try {
       const res = await axios.post(`${API_URL}/users/login`, credentials);
-      console.log(res.data);
       return res.data;
     } catch (err) {
       console.error("Login Error:", err.response?.data || err.message);
-      console.log(err.message);
       throw err;
     }
   };

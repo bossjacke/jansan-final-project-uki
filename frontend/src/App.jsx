@@ -1,29 +1,3 @@
-// import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
-// import './App.css'
-// import Register from './components/pages/Register';
-// import Login from './components/pages/Login';
-// import Navbar from './components/pages/navbar';
-
-
-// function App() {
-
-//   return (
-//     <>
-//       <Navbar></Navbar>
-//       <Register></Register>   
-//         <Login></Login>
-
-
-//     </>
-//   )
-// }
-
-// export default App
-
-
-
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.jsx';
