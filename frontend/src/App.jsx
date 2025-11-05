@@ -39,6 +39,7 @@ import Register from './components/pages/Register.jsx';
 import ForgotPassword from './components/pages/password/ForgotPassword.jsx';
 import ResetPassword from './components/pages/password/ResetPassword.jsx';
 import Admin from './components/pages/Admin.jsx';
+import Orders from './components/pages/Orders.jsx';
 
 function App() {
   return (
@@ -55,6 +56,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/orders" element={<Orders />} />
       </Routes>
     </AuthProvider>
   );
