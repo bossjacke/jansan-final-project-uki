@@ -6,11 +6,11 @@ function Home() {
 		<div className="simple-page">
 			<div className="card">
 				<h1 className="title">Welcome to Jansan</h1>
-				<p style={{ color: '#444', marginBottom: 12 }}>A small demo shop built with React + Express. Browse products and try the cart.</p>
+				<p style={{ color: '#444', marginBottom: '12px' }}>A small demo shop built with React + Express. Browse products and try cart.</p>
 
-				<div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 8 }}>
-					<Link to="/products" className="btn">Shop Products</Link>
-					<Link to="/cart" style={{ padding: '10px 14px', borderRadius: 6, border: '1px solid #ddd', textDecoration: 'none', color: '#111' }}>View Cart</Link>
+				<div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '8px' }}>
+					<Link to="/shop" className="btn">Shop Products</Link>
+					<Link to="/cart" style={{ padding: '10px 14px', borderRadius: '6px', border: '1px solid #ddd', textDecoration: 'none', color: '#111' }}>View Cart</Link>
 				</div>
 			</div>
 		</div>
@@ -18,4 +18,3 @@ function Home() {
 }
 
 export default Home;
-
