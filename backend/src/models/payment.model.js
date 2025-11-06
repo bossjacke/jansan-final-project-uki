@@ -15,7 +15,9 @@ const paymentSchema = new mongoose.Schema({
     },
     stripePaymentIntentId: {
         type: String,
-        required: true
+        required: function() {
+            return this.paymentMethod !== 'cash_on_delivery';
+        }
     },
     amount: {
         type: Number,
@@ -32,7 +34,7 @@ const paymentSchema = new mongoose.Schema({
     },
     paymentMethod: {
         type: String,
-        enum: ['card', 'paypal', 'bank_transfer'],
+        enum: ['card', 'paypal', 'bank_transfer', 'cash_on_delivery'],
         default: 'card'
     },
     description: {

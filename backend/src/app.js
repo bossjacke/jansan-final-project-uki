@@ -7,6 +7,7 @@ import productRoutes from "./routes/product.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
+import cartRoutes from "./routes/cart.routes.js";
 
 dotenv.config();
 const app = express();
@@ -29,6 +30,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/user", passwordRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/cart", cartRoutes);
 
 // Database connection
 connectDB();
