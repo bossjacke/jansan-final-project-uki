@@ -1,7 +1,7 @@
 import Order from "../models/order.model.js";
 import Cart from "../models/cart.model.js";
 import Payment from "../models/payment.model.js";
-import { Product } from "../models/product.model.js";
+import Product from "../models/product.model.js";
 import Stripe from "stripe";
 
 // 🧾 Setup Stripe

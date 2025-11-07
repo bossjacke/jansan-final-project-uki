@@ -1,5 +1,5 @@
 // import Cart from '../models/cart.model.js';
-// import { Product } from '../models/product.model.js';
+// import Product from '../models/product.model.js';
 
 // /**
 //  * Get user's cart
@@ -245,7 +245,7 @@
 
 
 import Cart from '../models/cart.model.js';
-import { Product } from '../models/product.model.js';
+import Product from '../models/product.model.js';
 
 // 🛒 Get User Cart
 export const getCart = async (req, res) => {

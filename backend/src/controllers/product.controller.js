@@ -1,4 +1,4 @@
-import { Product } from "../models/product.model.js";
+import Product from "../models/product.model.js";
 import Order from "../models/order.model.js";
 
 // ✅ Create New Product (Admin)
