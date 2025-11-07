@@ -13,7 +13,7 @@ const router = express.Router();
 
 // User routes
 // POST /api/orders - Create order from cart
-router.post("/", authMiddleware, createOrder);
+router.post("/create", authMiddleware, createOrder);
 
 // POST /api/orders/:orderId/payment - Process payment for order
 router.post("/:orderId/payment", authMiddleware, processOrderPayment);

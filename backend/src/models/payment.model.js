@@ -1,66 +1,36 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-// ==================== PAYMENT MODEL ====================
-// Simple MongoDB schema for storing payment records
-const paymentSchema = new mongoose.Schema({
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
-    orderId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Order',
-        required: false
-    },
+const paymentSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    orderId: { type: mongoose.Schema.Types.ObjectId, ref: "Order" },
+
     stripePaymentIntentId: {
-        type: String,
-        required: function() {
-            return this.paymentMethod !== 'cash_on_delivery';
-        }
+      type: String,
+      required: function () {
+        return this.paymentMethod !== "cash_on_delivery";
+      },
     },
-    amount: {
-        type: Number,
-        required: true
-    },
-    currency: {
-        type: String,
-        default: 'usd'
-    },
+
+    amount: { type: Number, required: true },
+    currency: { type: String, default: "usd" },
+
     status: {
-        type: String,
-        enum: ['pending', 'succeeded', 'failed', 'canceled'],
-        default: 'pending'
+      type: String,
+      enum: ["pending", "succeeded", "failed", "canceled"],
+      default: "pending",
     },
+
     paymentMethod: {
-        type: String,
-        enum: ['card', 'paypal', 'bank_transfer', 'cash_on_delivery'],
-        default: 'card'
+      type: String,
+      enum: ["card", "paypal", "bank_transfer", "cash_on_delivery"],
+      default: "card",
     },
-    description: {
-        type: String,
-        required: false
-    },
-    metadata: {
-        type: mongoose.Schema.Types.Mixed,
-        default: {}
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    }
-});
 
-// Update the updatedAt field before saving
-paymentSchema.pre('save', function (next) {
-    this.updatedAt = Date.now();
-    next();
-});
+    description: String,
+    metadata: { type: mongoose.Schema.Types.Mixed, default: {} },
+  },
+  { timestamps: true } // ✅ automatically manages createdAt & updatedAt
+);
 
-// Create and export the Payment model
-const Payment = mongoose.model('Payment', paymentSchema);
-export default Payment;
+export default mongoose.model("Payment", paymentSchema);
