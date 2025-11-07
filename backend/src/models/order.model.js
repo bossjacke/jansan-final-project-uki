@@ -1,74 +1,59 @@
 import mongoose from "mongoose";
 
-const orderItemSchema = new mongoose.Schema({
-    productId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product',
-        required: true
-    },
-    quantity: {
-        type: Number,
-        required: true,
-        min: 1
-    },
-    price: {
-        type: Number,
-        required: true
-    },
-    productName: {
-        type: String,
-        required: true
-    }
-});
-
 const orderSchema = new mongoose.Schema(
   {
-    orderNumber: {
-        type: String,
-        required: true,
-        unique: true
-    },
     userId: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: "User", 
-        required: true 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "User", 
+      required: true 
     },
-    items: [orderItemSchema],
-    totalAmount: {
-        type: Number,
-        required: true
+
+    items: [
+      {
+        productId: { 
+          type: mongoose.Schema.Types.ObjectId, 
+          ref: "Product", 
+          required: true 
+        },
+        quantity: { 
+          type: Number, 
+          required: true, 
+          min: 1 
+        },
+        price: { 
+          type: Number, 
+          required: true 
+        },
+      },
+    ],
+
+    totalAmount: { 
+      type: Number, 
+      required: true, 
+      min: 0 
     },
-    paymentMethod: {
-        type: String,
-        enum: ['card', 'paypal', 'bank_transfer', 'cash_on_delivery'],
-        required: true
+
+    orderStatus: {
+      type: String,
+      enum: ["pending", "confirmed", "packed", "shipped", "delivered", "cancelled"],
+      default: "pending",
     },
-    paymentStatus: {
-        type: String,
-        enum: ['pending', 'paid', 'failed', 'refunded'],
-        default: 'pending'
+
+    paymentId: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "Payment" 
     },
-    paymentId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Payment'
-    },
-    orderStatus: { 
-        type: String, 
-        enum: ["pending", "confirmed", "processing", "shipped", "delivered", "canceled"], 
-        default: "pending" 
-    },
+
     shippingAddress: {
-        street: String,
-        city: String,
-        state: String,
-        postalCode: String,
-        country: String
+      fullName: String,
+      phone: String,
+      addressLine1: String,
+      city: String,
+      postalCode: String,
+      country: String,
     },
-    deliveryDate: { type: Date },
-    orderDate: {
-        type: Date,
-        default: Date.now
-    }
+
+    deliveryDate: Date,
   },
   { timestamps: true }
 );
