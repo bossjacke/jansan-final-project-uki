@@ -26,13 +26,17 @@ app.use(express.json());
 
 // Routes
 app.use("/api/users", userRoutes);
+app.use("/api/auth", passwordRoutes); // Changed from /api/user to /api/auth to avoid conflicts
 app.use("/api/products", productRoutes);
-app.use("/api/user", passwordRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/cart", cartRoutes);
 
 // Database connection
-connectDB();
+console.log('🔗 Initializing database connection...');
+connectDB().catch(err => {
+    console.error('❌ Failed to connect to database:', err);
+    process.exit(1);
+});
 
 export default app;
