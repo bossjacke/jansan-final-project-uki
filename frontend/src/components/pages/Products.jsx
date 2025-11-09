@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { getAllProducts } from '../../api.js';
+import { useAuth } from '../../context/AuthContext.jsx';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3003/api";
 
 function Products() {
+	const { user, token } = useAuth();
 	const [products, setProducts] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -14,99 +19,123 @@ function Products() {
 	const fetchProducts = async () => {
 		try {
 			setLoading(true);
-			// Fetch products from backend API
-			const response = await getAllProducts();
-			setProducts(response.products || []);
+			const { products: data } = await getAllProducts();
+			setProducts(data || []);
 			setError(null);
 		} catch (err) {
-			console.error('Error fetching products:', err);
 			setError('Failed to load products from backend. Please make sure the backend server is running.');
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	const addToCart = (product) => {
+	const addToCart = async (product) => {
+		if (!user || !token) {
+			alert('Please login to add items to cart');
+			return;
+		}
+
 		try {
-			const raw = localStorage.getItem('cart');
-			const cart = raw ? JSON.parse(raw) : [];
-			const existing = cart.find((c) => c._id === product._id);
-			if (existing) {
-				existing.qty += 1;
-			} else {
-				cart.push({ ...product, qty: 1 });
-			}
-			localStorage.setItem('cart', JSON.stringify(cart));
+			await axios.post(`${API_URL}/cart/add`, 
+				{ productId: product._id, quantity: 1 },
+				{ headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+			);
 			alert(`${product.name} added to cart`);
-		} catch (e) {
-			console.error('Add to cart error', e);
-			alert('Could not add to cart');
+		} catch (err) {
+			alert(err.response?.data?.message || 'Could not add to cart');
 		}
 	};
 
-	const filteredProducts = products.filter(product => {
-		if (selectedCategory === 'all') return true;
-		return product.type === selectedCategory;
-	});
+	const filteredProducts = products.filter(product => 
+		selectedCategory === 'all' || product.type === selectedCategory
+	);
 
 	const biogasProducts = products.filter(p => p.type === 'biogas');
 	const fertilizerProducts = products.filter(p => p.type === 'fertilizer');
 
-	if (loading) {
-		return (
-			<div className="simple-page">
-				<div className="card">
-					<h1 className="title">Products</h1>
-					<div style={{ textAlign: 'center', padding: '40px' }}>
-						<div>Loading products...</div>
-					</div>
-				</div>
+	if (loading) return (
+		<div className="simple-page">
+			<div className="card">
+				<h1 className="title">Products</h1>
+				<div className="text-center py-10">Loading products...</div>
 			</div>
-		);
-	}
+		</div>
+	);
 
-	if (error) {
-		return (
-			<div className="simple-page">
-				<div className="card">
-					<h1 className="title">Products</h1>
-					<div style={{ textAlign: 'center', padding: '40px' }}>
-						<div style={{ color: 'red' }}>{error}</div>
-						<button className="btn" onClick={fetchProducts} style={{ marginTop: '20px' }}>
-							Retry
-						</button>
-					</div>
+	if (error) return (
+		<div className="simple-page">
+			<div className="card">
+				<h1 className="title">Products</h1>
+				<div className="text-center py-10">
+					<div className="text-red-500">{error}</div>
+					<button className="btn mt-5" onClick={fetchProducts}>Retry</button>
 				</div>
 			</div>
-		);
-	}
+		</div>
+	);
+
+	const ProductCard = ({ product }) => (
+		<div className="p-5 bg-white rounded-lg shadow-sm border">
+			<div className="flex justify-between items-start">
+				<div className="flex-1">
+					<div className="flex items-center gap-2 mb-2">
+						<h3 className="text-lg font-bold m-0">{product.name}</h3>
+						<span className={`px-2 py-0.5 rounded-full text-xs font-bold text-white ${
+							product.type === 'biogas' ? 'bg-orange-500' : 'bg-green-500'
+						}`}>
+							{product.type === 'biogas' ? '🔥 Biogas' : '🌱 Fertilizer'}
+						</span>
+					</div>
+					
+					{product.description && (
+						<p className="text-gray-600 text-sm my-2">{product.description}</p>
+					)}
+					
+					<div className="flex gap-4 flex-wrap my-2.5">
+						{product.capacity && (
+							<div className="text-sm"><strong>Capacity:</strong> {product.capacity}</div>
+						)}
+						{product.warrantyPeriod && (
+							<div className="text-sm"><strong>Warranty:</strong> {product.warrantyPeriod}</div>
+						)}
+					</div>
+					
+					<div className="text-xl font-bold text-gray-800 my-3">
+						₹{product.price.toLocaleString('en-IN')}
+					</div>
+				</div>
+				
+				<div className="ml-5">
+					<button className="btn btn-primary min-w-24" onClick={() => addToCart(product)}>
+						Add to Cart
+					</button>
+				</div>
+			</div>
+		</div>
+	);
 
 	return (
 		<div className="simple-page">
 			<div className="card">
 				<h1 className="title">Our Products</h1>
 				
-				{/* Category Filter */}
-				<div style={{ marginBottom: '30px', textAlign: 'center' }}>
-					<div style={{ display: 'inline-flex', gap: '10px', flexWrap: 'wrap' }}>
+				<div className="mb-8 text-center">
+					<div className="inline-flex gap-2.5 flex-wrap">
 						<button 
-							className={`btn ${selectedCategory === 'all' ? 'btn-primary' : ''}`}
+							className={`btn mb-2.5 ${selectedCategory === 'all' ? 'btn-primary' : ''}`}
 							onClick={() => setSelectedCategory('all')}
-							style={{ marginBottom: '10px' }}
 						>
 							All Products ({products.length})
 						</button>
 						<button 
-							className={`btn ${selectedCategory === 'biogas' ? 'btn-primary' : ''}`}
+							className={`btn mb-2.5 ${selectedCategory === 'biogas' ? 'btn-primary' : ''}`}
 							onClick={() => setSelectedCategory('biogas')}
-							style={{ marginBottom: '10px' }}
 						>
 							🔥 Biogas Units ({biogasProducts.length})
 						</button>
 						<button 
-							className={`btn ${selectedCategory === 'fertilizer' ? 'btn-primary' : ''}`}
+							className={`btn mb-2.5 ${selectedCategory === 'fertilizer' ? 'btn-primary' : ''}`}
 							onClick={() => setSelectedCategory('fertilizer')}
-							style={{ marginBottom: '10px' }}
 						>
 							🌱 Fertilizers ({fertilizerProducts.length})
 						</button>
@@ -114,109 +143,36 @@ function Products() {
 				</div>
 
 				{filteredProducts.length === 0 ? (
-					<div style={{ textAlign: 'center', padding: '40px' }}>
-						<div style={{ fontSize: '18px', color: '#666' }}>
+					<div className="text-center py-10">
+						<div className="text-lg text-gray-600">
 							{selectedCategory === 'all' 
 								? 'No products available at the moment.' 
 								: `No ${selectedCategory} products available.`}
 						</div>
 					</div>
 				) : (
-					<div style={{ display: 'grid', gap: '20px' }}>
+					<div className="grid gap-5">
 						{filteredProducts.map((product) => (
-							<div 
-								key={product._id} 
-								style={{
-									border: '1px solid #ddd',
-									borderRadius: '8px',
-									padding: '20px',
-									background: '#fff',
-									boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-								}}
-							>
-								<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-									<div style={{ flex: 1 }}>
-										<div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-											<h3 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>
-												{product.name}
-											</h3>
-											<span style={{
-												background: product.type === 'biogas' ? '#ff6b35' : '#4caf50',
-												color: 'white',
-												padding: '2px 8px',
-												borderRadius: '12px',
-												fontSize: '12px',
-												fontWeight: 'bold'
-											}}>
-												{product.type === 'biogas' ? '🔥 Biogas' : '🌱 Fertilizer'}
-											</span>
-										</div>
-										
-										{product.description && (
-											<p style={{ color: '#666', margin: '8px 0', fontSize: '14px' }}>
-												{product.description}
-											</p>
-										)}
-										
-										<div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', margin: '10px 0' }}>
-											{product.capacity && (
-												<div style={{ fontSize: '14px' }}>
-													<strong>Capacity:</strong> {product.capacity}
-												</div>
-											)}
-											{product.warrantyPeriod && (
-												<div style={{ fontSize: '14px' }}>
-													<strong>Warranty:</strong> {product.warrantyPeriod}
-												</div>
-											)}
-										</div>
-										
-										<div style={{ 
-											fontSize: '20px', 
-											fontWeight: 'bold', 
-											color: '#2c3e50',
-											margin: '12px 0'
-										}}>
-											₹{product.price.toLocaleString('en-IN')}
-										</div>
-									</div>
-									
-									<div style={{ marginLeft: '20px' }}>
-										<button 
-											className="btn btn-primary"
-											onClick={() => addToCart(product)}
-											style={{ minWidth: '100px' }}
-										>
-											Add to Cart
-										</button>
-									</div>
-								</div>
-							</div>
+							<ProductCard key={product._id} product={product} />
 						))}
 					</div>
 				)}
 
 				{products.length > 0 && (
-					<div style={{ marginTop: '40px', padding: '20px', background: '#f8f9fa', borderRadius: '8px' }}>
-						<h3 style={{ margin: '0 0 15px 0', color: '#2c3e50' }}>Product Summary</h3>
-						<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
-							<div style={{ textAlign: 'center', padding: '15px', background: 'white', borderRadius: '6px' }}>
-								<div style={{ fontSize: '24px', fontWeight: 'bold', color: '#2c3e50' }}>
-									{products.length}
-								</div>
-								<div style={{ color: '#666', fontSize: '14px' }}>Total Products</div>
+					<div className="mt-10 p-5 bg-gray-50 rounded-lg">
+						<h3 className="mb-4 font-bold text-gray-800">Product Summary</h3>
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+							<div className="text-center p-4 bg-white rounded-lg">
+								<div className="text-2xl font-bold text-gray-800">{products.length}</div>
+								<div className="text-gray-600 text-sm">Total Products</div>
 							</div>
-							<div style={{ textAlign: 'center', padding: '15px', background: 'white', borderRadius: '6px' }}>
-								<div style={{ fontSize: '24px', fontWeight: 'bold', color: '#ff6b35' }}>
-									{biogasProducts.length}
-								</div>
-								<div style={{ color: '#666', fontSize: '14px' }}>Biogas Units</div>
+							<div className="text-center p-4 bg-white rounded-lg">
+								<div className="text-2xl font-bold text-orange-500">{biogasProducts.length}</div>
+								<div className="text-gray-600 text-sm">Biogas Units</div>
 							</div>
-							<div style={{ textAlign: 'center', padding: '15px', background: 'white', borderRadius: '6px' }}>
-								<div style={{ fontSize: '24px', fontWeight: 'bold', color: '#4caf50' }}>
-									{fertilizerProducts.length}
-								</div>
-								<div style={{ color: '#666', fontSize: '14px' }}>Fertilizers</div>
+							<div className="text-center p-4 bg-white rounded-lg">
+								<div className="text-2xl font-bold text-green-500">{fertilizerProducts.length}</div>
+								<div className="text-gray-600 text-sm">Fertilizers</div>
 							</div>
 						</div>
 					</div>
