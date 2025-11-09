@@ -8,78 +8,113 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3003/api";
 function Cart() {
 	const { user, token } = useAuth();
 	const navigate = useNavigate();
-	const [cart, setCart] = useState([]);
-	const [loading, setLoading] = useState(false);
+	const [cart, setCart] = useState(null);
+	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
 	useEffect(() => {
-		const raw = localStorage.getItem('cart');
-		setCart(raw ? JSON.parse(raw) : []);
-	}, []);
+		if (user && token) {
+			fetchCart();
+		} else {
+			setCart({ items: [], totalAmount: 0 });
+			setLoading(false);
+		}
+	}, [user, token]);
 
-	const save = (next) => {
-		setCart(next);
-		localStorage.setItem('cart', JSON.stringify(next));
+	const fetchCart = async () => {
+		try {
+			setLoading(true);
+			const response = await axios.get(`${API_URL}/cart/`, {
+				headers: {
+					'Authorization': `Bearer ${token}`
+				}
+			});
+			setCart(response.data.data);
+			setError(null);
+		} catch (err) {
+			console.error('Error fetching cart:', err);
+			setError(err.response?.data?.message || 'Failed to fetch cart');
+			setCart({ items: [], totalAmount: 0 });
+		} finally {
+			setLoading(false);
+		}
 	};
 
-	const updateQty = (id, qty) => {
-		const next = cart.map((it) => (it._id === id ? { ...it, qty: Math.max(1, qty) } : it));
-		save(next);
-	};
-
-	const removeItem = (id) => {
-		const next = cart.filter((it) => it._id !== id);
-		save(next);
-	};
-
-	const total = cart.reduce((s, it) => s + (it.price || 0) * (it.qty || 0), 0);
-
-	const handleCheckout = async () => {
-		if (cart.length === 0) {
-			alert('Cart is empty');
+	const updateQty = async (productId, quantity) => {
+		if (!user || !token) {
+			alert('Please login to update cart');
 			return;
 		}
 
+		try {
+			const response = await axios.put(
+				`${API_URL}/cart/item/${productId}`,
+				{ quantity },
+				{
+					headers: {
+						'Authorization': `Bearer ${token}`,
+						'Content-Type': 'application/json'
+					}
+				}
+			);
+			setCart(response.data.data);
+			setError(null);
+		} catch (err) {
+			console.error('Error updating cart:', err);
+			setError(err.response?.data?.message || 'Failed to update cart');
+		}
+	};
+
+	const removeItem = async (productId) => {
+		if (!user || !token) {
+			alert('Please login to remove items');
+			return;
+		}
+
+		try {
+			const response = await axios.delete(`${API_URL}/cart/item/${productId}`, {
+				headers: {
+					'Authorization': `Bearer ${token}`
+				}
+			});
+			setCart(response.data.data);
+			setError(null);
+		} catch (err) {
+			console.error('Error removing item:', err);
+			setError(err.response?.data?.message || 'Failed to remove item');
+		}
+	};
+
+	const total = cart?.totalAmount || 0;
+
+	const handleCheckout = () => {
 		if (!user) {
 			alert('Please login to checkout');
 			navigate('/login');
 			return;
 		}
 
-		setLoading(true);
-		setError(null);
-
-		try {
-			// Place orders for each item in cart
-			const orderPromises = cart.map(item => 
-				axios.post(
-					`${API_URL}/products/order`,
-					{ productId: item._id },
-					{
-						headers: {
-							'Authorization': `Bearer ${token}`,
-							'Content-Type': 'application/json'
-						}
-					}
-				)
-			);
-
-			await Promise.all(orderPromises);
-
-			// Clear cart after successful order
-			localStorage.removeItem('cart');
-			setCart([]);
-
-			alert('Order placed successfully!');
-			navigate('/orders');
-		} catch (err) {
-			console.error('Checkout error:', err);
-			setError(err.response?.data?.message || 'Failed to place order');
-			alert('Failed to place order. Please try again.');
-		} finally {
-			setLoading(false);
+		if (!cart || cart.items.length === 0) {
+			alert('Your cart is empty');
+			return;
 		}
+
+		// Navigate to orders page with cart data
+		navigate('/orders', { state: { fromCart: true } });
 	};
+
+	if (loading) {
+		return (
+			<div className="simple-page">
+				<div className="card">
+					<h1 className="title">Shopping Cart</h1>
+					<div style={{ textAlign: 'center', padding: '40px' }}>
+						<div>Loading your cart...</div>
+					</div>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="simple-page">
@@ -98,7 +133,7 @@ function Cart() {
 					</div>
 				)}
 
-				{cart.length === 0 ? (
+				{!cart || cart.items.length === 0 ? (
 					<div style={{ textAlign: 'center', padding: '40px' }}>
 						<div style={{ fontSize: '48px', marginBottom: '20px' }}>🛒</div>
 						<h3 style={{ color: '#666', marginBottom: '10px' }}>Your cart is empty</h3>
@@ -114,9 +149,9 @@ function Cart() {
 					</div>
 				) : (
 					<div style={{ display: 'grid', gap: 20 }}>
-						{cart.map((it) => (
+						{cart.items.map((item) => (
 							<div 
-								key={it._id} 
+								key={item.productId?._id || item.productId} 
 								style={{ 
 									display: 'flex', 
 									justifyContent: 'space-between', 
@@ -128,26 +163,28 @@ function Cart() {
 								}}
 							>
 								<div style={{ textAlign: 'left', flex: 1 }}>
-									<div style={{ fontWeight: 700, marginBottom: '4px' }}>{it.name}</div>
-									<div style={{ color: '#666', fontSize: '14px' }}>
-										{it.type === 'biogas' ? '🔥 Biogas Unit' : '🌱 Fertilizer'}
+									<div style={{ fontWeight: 700, marginBottom: '4px' }}>
+										{item.productId?.name || 'Product'}
 									</div>
-									{it.capacity && (
+									<div style={{ color: '#666', fontSize: '14px' }}>
+										{item.productId?.type === 'biogas' ? '🔥 Biogas Unit' : '🌱 Fertilizer'}
+									</div>
+									{item.productId?.capacity && (
 										<div style={{ fontSize: '12px', color: '#888' }}>
-											Capacity: {it.capacity}
+											Capacity: {item.productId.capacity}
 										</div>
 									)}
 								</div>
 								
 								<div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
 									<div style={{ textAlign: 'right' }}>
-										<div style={{ fontWeight: 'bold', color: '#2c3e50' }}>₹{it.price}</div>
+										<div style={{ fontWeight: 'bold', color: '#2c3e50' }}>₹{item.price}</div>
 										<div style={{ fontSize: '12px', color: '#666' }}>each</div>
 									</div>
 									
 									<div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 										<button 
-											onClick={() => updateQty(it._id, it.qty - 1)}
+											onClick={() => updateQty(item.productId?._id || item.productId, item.quantity - 1)}
 											style={{ 
 												width: '30px', 
 												height: '30px', 
@@ -160,11 +197,11 @@ function Cart() {
 											-
 										</button>
 										<input 
-											aria-label={`qty-${it._id}`} 
+											aria-label={`qty-${item.productId?._id || item.productId}`} 
 											type="number" 
 											min={1} 
-											value={it.qty} 
-											onChange={(e) => updateQty(it._id, Number(e.target.value))} 
+											value={item.quantity} 
+											onChange={(e) => updateQty(item.productId?._id || item.productId, Number(e.target.value))} 
 											style={{ 
 												width: '60px', 
 												padding: '6px 8px', 
@@ -174,7 +211,7 @@ function Cart() {
 											}} 
 										/>
 										<button 
-											onClick={() => updateQty(it._id, it.qty + 1)}
+											onClick={() => updateQty(item.productId?._id || item.productId, item.quantity + 1)}
 											style={{ 
 												width: '30px', 
 												height: '30px', 
@@ -190,12 +227,12 @@ function Cart() {
 									
 									<div style={{ textAlign: 'right', minWidth: '80px' }}>
 										<div style={{ fontWeight: 'bold', color: '#2c3e50' }}>
-											₹{(it.price * it.qty).toLocaleString('en-IN')}
+											₹{(item.price * item.quantity).toLocaleString('en-IN')}
 										</div>
 									</div>
 									
 									<button 
-										onClick={() => removeItem(it._id)} 
+										onClick={() => removeItem(item.productId?._id || item.productId)} 
 										style={{ 
 											background: '#ff5252', 
 											color: 'white', 
@@ -222,8 +259,12 @@ function Cart() {
 							borderTop: '2px solid #e0e0e0'
 						}}>
 							<div>
-								<div style={{ fontSize: '14px', color: '#666' }}>Total ({cart.length} items)</div>
-								<div style={{ fontSize: '24px', fontWeight: 'bold', color: '#2c3e50' }}>₹{total.toLocaleString('en-IN')}</div>
+								<div style={{ fontSize: '14px', color: '#666' }}>
+									Total ({cart.items.length} items)
+								</div>
+								<div style={{ fontSize: '24px', fontWeight: 'bold', color: '#2c3e50' }}>
+									₹{total.toLocaleString('en-IN')}
+								</div>
 							</div>
 							
 							<div style={{ display: 'flex', gap: '10px' }}>
@@ -236,13 +277,13 @@ function Cart() {
 								<button 
 									className="btn btn-primary"
 									onClick={handleCheckout}
-									disabled={loading}
+									disabled={!cart?.items?.length}
 									style={{ 
-										opacity: loading ? 0.6 : 1,
-										cursor: loading ? 'not-allowed' : 'pointer'
+										opacity: !cart?.items?.length ? 0.6 : 1,
+										cursor: !cart?.items?.length ? 'not-allowed' : 'pointer'
 									}}
 								>
-									{loading ? 'Processing...' : 'Checkout'}
+									Proceed to Checkout
 								</button>
 							</div>
 						</div>
