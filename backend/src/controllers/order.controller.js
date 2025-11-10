@@ -20,7 +20,7 @@ try {
 // 🛍️ Create Order
 export const createOrder = async (req, res) => {
   try {
-    const { shippingAddress } = req.body;
+    const { shippingAddress, paymentMethod = "card" } = req.body;
 
     const cart = await Cart.getOrCreateCart(req.user.id);
     if (cart.items.length === 0)
@@ -39,12 +39,63 @@ export const createOrder = async (req, res) => {
       price: i.price,
     }));
 
+    // Create order first
     const order = await Order.create({
       userId: req.user.id,
       items: orderItems,
       totalAmount: cart.totalAmount,
       shippingAddress,
     });
+
+    let payment = null;
+    let clientSecret = null;
+
+    // Handle payment based on method
+    if (paymentMethod === "cash_on_delivery") {
+      // Create cash on delivery payment record
+      payment = await Payment.create({
+        userId: req.user.id,
+        orderId: order._id,
+        amount: cart.totalAmount,
+        paymentMethod: "cash_on_delivery",
+        status: "pending",
+        description: `Cash on delivery for order ${order.orderNumber}`,
+      });
+    } else if (paymentMethod === "card" && stripe) {
+      // Create Stripe payment intent
+      const intent = await stripe.paymentIntents.create({
+        amount: Math.round(cart.totalAmount * 100),
+        currency: "usd",
+        description: `Payment for order ${order.orderNumber}`,
+        metadata: { orderId: order._id.toString(), userId: req.user.id },
+        automatic_payment_methods: { enabled: true },
+      });
+
+      payment = await Payment.create({
+        userId: req.user.id,
+        orderId: order._id,
+        stripePaymentIntentId: intent.id,
+        amount: cart.totalAmount,
+        paymentMethod: "card",
+        status: "pending",
+      });
+
+      clientSecret = intent.client_secret;
+    } else {
+      // Fallback for demo/testing
+      payment = await Payment.create({
+        userId: req.user.id,
+        orderId: order._id,
+        amount: cart.totalAmount,
+        paymentMethod: "card",
+        status: "succeeded", // Auto-succeed for demo
+        description: `Demo payment for order ${order.orderNumber}`,
+      });
+    }
+
+    // Update order with payment reference
+    order.paymentId = payment._id;
+    await order.save();
 
     // Clear cart
     cart.items = [];
@@ -54,10 +105,16 @@ export const createOrder = async (req, res) => {
       .populate("items.productId", "name type description")
       .populate("paymentId");
 
+    const responseData = { order: fullOrder };
+    
+    if (clientSecret) {
+      responseData.clientSecret = clientSecret;
+    }
+
     res.status(201).json({
       success: true,
-      message: "Order created",
-      data: { order: fullOrder },
+      message: "Order created successfully",
+      data: responseData,
     });
   } catch (err) {
     res.status(500).json({ success: false, message: "Error creating order", error: err.message });

@@ -92,7 +92,6 @@ function Navbar() {
         <Link to="/" className="text-white px-3 py-1 rounded-md hover:bg-green-700 focus:bg-green-700">Home</Link>
         <Link to="/about" className="text-white px-3 py-1 rounded-md hover:bg-green-700 focus:bg-green-700">About</Link>
         <Link to="/products" className="text-white px-3 py-1 rounded-md hover:bg-green-700 focus:bg-green-700">Products</Link>
-        <Link to="/shop" className="text-white px-3 py-1 rounded-md hover:bg-green-700 focus:bg-green-700">Shop</Link>
         <Link to="/cart" className="text-white px-3 py-1 rounded-md hover:bg-green-700 focus:bg-green-700">Cart</Link>
         {isAuthenticated && user?.role === 'admin' && (
           <Link to="/admin" className="text-white px-3 py-1 rounded-md hover:bg-green-700 focus:bg-green-700">Admin</Link>
