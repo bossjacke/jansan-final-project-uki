@@ -19,10 +19,13 @@ function Products() {
 	const fetchProducts = async () => {
 		try {
 			setLoading(true);
-			const { products: data } = await getAllProducts();
-			setProducts(data || []);
+			const response = await getAllProducts();
+			console.log('Products API response:', response);
+			// Backend returns { success: true, data: products }
+			setProducts(response.data || []);
 			setError(null);
 		} catch (err) {
+			console.error('Error fetching products:', err);
 			setError('Failed to load products from backend. Please make sure the backend server is running.');
 		} finally {
 			setLoading(false);

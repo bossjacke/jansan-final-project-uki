@@ -75,7 +75,7 @@ function Cart() {
             {error && <CartError error={error} />}
 
             {!cart.items.length ? (
-                <EmptyCart onStartShopping={() => navigate('/shop')} />
+                <EmptyCart onStartShopping={() => navigate('/products')} />
             ) : (
                 <>
                     <div className="space-y-4 mb-6">
@@ -91,7 +91,7 @@ function Cart() {
 
                     <CartSummary 
                         totalAmount={cart.totalAmount}
-                        onContinueShopping={() => navigate('/shop')}
+                        onContinueShopping={() => navigate('/products')}
                         onCheckout={handleCheckout}
                     />
                 </>

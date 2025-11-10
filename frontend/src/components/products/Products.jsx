@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getAllProducts } from '../../api.js';
 import './Products.css';
 
 const Products = () => {
@@ -14,21 +15,15 @@ const Products = () => {
 
   const fetchProducts = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3003/api/products', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
-
+      const data = await getAllProducts();
+      console.log('Fetched products:', data);
       if (data.success) {
         setProducts(data.data);
       } else {
-        setError('Failed to fetch products');
+        setError(data.message || 'Failed to fetch products');
       }
     } catch (err) {
+      console.error('Error fetching products:', err);
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);

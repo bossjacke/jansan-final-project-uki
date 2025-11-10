@@ -1,16 +1,12 @@
 import React from 'react';
 import './CartSummary.css';
 
-const CartSummary = ({ totalAmount, itemCount, onCheckout }) => {
+const CartSummary = ({ totalAmount, onContinueShopping, onCheckout }) => {
   return (
     <div className="cart-summary">
       <h3>Order Summary</h3>
       
       <div className="summary-row">
-        <span>Items ({itemCount}):</span>
-      </div>
-      
-      <div className="summary-row total">
         <span>Total Amount:</span>
         <span className="total-amount">₹{totalAmount.toLocaleString()}</span>
       </div>
@@ -20,13 +16,21 @@ const CartSummary = ({ totalAmount, itemCount, onCheckout }) => {
         <span>Free (3-5 days)</span>
       </div>
       
-      <button 
-        className="checkout-btn"
-        onClick={onCheckout}
-        disabled={itemCount === 0}
-      >
-        Proceed to Checkout
-      </button>
+      <div className="summary-buttons">
+        <button 
+          className="continue-shopping-btn"
+          onClick={onContinueShopping}
+        >
+          Continue Shopping
+        </button>
+        
+        <button 
+          className="checkout-btn"
+          onClick={onCheckout}
+        >
+          Proceed to Checkout
+        </button>
+      </div>
     </div>
   );
 };
