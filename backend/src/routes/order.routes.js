@@ -22,6 +22,9 @@ router.post("/confirm", authMiddleware, confirmOrder);
 // GET /api/order/my - Get logged-in user's orders
 router.get("/my", authMiddleware, getMyOrders);
 
+// GET /api/order/admin/orders - Get all orders (Admin only) - MUST BE BEFORE /:orderId
+router.get("/admin/orders", authMiddleware, roleCheck(['admin']), getAllOrders);
+
 // GET /api/order/:orderId - Get specific order
 router.get("/:orderId", authMiddleware, getOrderById);
 
@@ -30,8 +33,5 @@ router.put("/:orderId/status", authMiddleware, roleCheck(['admin']), updateOrder
 
 // DELETE /api/order/:orderId/cancel - Cancel order (User only)
 router.delete("/:orderId/cancel", authMiddleware, cancelOrder);
-
-// GET /api/admin/orders - Get all orders (Admin only)
-router.get("/admin/orders", authMiddleware, roleCheck(['admin']), getAllOrders);
 
 export default router;

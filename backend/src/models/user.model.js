@@ -13,6 +13,10 @@ const userSchema = new mongoose.Schema(
                 return this.role === "customer";
             },
         },
+        fullName: { type: String },
+        city: { type: String },
+        postalCode: { type: String },
+        country: { type: String, default: "India" },
 
 
         // OTP fields for password reset

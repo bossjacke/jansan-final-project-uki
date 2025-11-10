@@ -34,6 +34,7 @@ export const registerUser = async (req, res) => {
     });
 
     res.status(201).json({
+      success: true,
       message: "User registered successfully",
       user: {
         id: newUser._id,
@@ -43,7 +44,7 @@ export const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
 
@@ -55,12 +56,12 @@ export const loginUser = async (req, res) => {
     // Find user
     const user = await User.findOne({ email });
     if (!user)
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ success: false, message: "User not found" });
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
 
     // Generate JWT
     const token = jwt.sign(
@@ -70,6 +71,7 @@ export const loginUser = async (req, res) => {
     );
 
     res.status(200).json({
+      success: true,
       message: "Login successful",
       token,
       user: {
@@ -80,7 +82,7 @@ export const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
 
@@ -90,11 +92,11 @@ export const getUserProfile = async (req, res) => {
       const userId = req.user.id; // token-la irunthu id vaanguradhu
       const user = await User.findById(userId).select("-password"); // password illa fetch
   
-      if (!user) return res.status(404).json({ message: "User not found" });
+      if (!user) return res.status(404).json({ success: false, message: "User not found" });
   
-      res.status(200).json({ user });
+      res.status(200).json({ success: true, user });
     } catch (error) {
-      res.status(500).json({ message: "Server error", error: error.message });
+      res.status(500).json({ success: false, message: "Server error", error: error.message });
     }
   };
 
@@ -109,9 +111,9 @@ export const updateUserProfile = async (req, res) => {
       new: true,
     }).select("-password");
 
-    res.json({ message: "Profile updated successfully", user });
+    res.json({ success: true, message: "Profile updated successfully", user });
   } catch (error) {
-    res.status(500).json({ message: "Error updating profile", error: error.message });
+    res.status(500).json({ success: false, message: "Error updating profile", error: error.message });
   }
 };
 

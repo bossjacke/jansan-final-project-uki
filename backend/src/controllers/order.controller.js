@@ -7,12 +7,16 @@ import User from "../models/user.model.js";
 
 // 🧾 Setup Stripe
 let stripe;
-try {
-  stripe = process.env.STRIPE_SECRET_KEY
-    ? new Stripe(process.env.STRIPE_SECRET_KEY)
-    : null;
-} catch (err) {
-  console.error("Stripe init failed:", err.message);
+if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SECRET_KEY !== 'sk_test_51234567890abcdef') {
+  try {
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    console.log("✅ Stripe initialized successfully");
+  } catch (err) {
+    console.error("Stripe init failed:", err.message);
+    stripe = null;
+  }
+} else {
+  console.log("⚠️ Stripe is using demo/test mode - payment features will be simulated");
   stripe = null;
 }
 
@@ -194,7 +198,7 @@ export const createOrder = async (req, res) => {
 
     // Get complete order with populated data
     const fullOrder = await Order.findById(order._id)
-      .populate("products.productId", "name type description images")
+      .populate("products.productId", "name type description images image")
       .populate("paymentId");
 
     const responseData = { order: fullOrder };
@@ -324,7 +328,7 @@ export const getMyOrders = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(Number(limit))
-      .populate("products.productId", "name type description images")
+      .populate("products.productId", "name type description images image")
       .populate("paymentId", "status paymentMethod stripePaymentIntentId");
 
     // Get total count for pagination
@@ -368,7 +372,7 @@ export const getOrderById = async (req, res) => {
     }
 
     const order = await Order.findById(orderId)
-      .populate("products.productId", "name type description images")
+      .populate("products.productId", "name type description images image")
       .populate("paymentId", "status paymentMethod stripePaymentIntentId amount")
       .populate("userId", "name email");
 
@@ -554,7 +558,7 @@ export const getAllOrders = async (req, res) => {
       .skip((page - 1) * limit)
       .limit(Number(limit))
       .populate("userId", "name email")
-      .populate("products.productId", "name type description")
+      .populate("products.productId", "name type description images image")
       .populate("paymentId", "status paymentMethod amount");
 
     // Get total count for pagination

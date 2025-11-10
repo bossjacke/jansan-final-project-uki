@@ -55,7 +55,7 @@ cartSchema.statics.getOrCreateCart = async function(userId) {
     try {
         console.log(`🔍 Looking for cart for userId: ${userId}`);
         let cart = await this.findOne({ userId, isActive: true })
-            .populate('items.productId', 'name type description capacity warrantyPeriod');
+            .populate('items.productId', 'name type description capacity warrantyPeriod images image');
         
         console.log('🛒 Cart found:', cart);
         
@@ -66,7 +66,7 @@ cartSchema.statics.getOrCreateCart = async function(userId) {
             console.log('✅ New cart saved:', cart);
             
             cart = await this.findById(cart._id)
-                .populate('items.productId', 'name type description capacity warrantyPeriod');
+                .populate('items.productId', 'name type description capacity warrantyPeriod images image');
             console.log('🛒 Populated cart:', cart);
         }
         
