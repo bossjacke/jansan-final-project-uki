@@ -13,6 +13,8 @@ import ForgotPassword from './components/pages/password/ForgotPassword.jsx';
 import ResetPassword from './components/pages/password/ResetPassword.jsx';
 import Admin from './components/pages/Admin.jsx';
 import Orders from './components/pages/Orders.jsx';
+import OrderDetail from './components/orders/OrderDetail.jsx';
+import Checkout from './components/orders/Checkout.jsx';
 
 function App() {
   return (
@@ -29,6 +31,8 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/orders" element={<Orders />} />
+        <Route path="/order/:orderId" element={<OrderDetail />} />
+        <Route path="/checkout" element={<Checkout />} />
       </Routes>
     </AuthProvider>
   );

@@ -1,33 +1,37 @@
 import express from "express";
 import { authMiddleware } from '../middleware/auth.js';
+import { roleCheck } from '../middleware/roleCheck.js';
 import {
     createOrder,
-    processOrderPayment,
-    confirmOrderPayment,
-    getUserOrders,
+    confirmOrder,
+    getMyOrders,
     getOrderById,
-    cancelOrder
+    updateOrderStatus,
+    cancelOrder,
+    getAllOrders
 } from '../controllers/order.controller.js';
 
 const router = express.Router();
 
-// User routes
-// POST /api/orders - Create order from cart
+// POST /api/order/create - Create order from cart
 router.post("/create", authMiddleware, createOrder);
 
-// POST /api/orders/:orderId/payment - Process payment for order
-router.post("/:orderId/payment", authMiddleware, processOrderPayment);
+// POST /api/order/confirm - Confirm order after Stripe success
+router.post("/confirm", authMiddleware, confirmOrder);
 
-// POST /api/orders/:orderId/payment/confirm - Confirm payment
-router.post("/:orderId/payment/confirm", authMiddleware, confirmOrderPayment);
+// GET /api/order/my - Get logged-in user's orders
+router.get("/my", authMiddleware, getMyOrders);
 
-// GET /api/orders - Get user's orders
-router.get("/", authMiddleware, getUserOrders);
-
-// GET /api/orders/:orderId - Get specific order
+// GET /api/order/:orderId - Get specific order
 router.get("/:orderId", authMiddleware, getOrderById);
 
-// DELETE /api/orders/:orderId - Cancel order
-router.delete("/:orderId", authMiddleware, cancelOrder);
+// PUT /api/order/:orderId/status - Update order status (Admin only)
+router.put("/:orderId/status", authMiddleware, roleCheck(['admin']), updateOrderStatus);
+
+// DELETE /api/order/:orderId/cancel - Cancel order (User only)
+router.delete("/:orderId/cancel", authMiddleware, cancelOrder);
+
+// GET /api/admin/orders - Get all orders (Admin only)
+router.get("/admin/orders", authMiddleware, roleCheck(['admin']), getAllOrders);
 
 export default router;

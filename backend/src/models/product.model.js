@@ -9,6 +9,8 @@ const productSchema = new mongoose.Schema(
     price: { type: Number, required: true },
     warrantyPeriod: { type: String }, // For biogas only
     description: { type: String },
+    stock: { type: Number, required: true, default: 0 }, // Available stock
+    image: { type: String }, // Product image URL (optional)
   },
   { timestamps: true }
 );

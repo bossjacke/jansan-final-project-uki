@@ -1,4 +1,4 @@
-# 🚀 Complete E-commerce Postman Testing Guide - User Login to Payment
+# 🚀 Complete E-commerce Postman Testing Guide - Registration to Payment
 
 ## 📋 Prerequisites
 1. **Backend Server Running:**
@@ -21,14 +21,41 @@
 
 ---
 
-## 🔐 STEP 1: USER LOGIN & AUTHENTICATION
+## 🔐 STEP 1: USER REGISTRATION & AUTHENTICATION
 
-### **1.1 User Login**
+### **1.1 User Registration (New User)**
 ```
-POST {{baseUrl}}/api/users/login
+POST {{baseUrl}}/api/auth/register
 Headers: Content-Type: application/json
 Body: {
-    "email": "test@example.com",
+    "name": "Test User",
+    "email": "testuser@example.com",
+    "phone": "1234567890",
+    "password": "password123",
+    "location": "Chennai, Tamil Nadu",
+    "role": "customer"
+}
+```
+
+**Expected Response (201):**
+```json
+{
+    "message": "User registered successfully",
+    "user": {
+        "id": "507f1f77bcf86cd799439011",
+        "name": "Test User",
+        "email": "testuser@example.com",
+        "role": "customer"
+    }
+}
+```
+
+### **1.2 User Login**
+```
+POST {{baseUrl}}/api/auth/login
+Headers: Content-Type: application/json
+Body: {
+    "email": "testuser@example.com",
     "password": "password123"
 }
 ```
@@ -36,15 +63,13 @@ Body: {
 **Expected Response (200):**
 ```json
 {
-    "success": true,
     "message": "Login successful",
-    "data": {
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-        "user": {
-            "id": "507f1f77bcf86cd799439011",
-            "name": "Test User",
-            "email": "test@example.com"
-        }
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+        "id": "507f1f77bcf86cd799439011",
+        "name": "Test User",
+        "email": "testuser@example.com",
+        "role": "customer"
     }
 }
 ```
@@ -138,30 +163,38 @@ Headers:
 
 ---
 
-## 📦 STEP 4: ORDER OPERATIONS
+## 📦 STEP 4: ORDER CREATION WITH PAYMENT OPTIONS
 
-### **4.1 Get Customer Orders**
+### **4.1 Get Customer Orders (Check Existing)**
 ```
-GET {{baseUrl}}/api/orders/
+GET {{baseUrl}}/api/orders/my
 Headers: 
     Authorization: Bearer {{userToken}}
 ```
 
-### **4.2 Create Order from Cart**
+### **4.2 Create Order with CASH ON DELIVERY**
 ```
 POST {{baseUrl}}/api/orders/create
 Headers: 
     Content-Type: application/json
     Authorization: Bearer {{userToken}}
 Body: {
-    "items": [
-        {
-            "productId": "{{productId}}",
-            "quantity": 1,
-            "price": 25000
-        }
-    ],
-    "totalAmount": 25000
+    "paymentMethod": "cash"
+}
+```
+
+**📋 COMPLETE JSON STRUCTURE (if needed):**
+```json
+{
+    "paymentMethod": "cash",
+    "shippingAddress": {
+        "fullName": "Test User",
+        "phone": "1234567890",
+        "addressLine1": "123 Main Street",
+        "city": "Chennai",
+        "postalCode": "600001",
+        "country": "India"
+    }
 }
 ```
 
@@ -171,12 +204,76 @@ Body: {
     "success": true,
     "message": "Order created successfully",
     "data": {
-        "_id": "order123",
-        "userId": "507f1f77bcf86cd799439011",
-        "items": [...],
-        "totalAmount": 25000,
-        "orderStatus": "pending",
-        "createdAt": "2025-01-06T10:30:00.000Z"
+        "order": {
+            "_id": "order123",
+            "userId": "507f1f77bcf86cd799439011",
+            "products": [
+                {
+                    "productId": "64a7b8c9d1e2f3g4h5i6j7k8",
+                    "quantity": 1,
+                    "price": 25000
+                }
+            ],
+            "totalAmount": 25000,
+            "paymentMethod": "cash",
+            "paymentStatus": "pending",
+            "orderStatus": "Processing",
+            "deliveryLocation": "Chennai, Tamil Nadu",
+            "orderNumber": "ORD-1704123456789-ABC123XYZ"
+        }
+    }
+}
+```
+
+### **4.3 Create Order with CARD PAYMENT**
+```
+POST {{baseUrl}}/api/orders/create
+Headers: 
+    Content-Type: application/json
+    Authorization: Bearer {{userToken}}
+Body: {
+    "paymentMethod": "card"
+}
+```
+
+**📋 COMPLETE JSON STRUCTURE (if needed):**
+```json
+{
+    "paymentMethod": "card",
+    "shippingAddress": {
+        "fullName": "Test User",
+        "phone": "1234567890", 
+        "addressLine1": "123 Main Street",
+        "city": "Chennai",
+        "postalCode": "600001",
+        "country": "India"
+    }
+}
+```
+
+**Expected Response (201):**
+```json
+{
+    "success": true,
+    "message": "Order created successfully",
+    "data": {
+        "order": {
+            "_id": "order123",
+            "userId": "507f1f77bcf86cd799439011",
+            "products": [
+                {
+                    "productId": "64a7b8c9d1e2f3g4h5i6j7k8",
+                    "quantity": 1,
+                    "price": 25000
+                }
+            ],
+            "totalAmount": 25000,
+            "paymentMethod": "card",
+            "paymentStatus": "pending",
+            "orderStatus": "Processing",
+            "orderNumber": "ORD-1704123456789-ABC123XYZ"
+        },
+        "clientSecret": "pi_1234567890abcdef_secret_abcdefghijk"
     }
 }
 ```
@@ -185,44 +282,23 @@ Body: {
 
 ---
 
-## 💳 STEP 5: PAYMENT OPERATIONS
+## 💳 STEP 5: PAYMENT PROCESSING
 
-### **5.1 Create Payment Intent**
-```
-POST {{baseUrl}}/api/payments/create-intent
-Headers: 
-    Content-Type: application/json
-    Authorization: Bearer {{userToken}}
-Body: {
-    "amount": 250.00,
-    "currency": "usd",
-    "description": "Payment for order 690dbccdae4df57d7756c87d",
-    "metadata": {
-        "orderId": "690dbccdae4df57d7756c87d",
-        "orderType": "product_purchase"
-    }
-}
-```
+### **5.1 For Cash on Delivery Orders**
+No additional payment steps needed! Order is created and will be delivered.
 
-**Expected Response (200):**
-```json
-{
-    "success": true,
-    "message": "Payment intent created successfully",
-    "data": {
-        "clientSecret": "pi_1234567890abcdef_secret_abcdefghijk",
-        "paymentId": "pay123",
-        "amount": 250,
-        "currency": "usd"
-    }
-}
-```
+### **5.2 For Card Payment - Simulate Card Details Form**
+In a real frontend, user would see a card form. For testing, we'll use the clientSecret:
 
-**✅ Action:** Copy `paymentId` and set environment variable
+**Card Details (for testing with Stripe):**
+- Card Number: `4242 4242 4242 4242`
+- Expiry: `12/25`
+- CVV: `123`
+- Name: `Test User`
 
-### **5.2 Confirm Payment**
+### **5.3 Confirm Card Payment**
 ```
-POST {{baseUrl}}/api/payments/confirm
+POST {{baseUrl}}/api/orders/confirm
 Headers: 
     Content-Type: application/json
     Authorization: Bearer {{userToken}}
@@ -237,15 +313,14 @@ Body: {
     "success": true,
     "message": "Payment confirmed successfully",
     "data": {
-        "paymentId": "pay123",
-        "status": "succeeded",
-        "amount": 250,
-        "currency": "usd"
+        "orderId": "order123",
+        "paymentStatus": "succeeded",
+        "message": "Your order has been placed successfully. It will arrive in 3 days."
     }
 }
 ```
 
-### **5.3 Get Payment History**
+### **5.4 Get Payment History**
 ```
 GET {{baseUrl}}/api/payments/history?page=1&limit=5
 Headers: 
@@ -258,7 +333,7 @@ Headers:
 
 ### **6.1 Check Updated Order Status**
 ```
-GET {{baseUrl}}/api/orders/
+GET {{baseUrl}}/api/orders/my
 Headers: 
     Authorization: Bearer {{userToken}}
 ```
@@ -283,7 +358,7 @@ Headers:
 
 ### **Test 1: Invalid Login**
 ```
-POST {{baseUrl}}/api/users/login
+POST {{baseUrl}}/api/auth/login
 Body: {
     "email": "wrong@example.com",
     "password": "wrongpassword"
@@ -321,16 +396,26 @@ Body: {
 
 ---
 
-## 🧪 COMPLETE TESTING WORKFLOW
+## 🧪 COMPLETE TESTING WORKFLOWS
 
-### **Sequential Testing Order:**
-1. **Login** → Get token
-2. **View Products** → Get product ID
-3. **Add to Cart** → Verify cart updated
-4. **Create Order** → Get order ID
-5. **Create Payment** → Get payment ID
-6. **Confirm Payment** → Verify success
-7. **Check History** → Verify all records
+### **WORKFLOW 1: CASH ON DELIVERY FLOW**
+1. **Register** → Create new user account
+2. **Login** → Get authentication token
+3. **View Products** → Get product ID
+4. **Add to Cart** → Verify cart updated
+5. **Create Order (Cash)** → Order created with cash payment
+6. **Verify Order** → Check order status
+7. **Check History** → Verify order records
+
+### **WORKFLOW 2: CARD PAYMENT FLOW**
+1. **Register** → Create new user account
+2. **Login** → Get authentication token
+3. **View Products** → Get product ID
+4. **Add to Cart** → Verify cart updated
+5. **Create Order (Card)** → Get clientSecret for payment
+6. **Simulate Card Payment** → Use test card details
+7. **Confirm Payment** → Verify payment success
+8. **Check History** → Verify payment and order records
 
 ### **Environment Variable Updates:**
 - After login: `userToken`
@@ -406,6 +491,36 @@ if (pm.response.code === 200) {
 2. **Token Issues**: Re-login if token expires
 3. **Database Connection**: Check MongoDB connection
 4. **Port Conflicts**: Ensure server runs on 3003
+5. **❌ ORDER CREATION FAILS**: **Cart is empty!** You MUST add products to cart first
+
+### **🔥 ORDER CREATION TROUBLESHOOTING:**
+
+**Problem:** "Cart is empty" error when creating order
+
+**Solution:** Follow these steps EXACTLY:
+1. ✅ Register & Login (get token)
+2. ✅ Get Products (copy product ID)
+3. ✅ Add to Cart (IMPORTANT!)
+4. ✅ Verify Cart has items
+5. ✅ Create Order
+
+**Quick Test:**
+```bash
+# Check if products exist in database
+cd backend
+node -e "
+const mongoose = require('mongoose');
+const Product = require('./src/models/product.model.js');
+mongoose.connect(process.env.MONGO_URI).then(async () => {
+  const count = await Product.countDocuments();
+  console.log('Products in DB:', count);
+  process.exit(0);
+});
+"
+
+# Create sample products if needed
+cd backend && node scripts/create-products.js
+```
 
 ### **Quick Fixes:**
 ```bash
@@ -414,23 +529,39 @@ cd backend && npm start
 
 # Check environment variables
 echo $PORT
-echo $MONGODB_URI
+echo $MONGO_URI
+
+# Create sample products
+cd backend && node scripts/create-products.js
 
 # Clear Postman cache
 # File → Settings → Data → Clear → Clear All
 ```
 
+### **📋 ORDER CREATION CHECKLIST:**
+- [ ] User logged in? (Token in headers)
+- [ ] Products exist in database?
+- [ ] Items added to cart?
+- [ ] Cart not empty?
+- [ ] User has location? (Required for order)
+
 ---
 
 ## 🎯 ONE-LINE TESTING SUMMARY
 
-**Complete Flow:** `Login → Get Products → Add to Cart → Create Order → Make Payment → Verify Success`
+**Cash on Delivery Flow:** `Register → Login → Get Products → Add to Cart → Create Order (Cash) → Verify Success`
 
-**All requests use:** `Authorization: Bearer {{userToken}}` (except login)
+**Card Payment Flow:** `Register → Login → Get Products → Add to Cart → Create Order (Card) → Confirm Payment → Verify Success`
+
+**All requests use:** `Authorization: Bearer {{userToken}}` (except register and login)
 
 **Base URL:** `{{baseUrl}}` = `http://localhost:3003`
 
 **Environment Variables:** `userToken`, `productId`, `orderId`, `paymentId`
+
+**Payment Options:**
+- `"paymentMethod": "cash"` → Cash on delivery (no additional steps)
+- `"paymentMethod": "card"` → Card payment (requires confirmation)
 
 ---
 
@@ -443,3 +574,22 @@ If you encounter any issues:
 4. Test each step individually before proceeding to next
 
 **Happy Testing! 🚀**
+
+## 💡 TAMIL GUIDE (தமிழ் வழிகாட்டி)
+
+### **படிப்படியான பரிசோதனை:**
+
+1. **பயனர் பதிவு** → புதிய கணக்கு உருவாக்கம்
+2. **உள்நுழைவு** → டோக்கன் பெறுதல்
+3. **தயாரிப்புகள் பார்க்க** → தயாரிப்பு ஐடி பெறுதல்
+4. **கார்ட்டில் சேர்க்க** → கார்ட் புதுப்பித்தல்
+5. **ஆர்டர் புருவாக்கம்** → கட்டண முறை தேர்வு
+   - **பணம் வழங்கும் போது** (Cash on delivery) → நேரடி ஆர்டர்
+   - **கார்டு கட்டணம்** (Card payment) → கார்டு விவரங்கள் மற்றும் உறுதிப்படுத்தல்
+6. **ஆர்டர் உறுதிப்படுத்தல்** → வெற்றி சரிபார்ப்பு
+
+### **கட்டண விருப்பங்கள்:**
+- **"paymentMethod": "cash"** → டெலிவரியின் போது பணம் செலுத்துதல்
+- **"paymentMethod": "card"** → கார்டு மூலம் கட்டணம் செலுத்துதல்
+
+**வெற்றியான பரிசோதனை! 🎉**

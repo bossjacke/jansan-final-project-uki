@@ -7,17 +7,17 @@ const JWT_SECRET = process.env.JWT_SECRET || "your_super_secret";
 // ✅ Register
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, phone, password, role, locationId } = req.body;
+    const { name, email, phone, password, role, location } = req.body;
 
     // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser)
-      return res.status(400).json({ message: "Email already registered" });
+      return res.status(400).json({ success: false, message: "Email already registered" });
 
     // Validate required fields for customer role
     const effectiveRole = role || "customer";
-    if (effectiveRole === "customer" && !locationId) {
-      return res.status(400).json({ message: "locationId is required for customers" });
+    if (effectiveRole === "customer" && !location) {
+      return res.status(400).json({ success: false, message: "Location is required for customers" });
     }
 
     // Hash password
@@ -30,7 +30,7 @@ export const registerUser = async (req, res) => {
       phone,
       password: hashedPassword,
       role: effectiveRole,
-      locationId,
+      location,
     });
 
     res.status(201).json({

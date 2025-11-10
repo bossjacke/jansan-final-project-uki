@@ -65,7 +65,7 @@ function Cart() {
     const handleCheckout = () => {
         if (!user) return navigate('/login');
         if (!cart.items.length) return alert('Cart is empty');
-        navigate('/orders', { state: { fromCart: true } });
+        navigate('/checkout');
     };
 
     if (loading) return <LoadingCart />;

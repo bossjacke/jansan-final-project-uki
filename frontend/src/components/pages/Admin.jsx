@@ -7,6 +7,7 @@ import LoadingState from '../admin/LoadingState.jsx';
 import ErrorDisplay from '../admin/ErrorDisplay.jsx';
 import ProductTab from '../admin/ProductTab.jsx';
 import UsersTab from '../admin/UsersTab.jsx';
+import OrderManagement from '../admin/OrderManagement.jsx';
 
 const API_URL = "http://localhost:3003/api";
 
@@ -15,9 +16,10 @@ function Admin() {
 	const navigate = useNavigate();
 	const [products, setProducts] = useState([]);
 	const [users, setUsers] = useState([]);
+	const [orders, setOrders] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
-	const [activeTab, setActiveTab] = useState('products');
+	const [activeTab, setActiveTab] = useState('orders');
 	const [showAddForm, setShowAddForm] = useState(false);
 	const [editingProduct, setEditingProduct] = useState(null);
 	const [formData, setFormData] = useState({
@@ -29,7 +31,8 @@ function Admin() {
 		if (!isAdmin) return navigate('/');
 		
 		if (activeTab === 'products') fetchProducts();
-		else fetchUsers();
+		else if (activeTab === 'users') fetchUsers();
+		else if (activeTab === 'orders') fetchOrders();
 	}, [activeTab, isAuthenticated, isAdmin, navigate]);
 
 	const fetchData = async (endpoint, setter) => {
@@ -50,6 +53,10 @@ function Admin() {
 
 	const fetchProducts = () => fetchData('products', setProducts);
 	const fetchUsers = () => fetchData('users', setUsers);
+	const fetchOrders = () => {
+		// Orders are handled by the OrderManagement component directly
+		setOrders([]);
+	};
 
 	const handleInputChange = (e) => {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -124,6 +131,7 @@ function Admin() {
 				setActiveTab={setActiveTab} 
 				productsLength={products.length} 
 				usersLength={users.length} 
+				ordersLength={orders.length} 
 			/>
 
 			{error && <ErrorDisplay error={error} />}
@@ -144,6 +152,7 @@ function Admin() {
 			)}
 
 			{activeTab === 'users' && <UsersTab users={users} />}
+			{activeTab === 'orders' && <OrderManagement />}
 		</AdminLayout>
 	);
 }

@@ -1,25 +1,27 @@
-import express from "express";
-import {
-  createProduct,
-  getAllProducts,
-  getProductById,
-  updateProduct,
-  deleteProduct,
-  placeOrder,
-} from "../controllers/product.controller.js";
-import { authMiddleware } from "../middleware/auth.js";
-import { adminOnly } from "../middleware/roleCheck.js";
+import express from 'express';
+import { 
+  getAllProducts, 
+  getProductById, 
+  createProduct, 
+  updateProduct, 
+  deleteProduct 
+} from '../controllers/product.controller.js';
 
 const router = express.Router();
 
-// Product CRUD
-router.post("/", authMiddleware, adminOnly, createProduct); // Admin only
-router.get("/", getAllProducts); // Public
-router.get("/:id", getProductById); // Public
-router.put("/:id", authMiddleware, adminOnly, updateProduct); // Admin only
-router.delete("/:id", authMiddleware, adminOnly, deleteProduct); // Admin only
+// GET /api/products → Return Bio-Gas and Fertilizer
+router.get('/', getAllProducts);
 
-// Orders
-router.post("/order", authMiddleware, placeOrder); // Authenticated users
+// GET /api/products/:id → Get single product
+router.get('/:id', getProductById);
+
+// POST /api/products → Create product (admin only)
+router.post('/', createProduct);
+
+// PUT /api/products/:id → Update product (admin only)
+router.put('/:id', updateProduct);
+
+// DELETE /api/products/:id → Delete product (admin only)
+router.delete('/:id', deleteProduct);
 
 export default router;

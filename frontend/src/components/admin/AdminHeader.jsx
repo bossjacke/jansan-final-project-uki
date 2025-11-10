@@ -1,6 +1,6 @@
 import React from 'react';
 
-const AdminHeader = ({ activeTab, setActiveTab, productsLength, usersLength }) => (
+const AdminHeader = ({ activeTab, setActiveTab, productsLength, usersLength, ordersLength }) => (
 	<div className="mb-8 border-b">
 		<div className="flex gap-5">
 			<button 
@@ -18,6 +18,14 @@ const AdminHeader = ({ activeTab, setActiveTab, productsLength, usersLength }) =
 				onClick={() => setActiveTab('users')}
 			>
 				👥 Users ({usersLength})
+			</button>
+			<button 
+				className={`btn rounded-none border-b-2 ${
+					activeTab === 'orders' ? 'btn-primary border-blue-500' : 'border-transparent'
+				}`}
+				onClick={() => setActiveTab('orders')}
+			>
+				📋 Orders ({ordersLength || 0})
 			</button>
 		</div>
 	</div>

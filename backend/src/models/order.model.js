@@ -8,7 +8,13 @@ const orderSchema = new mongoose.Schema(
       required: true 
     },
 
-    items: [
+    orderNumber: {
+      type: String,
+      unique: true,
+      required: true
+    },
+
+    products: [
       {
         productId: { 
           type: mongoose.Schema.Types.ObjectId, 
@@ -22,7 +28,8 @@ const orderSchema = new mongoose.Schema(
         },
         price: { 
           type: Number, 
-          required: true 
+          required: true,
+          min: 0
         },
       },
     ],
@@ -33,10 +40,28 @@ const orderSchema = new mongoose.Schema(
       min: 0 
     },
 
+    paymentMethod: {
+      type: String,
+      enum: ["card", "cash"],
+      required: true,
+      default: "card"
+    },
+
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "paid", "failed", "cancelled", "refunded"],
+      default: "pending"
+    },
+
+    deliveryLocation: {
+      type: String,
+      required: true
+    },
+
     orderStatus: {
       type: String,
-      enum: ["pending", "confirmed", "packed", "shipped", "delivered", "cancelled"],
-      default: "pending",
+      enum: ["Processing", "Delivered", "Cancelled"],
+      default: "Processing"
     },
 
     paymentId: { 
@@ -45,36 +70,106 @@ const orderSchema = new mongoose.Schema(
     },
 
     shippingAddress: {
-      fullName: String,
-      phone: String,
-      addressLine1: String,
-      city: String,
-      postalCode: String,
-      country: String,
+      fullName: {
+        type: String,
+        required: true
+      },
+      phone: {
+        type: String,
+        required: true
+      },
+      addressLine1: {
+        type: String,
+        required: true
+      },
+      city: {
+        type: String,
+        required: true
+      },
+      postalCode: {
+        type: String,
+        required: true
+      },
+      country: {
+        type: String,
+        default: "India"
+      },
     },
 
     deliveryDate: Date,
+    
+    // Track order timeline
+    statusHistory: [{
+      status: String,
+      timestamp: {
+        type: Date,
+        default: Date.now
+      },
+      note: String
+    }],
+
+    // Order notes for admin
+    adminNotes: String
   },
-  { timestamps: true }
+  { 
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
 );
 
 // Generate order number before saving
 orderSchema.pre('save', function(next) {
     if (this.isNew && !this.orderNumber) {
-        this.orderNumber = 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        const timestamp = Date.now();
+        const random = Math.random().toString(36).substr(2, 9).toUpperCase();
+        this.orderNumber = `ORD-${timestamp}-${random}`;
     }
     next();
 });
 
 // Calculate total amount before saving
 orderSchema.pre('save', function(next) {
-    if (this.isModified('items')) {
-        this.totalAmount = this.items.reduce((total, item) => {
+    if (this.isModified('products') && this.products) {
+        this.totalAmount = this.products.reduce((total, item) => {
             return total + (item.price * item.quantity);
         }, 0);
     }
     next();
 });
+
+// Add status history when order status changes
+orderSchema.pre('save', function(next) {
+    if (this.isModified('orderStatus') && !this.isNew) {
+        this.statusHistory.push({
+            status: this.orderStatus,
+            timestamp: new Date(),
+            note: `Order status changed to ${this.orderStatus}`
+        });
+    }
+    next();
+});
+
+// Virtual for formatted total amount
+orderSchema.virtual('formattedTotal').get(function() {
+    return `₹${this.totalAmount.toLocaleString()}`;
+});
+
+// Virtual for estimated delivery date
+orderSchema.virtual('estimatedDelivery').get(function() {
+    if (this.deliveryDate) {
+        return this.deliveryDate;
+    }
+    const estimated = new Date(this.createdAt);
+    estimated.setDate(estimated.getDate() + 3);
+    return estimated;
+});
+
+// Indexes for better query performance
+orderSchema.index({ userId: 1, createdAt: -1 });
+orderSchema.index({ orderNumber: 1 });
+orderSchema.index({ orderStatus: 1 });
+orderSchema.index({ paymentStatus: 1 });
 
 const Order = mongoose.model("Order", orderSchema);
 export default Order;

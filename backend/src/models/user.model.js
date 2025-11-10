@@ -6,10 +6,9 @@ const userSchema = new mongoose.Schema(
         email: { type: String, required: true, unique: true, lowercase: true },
         phone: { type: String, required: true },
         password: { type: String, required: true },
-        // Note: corrected typo 'buier' -> 'buyer'
-        role: { type: String, enum: ["admin", "customer", "buyer"], default: "customer" },
-        locationId: {
-            type: String,
+        role: { type: String, enum: ["admin", "customer"], default: "customer" },
+        location: { 
+            type: String, 
             required: function () {
                 return this.role === "customer";
             },

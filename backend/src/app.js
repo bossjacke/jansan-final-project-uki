@@ -5,6 +5,7 @@ import connectDB from "./config/db.js";
 import userRoutes from "./routes/user.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
+import authRoutes from "./routes/auth.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
@@ -26,7 +27,8 @@ app.use(express.json());
 
 // Routes
 app.use("/api/users", userRoutes);
-app.use("/api/auth", passwordRoutes); // Changed from /api/user to /api/auth to avoid conflicts
+app.use("/api/auth", authRoutes); // Auth routes for register/login
+app.use("/api/password", passwordRoutes); // Password reset routes
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);

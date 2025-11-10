@@ -1,29 +1,34 @@
 import React from 'react';
+import './CartSummary.css';
 
-const CartSummary = ({ totalAmount, onContinueShopping, onCheckout }) => (
-	<div className="border-t pt-6">
-		<div className="flex justify-between items-center mb-6">
-			<h2 className="text-2xl font-bold text-gray-800">Total:</h2>
-			<div className="text-3xl font-bold text-blue-600">
-				₹{totalAmount.toLocaleString('en-IN')}
-			</div>
-		</div>
-
-		<div className="flex gap-4">
-			<button 
-				className="btn flex-1"
-				onClick={onContinueShopping}
-			>
-				Continue Shopping
-			</button>
-			<button 
-				className="btn btn-primary flex-1"
-				onClick={onCheckout}
-			>
-				Proceed to Checkout
-			</button>
-		</div>
-	</div>
-);
+const CartSummary = ({ totalAmount, itemCount, onCheckout }) => {
+  return (
+    <div className="cart-summary">
+      <h3>Order Summary</h3>
+      
+      <div className="summary-row">
+        <span>Items ({itemCount}):</span>
+      </div>
+      
+      <div className="summary-row total">
+        <span>Total Amount:</span>
+        <span className="total-amount">₹{totalAmount.toLocaleString()}</span>
+      </div>
+      
+      <div className="summary-row">
+        <span>Delivery:</span>
+        <span>Free (3-5 days)</span>
+      </div>
+      
+      <button 
+        className="checkout-btn"
+        onClick={onCheckout}
+        disabled={itemCount === 0}
+      >
+        Proceed to Checkout
+      </button>
+    </div>
+  );
+};
 
 export default CartSummary;
