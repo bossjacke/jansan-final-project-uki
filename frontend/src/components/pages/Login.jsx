@@ -100,16 +100,17 @@
 
 
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 
 function Login({ onLogin, onClose }) {
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const [oneTapSkipped, setOneTapSkipped] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -131,6 +132,43 @@ function Login({ onLogin, onClose }) {
       setLoading(false);
     }
   };
+
+  const handleGoogleLogin = async (credentialResponse) => {
+    try {
+      const result = await googleLogin(credentialResponse.credential);
+      if (result.success) {
+        alert("Google login successful");
+        if (onLogin) onLogin();
+        if (onClose) onClose();
+        navigate('/');
+      } else {
+        alert(result.error);
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
+      alert("Google login failed. Please try again.");
+    }
+  };
+
+  useEffect(() => {
+    // Initialize GIS One Tap
+    if (window.google && window.google.accounts) {
+      window.google.accounts.id.initialize({
+        client_id: "367194647798-0qjrumukncrmjj543lv31q5gop97elfk.apps.googleusercontent.com",
+        callback: handleGoogleLogin
+      });
+
+      // Call prompt to show One Tap
+      window.google.accounts.id.prompt((notification) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          setOneTapSkipped(true);
+          console.log("One Tap not displayed or skipped");
+        } else if (notification.isDisplayed()) {
+          console.log("One Tap displayed");
+        }
+      });
+    }
+  }, []);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -190,21 +228,20 @@ function Login({ onLogin, onClose }) {
           </button>
 
 
-          {/* Google Login - Outside the form */}
-        <GoogleOAuthProvider clientId="367194647798-0qjrumukncrmjj543lv31q5gop97elfk.apps.googleusercontent.com">
-          <div style={{ textAlign: 'center', marginTop: '20px' }}>
-            <GoogleLogin
-              onSuccess={credentialResponse => {
-                console.log("Login Success:", credentialResponse);
-                // TODO: Handle Google login success
-              }}
-              onError={() => {
-                console.log("Login Failed");
-                alert("Google login failed");
-              }}
-            />
-          </div>
-        </GoogleOAuthProvider>
+          {/* Google Login Button - Fallback if One Tap is skipped */}
+          {oneTapSkipped && (
+            <GoogleOAuthProvider clientId="367194647798-0qjrumukncrmjj543lv31q5gop97elfk.apps.googleusercontent.com">
+              <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                <GoogleLogin
+                  onSuccess={handleGoogleLogin}
+                  onError={() => {
+                    console.log("Login Failed");
+                    alert("Google login failed");
+                  }}
+                />
+              </div>
+            </GoogleOAuthProvider>
+          )}
         <br /><br />
         {/* sign up path Link */}
         <Link

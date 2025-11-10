@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { LoginUser, RegisterUser } from '../api.js';
+import { LoginUser, RegisterUser, GoogleLogin } from '../api.js';
 
 const AuthContext = createContext();
 
@@ -44,6 +44,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const googleLogin = async (credential) => {
+    try {
+      const response = await GoogleLogin(credential);
+      if (response.token) {
+        setToken(response.token);
+        setUser(response.user);
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        return { success: true };
+      }
+      return { success: false, error: 'Google login failed' };
+    } catch (error) {
+      return { success: false, error: error.response?.data?.message || 'Google login failed' };
+    }
+  };
+
   const register = async (userData) => {
     try {
       const response = await RegisterUser(userData);
@@ -64,6 +80,7 @@ export const AuthProvider = ({ children }) => {
     user,
     token,
     login,
+    googleLogin,
     register,
     logout,
     loading,
