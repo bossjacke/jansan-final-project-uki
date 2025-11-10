@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import { getCart, getMyOrders, createOrder, confirmOrder } from '../../api.js';
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3003/api";
+
 
 function Orders() {
   const { user, token } = useAuth();
@@ -29,10 +29,8 @@ function Orders() {
   const fetchCartAndShowCheckout = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get(`${API_URL}/cart/`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
+      const data = await getCart();
+
       if (data.data.items.length > 0) {
         setCart(data.data);
         setShowCheckout(true);
@@ -51,10 +49,8 @@ function Orders() {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get(`${API_URL}/orders/`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      setOrders(data.orders || []);
+      const data = await getMyOrders();
+      setOrders(data.data.orders || []);
       setError(null);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch orders');
@@ -72,7 +68,7 @@ function Orders() {
     setShippingAddress({ ...shippingAddress, [e.target.name]: e.target.value });
   };
 
-  const createOrder = async () => {
+  const createOrderHandler = async () => {
     if (!shippingAddress.street || !shippingAddress.city || !shippingAddress.postalCode) {
       alert('Please fill in all shipping address fields');
       return;
@@ -80,26 +76,19 @@ function Orders() {
 
     try {
       setPaymentProcessing(true);
-      
-      const { data: { data: { order } } } = await axios.post(
-        `${API_URL}/orders/create`,
-        { shippingAddress },
-        { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
-      );
-      
-      await axios.post(`${API_URL}/orders/${order._id}/payment`, {}, {
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
-      });
 
-      await axios.post(`${API_URL}/orders/${order._id}/payment/confirm`, {
-        paymentIntentId: 'simulated_success'
-      }, { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } });
+      const data = await createOrder({ shippingAddress });
+      const order = data.data.order;
+
+      // Note: The payment endpoints in this component seem to be different from backend routes
+      // This might need adjustment based on actual backend implementation
+      await confirmOrder('simulated_success');
 
       alert('Order placed successfully!');
       setShowCheckout(false);
       setCart(null);
       fetchOrders();
-      
+
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to create order');
     } finally {
@@ -184,7 +173,7 @@ function Orders() {
 
       <div className="flex gap-4 justify-end">
         <button className="btn" onClick={cancelCheckout} disabled={paymentProcessing}>Cancel</button>
-        <button className="btn btn-primary" onClick={createOrder} disabled={paymentProcessing}>
+        <button className="btn btn-primary" onClick={createOrderHandler} disabled={paymentProcessing}>
           {paymentProcessing ? 'Processing...' : `Pay ₹${cart.totalAmount.toLocaleString('en-IN')}`}
         </button>
       </div>

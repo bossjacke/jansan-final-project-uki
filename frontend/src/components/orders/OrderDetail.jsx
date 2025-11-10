@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { getOrderById, cancelOrder } from '../../api.js';
 import './Orders.css';
 
 const OrderDetail = () => {
@@ -15,15 +16,7 @@ const OrderDetail = () => {
 
   const fetchOrderDetails = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3003/api/order/${orderId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
-
+      const data = await getOrderById(orderId);
       if (data.success) {
         setOrder(data.data);
         setError('');
@@ -38,22 +31,13 @@ const OrderDetail = () => {
     }
   };
 
-  const cancelOrder = async () => {
+  const cancelOrderHandler = async () => {
     if (!window.confirm('Are you sure you want to cancel this order?')) {
       return;
     }
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3003/api/order/${orderId}/cancel`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
-
+      const data = await cancelOrder(orderId);
       if (data.success) {
         alert('Order cancelled successfully');
         fetchOrderDetails(); // Refresh order details
@@ -351,9 +335,9 @@ const OrderDetail = () => {
           <h3>Actions</h3>
           <div className="action-buttons">
             {order.orderStatus === 'Processing' && (
-              <button 
+              <button
                 className="cancel-btn"
-                onClick={cancelOrder}
+                onClick={cancelOrderHandler}
               >
                 Cancel Order
               </button>

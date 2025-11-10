@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllProducts } from '../../api.js';
+import { getAllProducts, addToCart } from '../../api.js';
 import './Products.css';
 
 const Products = () => {
@@ -30,23 +30,9 @@ const Products = () => {
     }
   };
 
-  const addToCart = async (productId, productName) => {
+  const addToCartHandler = async (productId, productName) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3003/api/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          productId: productId,
-          quantity: 1
-        })
-      });
-
-      const data = await response.json();
-
+      const data = await addToCart(productId, 1);
       if (data.success) {
         alert(`${productName} added to cart!`);
       } else {
@@ -103,9 +89,9 @@ const Products = () => {
               <p className="product-stock">Stock: {product.stock} available</p>
               <p className="product-price">₹{product.price.toLocaleString()}</p>
               
-              <button 
+              <button
                 className="add-to-cart-btn"
-                onClick={() => addToCart(product._id, product.name)}
+                onClick={() => addToCartHandler(product._id, product.name)}
                 disabled={product.stock === 0}
               >
                 {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}

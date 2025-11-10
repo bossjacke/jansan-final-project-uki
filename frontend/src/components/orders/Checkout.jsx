@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getCart, createOrder, confirmOrder } from '../../api.js';
 import './Checkout.css';
 
 const Checkout = () => {
@@ -25,15 +26,7 @@ const Checkout = () => {
 
   const fetchCart = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3003/api/cart', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
-
+      const data = await getCart();
       if (data.success) {
         setCart(data.data);
       } else {
@@ -109,20 +102,10 @@ const Checkout = () => {
     setError('');
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3003/api/order/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          paymentMethod,
-          shippingAddress
-        })
+      const data = await createOrder({
+        paymentMethod,
+        shippingAddress
       });
-
-      const data = await response.json();
 
       if (data.success) {
         if (data.data.clientSecret) {
@@ -151,21 +134,9 @@ const Checkout = () => {
 
   const handlePaymentSuccess = async (orderId) => {
     try {
-      const token = localStorage.getItem('token');
       // In a real app, this would be handled by Stripe's webhook
       // For demo, we'll simulate payment confirmation
-      const response = await fetch('http://localhost:3003/api/order/confirm', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          paymentIntentId: 'demo_payment_intent_' + orderId
-        })
-      });
-
-      const data = await response.json();
+      const data = await confirmOrder('demo_payment_intent_' + orderId);
 
       if (data.success) {
         alert('Payment successful! Order confirmed.');

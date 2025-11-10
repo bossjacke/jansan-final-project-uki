@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getMyOrders, cancelOrder } from '../../api.js';
 import './Orders.css';
 
 const Orders = () => {
@@ -18,20 +19,13 @@ const Orders = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const queryParams = new URLSearchParams({
+      const params = {
         page: currentPage,
         limit: 10,
         ...(filter !== 'all' && { status: filter })
-      });
+      };
 
-      const response = await fetch(`http://localhost:3003/api/order/my?${queryParams}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
+      const data = await getMyOrders(params);
 
       if (data.success) {
         setOrders(data.data.orders);
@@ -54,22 +48,13 @@ const Orders = () => {
     navigate(`/order/${orderId}`);
   };
 
-  const cancelOrder = async (orderId) => {
+  const cancelOrderHandler = async (orderId) => {
     if (!window.confirm('Are you sure you want to cancel this order?')) {
       return;
     }
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3003/api/order/${orderId}/cancel`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
-
+      const data = await cancelOrder(orderId);
       if (data.success) {
         alert('Order cancelled successfully');
         fetchOrders(); // Refresh orders
@@ -241,9 +226,9 @@ const Orders = () => {
                     View Details
                   </button>
                   {order.orderStatus === 'Processing' && (
-                    <button 
+                    <button
                       className="cancel-btn"
-                      onClick={() => cancelOrder(order._id)}
+                      onClick={() => cancelOrderHandler(order._id)}
                     >
                       Cancel Order
                     </button>

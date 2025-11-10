@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getCart, updateCartItem, removeFromCart } from '../../api.js';
 import CartItem from './CartItem';
 import CartSummary from './CartSummary';
 import './Cart.css';
@@ -16,15 +17,7 @@ const Cart = () => {
 
   const fetchCart = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3003/api/cart', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
-
+      const data = await getCart();
       if (data.success) {
         setCart(data.data);
       } else {
@@ -39,18 +32,7 @@ const Cart = () => {
 
   const updateQuantity = async (productId, newQuantity) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3003/api/cart/update/${productId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ quantity: newQuantity })
-      });
-
-      const data = await response.json();
-
+      const data = await updateCartItem(productId, newQuantity);
       if (data.success) {
         fetchCart(); // Refresh cart
       } else {
@@ -63,16 +45,7 @@ const Cart = () => {
 
   const removeFromCart = async (productId) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3003/api/cart/remove/${productId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
-
+      const data = await removeFromCart(productId);
       if (data.success) {
         fetchCart(); // Refresh cart
       } else {
