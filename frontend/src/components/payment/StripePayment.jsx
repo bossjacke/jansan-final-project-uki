@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { createPaymentIntent, confirmPayment } from '../../api.js';
 
 
@@ -20,7 +20,7 @@ const StripePaymentForm = ({ amount, onSuccess, onError, onClose }) => {
       try {
         const response = await createPaymentIntent({
           amount: amount,
-          currency: 'usd', // You can change this to your preferred currency
+          currency: 'inr', // Changed to INR for Indian Rupees
           description: 'Order payment'
         });
 
@@ -132,7 +132,7 @@ const StripePaymentForm = ({ amount, onSuccess, onError, onClose }) => {
                 Processing...
               </>
             ) : (
-              `Pay $${amount.toFixed(2)}`
+              `Pay ₹${amount.toFixed(2)}`
             )}
           </button>
         </div>

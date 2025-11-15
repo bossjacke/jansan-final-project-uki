@@ -2,18 +2,24 @@ import Stripe from 'stripe';
 import Payment from '../models/payment.model.js';
 
 // Initialize Stripe with proper error handling
-let stripe;
-try {
-    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_your_stripe_secret_key_here') {
-        console.warn('Stripe secret key is not configured or using placeholder value. Payment features will be limited.');
-        stripe = null;
+const getStripe = () => {
+    if (!process.env.STRIPE_SECRET_KEY) {
+        console.warn('Stripe secret key is not configured. Payment features will be limited.');
+        return null;
+    } else if (process.env.STRIPE_SECRET_KEY === 'sk_test_your_stripe_secret_key_here') {
+        console.warn('Stripe is using placeholder secret key. Please configure your actual Stripe secret key.');
+        return null;
     } else {
-        stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+        try {
+            const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+            console.log('✅ Stripe initialized successfully');
+            return stripe;
+        } catch (error) {
+            console.error('Failed to initialize Stripe:', error.message);
+            return null;
+        }
     }
-} catch (error) {
-    console.error('Failed to initialize Stripe:', error.message);
-    stripe = null;
-}
+};
 
 // ==================== PAYMENT CONTROLLERS ====================
 
@@ -23,7 +29,7 @@ try {
  */
 export const createPaymentIntent = async (req, res) => {
     try {
-        const { amount, currency = 'usd', description, metadata = {} } = req.body;
+        const { amount, currency = 'inr', description, metadata = {} } = req.body;
 
         // Validate input
         if (!amount || amount <= 0) {
@@ -33,6 +39,9 @@ export const createPaymentIntent = async (req, res) => {
             });
         }
 
+        // Get Stripe instance
+        const stripe = getStripe();
+        
         // Check if Stripe is properly configured
         if (!stripe) {
             return res.status(500).json({
@@ -121,6 +130,9 @@ export const confirmPayment = async (req, res) => {
             });
         }
 
+        // Get Stripe instance
+        const stripe = getStripe();
+        
         // Retrieve payment intent from Stripe to get the latest status
         if (stripe) {
             const stripePaymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
@@ -294,6 +306,9 @@ export const cancelPayment = async (req, res) => {
             });
         }
 
+        // Get Stripe instance
+        const stripe = getStripe();
+        
         // Cancel payment intent in Stripe
         if (stripe) {
             try {

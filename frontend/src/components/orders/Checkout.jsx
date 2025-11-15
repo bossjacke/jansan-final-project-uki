@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCart, createOrder, confirmOrder } from '../../api.js';
+import StripePayment from '../payment/StripePayment.jsx';
 import './Checkout.css';
 
 const Checkout = () => {
@@ -17,6 +18,7 @@ const Checkout = () => {
     country: 'India'
   });
   const [user, setUser] = useState(null);
+  const [showStripePayment, setShowStripePayment] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -98,29 +100,28 @@ const Checkout = () => {
       return;
     }
 
+    if (paymentMethod === 'card') {
+      // Show Stripe payment form for card payments
+      setShowStripePayment(true);
+    } else {
+      // Handle cash on delivery
+      handleCashOnDelivery();
+    }
+  };
+
+  const handleCashOnDelivery = async () => {
     setLoading(true);
     setError('');
 
     try {
       const data = await createOrder({
-        paymentMethod,
+        paymentMethod: 'cash_on_delivery',
         shippingAddress
       });
 
       if (data.success) {
-        if (data.data.clientSecret) {
-          // Stripe payment - in a real app, you would redirect to Stripe Checkout
-          // For demo purposes, we'll simulate payment completion
-          alert('Redirecting to payment gateway...');
-          setTimeout(() => {
-            // Simulate successful payment
-            handlePaymentSuccess(data.data.order._id);
-          }, 2000);
-        } else {
-          // Cash on delivery or demo payment
-          alert('Order placed successfully!');
-          navigate('/orders');
-        }
+        alert('Order placed successfully! Cash on delivery selected.');
+        navigate('/orders');
       } else {
         setError(data.message || 'Failed to place order');
       }
@@ -132,22 +133,34 @@ const Checkout = () => {
     }
   };
 
-  const handlePaymentSuccess = async (orderId) => {
+  const handlePaymentSuccess = async (paymentIntent) => {
     try {
-      // In a real app, this would be handled by Stripe's webhook
-      // For demo, we'll simulate payment confirmation
-      const data = await confirmOrder('demo_payment_intent_' + orderId);
+      // Create order with successful payment
+      const data = await createOrder({
+        paymentMethod: 'card',
+        shippingAddress,
+        paymentIntentId: paymentIntent.id
+      });
 
       if (data.success) {
         alert('Payment successful! Order confirmed.');
         navigate('/orders');
       } else {
-        alert('Payment confirmation failed. Please contact support.');
+        setError('Order creation failed after payment. Please contact support.');
       }
     } catch (err) {
-      console.error('Error confirming payment:', err);
-      alert('Payment confirmation error. Please contact support.');
+      console.error('Error creating order after payment:', err);
+      setError('Order creation error. Please contact support.');
     }
+  };
+
+  const handlePaymentError = (error) => {
+    setError(error.message || 'Payment failed. Please try again.');
+    setShowStripePayment(false);
+  };
+
+  const handlePaymentClose = () => {
+    setShowStripePayment(false);
   };
 
   if (!cart || cart.items.length === 0) {
@@ -350,6 +363,20 @@ const Checkout = () => {
           </form>
         </div>
       </div>
+
+      {/* Stripe Payment Modal */}
+      {showStripePayment && (
+        <div className="payment-modal-overlay">
+          <div className="payment-modal">
+            <StripePayment
+              amount={cart.totalAmount}
+              onSuccess={handlePaymentSuccess}
+              onError={handlePaymentError}
+              onClose={handlePaymentClose}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
