@@ -15,6 +15,7 @@ import Admin from './components/pages/Admin.jsx';
 import Orders from './components/pages/Orders.jsx';
 import OrderDetail from './components/orders/OrderDetail.jsx';
 import Checkout from './components/orders/Checkout.jsx';
+import Contact from './components/pages/Contact.jsx';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="/orders" element={<Orders />} />
         <Route path="/order/:orderId" element={<OrderDetail />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/contact" element={<Contact />} />
       </Routes>
     </AuthProvider>
   );

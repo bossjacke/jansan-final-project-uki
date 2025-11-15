@@ -57,59 +57,89 @@ function Products() {
 	const fertilizerProducts = products.filter(p => p.type === 'fertilizer');
 
 	if (loading) return (
-		<div className="simple-page">
-			<div className="card">
-				<h1 className="title">Products</h1>
-				<div className="text-center py-10">Loading products...</div>
+		<div className="min-h-screen bg-gray-50 py-12">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div className="text-center py-16">
+					<div className="loading-spinner mx-auto mb-4"></div>
+					<h2 className="text-2xl font-bold text-gray-900 mb-2">Loading Products</h2>
+					<p className="text-gray-600">Please wait while we fetch our amazing products...</p>
+				</div>
 			</div>
 		</div>
 	);
 
 	if (error) return (
-		<div className="simple-page">
-			<div className="card">
-				<h1 className="title">Products</h1>
-				<div className="text-center py-10">
-					<div className="text-red-500">{error}</div>
-					<button className="btn mt-5" onClick={fetchProducts}>Retry</button>
+		<div className="min-h-screen bg-gray-50 py-12">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div className="text-center py-16">
+					<div className="text-6xl mb-4">⚠️</div>
+					<h2 className="text-2xl font-bold text-gray-900 mb-2">Oops! Something went wrong</h2>
+					<p className="text-gray-600 mb-6 max-w-md mx-auto">{error}</p>
+					<button 
+						onClick={fetchProducts}
+						className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+					>
+						Try Again
+					</button>
 				</div>
 			</div>
 		</div>
 	);
 
 	const ProductCard = ({ product }) => (
-		<div className="p-5 bg-white rounded-lg shadow-sm border">
-			<div className="flex justify-between items-start">
-				<div className="flex-1">
-					<div className="flex items-center gap-2 mb-2">
-						<h3 className="text-lg font-bold m-0">{product.name}</h3>
-						<span className={`px-2 py-0.5 rounded-full text-xs font-bold text-white ${
-							product.type === 'biogas' ? 'bg-orange-500' : 'bg-green-500'
-						}`}>
-							{product.type === 'biogas' ? '🔥 Biogas' : '🌱 Fertilizer'}
-						</span>
-					</div>
-					
-					{product.description && (
-						<p className="text-gray-600 text-sm my-2">{product.description}</p>
-					)}
-					
-					<div className="flex gap-4 flex-wrap my-2.5">
-						{product.capacity && (
-							<div className="text-sm"><strong>Capacity:</strong> {product.capacity}</div>
-						)}
-						{product.warrantyPeriod && (
-							<div className="text-sm"><strong>Warranty:</strong> {product.warrantyPeriod}</div>
-						)}
-					</div>
-					
-					<div className="text-xl font-bold text-gray-800 my-3">
-						₹{product.price.toLocaleString('en-IN')}
+		<div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
+			<div className="relative">
+				<div className="h-48 bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center">
+					<div className="text-6xl">
+						{product.type === 'biogas' ? '🔥' : '🌱'}
 					</div>
 				</div>
+				<div className="absolute top-4 right-4">
+					<span className={`px-3 py-1 rounded-full text-xs font-bold text-white shadow-lg ${
+						product.type === 'biogas' ? 'bg-orange-500' : 'bg-green-500'
+					}`}>
+						{product.type === 'biogas' ? 'Biogas' : 'Fertilizer'}
+					</span>
+				</div>
+			</div>
+			
+			<div className="p-6">
+				<h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">
+					{product.name}
+				</h3>
 				
-				<div className="ml-5">
-					<button className="btn btn-primary min-w-24" onClick={() => addToCart(product)}>
+				{product.description && (
+					<p className="text-gray-600 text-sm mb-4 line-clamp-2">
+						{product.description}
+					</p>
+				)}
+				
+				<div className="space-y-2 mb-4">
+					{product.capacity && (
+						<div className="flex items-center text-sm text-gray-500">
+							<span className="font-medium mr-2">Capacity:</span>
+							<span>{product.capacity}</span>
+						</div>
+					)}
+					{product.warrantyPeriod && (
+						<div className="flex items-center text-sm text-gray-500">
+							<span className="font-medium mr-2">Warranty:</span>
+							<span>{product.warrantyPeriod}</span>
+						</div>
+					)}
+				</div>
+				
+				<div className="flex items-center justify-between pt-4 border-t border-gray-100">
+					<div className="text-2xl font-bold text-gray-900">
+						₹{product.price.toLocaleString('en-IN')}
+					</div>
+					<button 
+						onClick={() => addToCart(product)}
+						className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2"
+					>
+						<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+						</svg>
 						Add to Cart
 					</button>
 				</div>
@@ -118,26 +148,48 @@ function Products() {
 	);
 
 	return (
-		<div className="simple-page">
-			<div className="card">
-				<h1 className="title">Our Products</h1>
-				
-				<div className="mb-8 text-center">
-					<div className="inline-flex gap-2.5 flex-wrap">
+		<div className="min-h-screen bg-gray-50 py-8">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				{/* Header */}
+				<div className="text-center mb-12">
+					<h1 className="text-4xl font-bold text-gray-900 mb-4">Our Products</h1>
+					<p className="text-xl text-gray-600 max-w-3xl mx-auto">
+						High-quality biogas systems and organic fertilizers for sustainable agriculture
+					</p>
+				</div>
+
+				{/* Category Filters */}
+				<div className="flex justify-center mb-10">
+					<div className="inline-flex rounded-lg shadow-sm" role="group">
 						<button 
-							className={`btn mb-2.5 ${selectedCategory === 'all' ? 'btn-primary' : ''}`}
+							type="button"
+							className={`px-6 py-3 text-sm font-medium rounded-l-lg border ${
+								selectedCategory === 'all' 
+									? 'bg-purple-600 text-white border-purple-600' 
+									: 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+							}`}
 							onClick={() => setSelectedCategory('all')}
 						>
 							All Products ({products.length})
 						</button>
 						<button 
-							className={`btn mb-2.5 ${selectedCategory === 'biogas' ? 'btn-primary' : ''}`}
+							type="button"
+							className={`px-6 py-3 text-sm font-medium border-t border-b ${
+								selectedCategory === 'biogas' 
+									? 'bg-purple-600 text-white border-purple-600' 
+									: 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+							}`}
 							onClick={() => setSelectedCategory('biogas')}
 						>
 							🔥 Biogas Units ({biogasProducts.length})
 						</button>
 						<button 
-							className={`btn mb-2.5 ${selectedCategory === 'fertilizer' ? 'btn-primary' : ''}`}
+							type="button"
+							className={`px-6 py-3 text-sm font-medium rounded-r-lg border ${
+								selectedCategory === 'fertilizer' 
+									? 'bg-purple-600 text-white border-purple-600' 
+									: 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+							}`}
 							onClick={() => setSelectedCategory('fertilizer')}
 						>
 							🌱 Fertilizers ({fertilizerProducts.length})
@@ -146,15 +198,27 @@ function Products() {
 				</div>
 
 				{filteredProducts.length === 0 ? (
-					<div className="text-center py-10">
-						<div className="text-lg text-gray-600">
+					<div className="text-center py-16">
+						<div className="text-6xl mb-4">📦</div>
+						<h3 className="text-xl font-semibold text-gray-900 mb-2">
 							{selectedCategory === 'all' 
-								? 'No products available at the moment.' 
-								: `No ${selectedCategory} products available.`}
-						</div>
+								? 'No products available at the moment' 
+								: `No ${selectedCategory} products available`}
+						</h3>
+						<p className="text-gray-600 mb-6">
+							{selectedCategory === 'all' 
+								? 'Check back later for new products' 
+								: `Try selecting a different category`}
+						</p>
+						<button 
+							onClick={() => setSelectedCategory('all')}
+							className="btn btn-primary"
+						>
+							View All Products
+						</button>
 					</div>
 				) : (
-					<div className="grid gap-5">
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 						{filteredProducts.map((product) => (
 							<ProductCard key={product._id} product={product} />
 						))}
@@ -162,20 +226,20 @@ function Products() {
 				)}
 
 				{products.length > 0 && (
-					<div className="mt-10 p-5 bg-gray-50 rounded-lg">
-						<h3 className="mb-4 font-bold text-gray-800">Product Summary</h3>
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-							<div className="text-center p-4 bg-white rounded-lg">
-								<div className="text-2xl font-bold text-gray-800">{products.length}</div>
-								<div className="text-gray-600 text-sm">Total Products</div>
+					<div className="mt-16 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-8">
+						<h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Product Summary</h3>
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+							<div className="bg-white rounded-xl p-6 text-center shadow-sm">
+								<div className="text-4xl font-bold text-gray-900 mb-2">{products.length}</div>
+								<div className="text-gray-600">Total Products</div>
 							</div>
-							<div className="text-center p-4 bg-white rounded-lg">
-								<div className="text-2xl font-bold text-orange-500">{biogasProducts.length}</div>
-								<div className="text-gray-600 text-sm">Biogas Units</div>
+							<div className="bg-white rounded-xl p-6 text-center shadow-sm">
+								<div className="text-4xl font-bold text-orange-500 mb-2">{biogasProducts.length}</div>
+								<div className="text-gray-600">Biogas Units</div>
 							</div>
-							<div className="text-center p-4 bg-white rounded-lg">
-								<div className="text-2xl font-bold text-green-500">{fertilizerProducts.length}</div>
-								<div className="text-gray-600 text-sm">Fertilizers</div>
+							<div className="bg-white rounded-xl p-6 text-center shadow-sm">
+								<div className="text-4xl font-bold text-green-500 mb-2">{fertilizerProducts.length}</div>
+								<div className="text-gray-600">Fertilizers</div>
 							</div>
 						</div>
 					</div>
