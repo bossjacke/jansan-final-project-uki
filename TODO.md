@@ -1,12 +1,10 @@
-# TODO: Integrate Google Identity Services (GIS) One Tap Sign-in
+# TODO: Implement Google OAuth Login
 
-## Steps to Complete
-
-- [x] Add Google Identity Services script to index.html
-- [x] Add Google login API function to api.js
-- [x] Update AuthContext.jsx to handle Google login
-- [x] Modify Login.jsx to initialize GIS and call prompt() on mount
-- [x] Add callback handling in Login.jsx for One Tap authentication
-- [x] Add notification callback to prompt() for handling display status
-- [x] Test One Tap prompt on login page load (verified script loading)
-- [x] Verify fallback behavior if One Tap is skipped (implemented conditional rendering)
+- [x] Update backend/src/models/user.model.js to add googleId field
+- [x] Install google-auth-library in backend
+- [x] Create backend/src/controllers/googleAuth.controller.js with googleLogin function
+- [x] Update backend/src/routes/user.routes.js to add POST /google-login route
+- [x] Modify frontend/src/components/auth/Login.jsx to include GoogleLogin component
+- [x] Update frontend/src/components/auth/Login.css for Google login styling
+- [ ] Test both login methods end-to-end
+- [ ] Set up Google OAuth credentials (GOOGLE_CLIENT_ID in .env)

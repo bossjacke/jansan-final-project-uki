@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
+import { useAuth } from '../../context/AuthContext.jsx';
 import './Login.css';
 
 const Login = () => {
@@ -10,6 +12,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { googleLogin } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -48,6 +51,23 @@ const Login = () => {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const result = await googleLogin(credentialResponse.credential);
+      if (result.success) {
+        navigate('/products');
+      } else {
+        setError(result.error || 'Google login failed');
+      }
+    } catch (err) {
+      setError('Google login failed. Please try again.');
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google login failed. Please try again.');
+  };
+
   return (
     <div className="auth-container">
       <div className="auth-form">
@@ -82,6 +102,17 @@ const Login = () => {
           </button>
         </form>
         
+        <div className="google-login-container">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            theme="outline"
+            size="large"
+            text="signin_with"
+            shape="rectangular"
+          />
+        </div>
+
         <p>
           Don't have an account? <a href="/register">Register here</a>
         </p>

@@ -237,7 +237,7 @@ export const cancelOrder = async (orderId) => {
 // Payment API functions
 export const createPaymentIntent = async (paymentData) => {
   try {
-    const res = await axios.post(`${API_URL}/payment/create-intent`, paymentData, {
+    const res = await axios.post(`${API_URL}/payments/create-intent`, paymentData, {
       headers: getAuthHeaders()
     });
     return res.data;
@@ -249,7 +249,7 @@ export const createPaymentIntent = async (paymentData) => {
 
 export const confirmPayment = async (paymentData) => {
   try {
-    const res = await axios.post(`${API_URL}/payment/confirm`, paymentData, {
+    const res = await axios.post(`${API_URL}/payments/confirm`, paymentData, {
       headers: getAuthHeaders()
     });
     return res.data;
@@ -261,7 +261,7 @@ export const confirmPayment = async (paymentData) => {
 
 export const getPaymentHistory = async () => {
   try {
-    const res = await axios.get(`${API_URL}/payment/history`, {
+    const res = await axios.get(`${API_URL}/payments/history`, {
       headers: getAuthHeaders()
     });
     return res.data;
@@ -273,7 +273,7 @@ export const getPaymentHistory = async () => {
 
 export const getPaymentById = async (paymentId) => {
   try {
-    const res = await axios.get(`${API_URL}/payment/${paymentId}`, {
+    const res = await axios.get(`${API_URL}/payments/${paymentId}`, {
       headers: getAuthHeaders()
     });
     return res.data;
