@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './components/context/AuthContext.jsx';
 import './App.css';
 import Navbar from './components/navbar/navbar.jsx';
+import Footer from './components/Footer.jsx';
 import Home from './components/home/Home.jsx';
 import About from './components/about/About.jsx';
 import ProductsPage from './components/products/ProductsPage.jsx';
@@ -36,7 +37,9 @@ function App() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/contact" element={<Contact />} />
       </Routes>
+      <Footer/>
     </AuthProvider>
+    
   );
 }
 
