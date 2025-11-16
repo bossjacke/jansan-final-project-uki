@@ -1,5 +1,4 @@
 import React from 'react';
-import './CartSummary.css';
 
 const CartSummary = ({ totalAmount, onContinueShopping, onCheckout }) => {
   return (

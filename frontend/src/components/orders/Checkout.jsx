@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCart, createOrder, confirmOrder } from '../../api.js';
 import StripePayment from '../payment/StripePayment.jsx';
-import './Checkout.css';
 
 const Checkout = () => {
   const [cart, setCart] = useState(null);
