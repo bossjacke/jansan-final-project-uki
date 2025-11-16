@@ -70,7 +70,7 @@ function Navbar() {
   };
 
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50 border-b border-gray-200">
+    <nav className="bg-gray-50 dark:bg-gray-900 shadow-lg sticky top-0 z-50 border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo Section */}
@@ -86,8 +86,8 @@ function Navbar() {
               )}
             </div>
             <Link to="/" className="flex items-center">
-              <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Jansan</span>
-              <span className="text-sm text-gray-500 ml-2">Eco Solutions</span>
+              <span className="text-2xl font-bold bg-gradient-to-r from-white to-white bg-clip-text text-transparent">Jansan</span>
+              <span className="text-sm bg-slate-900 text-white p-6 rounded-lg ml-2">Eco Solutions</span>
             </Link>
           </div>
 
