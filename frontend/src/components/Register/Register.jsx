@@ -36,7 +36,7 @@
 
 
 import React, { useState } from "react";
-import { RegisterUser } from "../../api";
+import { RegisterUser } from "../../api.js";
 import { Link, useNavigate } from 'react-router-dom';
 
 function Register({ onRegister, onClose }) {

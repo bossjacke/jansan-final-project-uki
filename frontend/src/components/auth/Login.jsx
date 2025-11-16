@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../context/AuthContext.jsx';
-import './Login.css';
 
 const Login = () => {
   const [formData, setFormData] = useState({

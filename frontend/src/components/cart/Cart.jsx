@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import CartLayout from '../cart/CartLayout.jsx';
-import CartItem from '../cart/CartItem.jsx';
-import CartSummary from '../cart/CartSummary.jsx';
-import EmptyCart from '../cart/EmptyCart.jsx';
-import LoadingCart from '../cart/LoadingCart.jsx';
-import CartError from '../cart/CartError.jsx';
+import CartLayout from './CartLayout.jsx';
+import CartItem from './CartItem.jsx';
+import CartSummary from './CartSummary.jsx';
+import EmptyCart from './EmptyCart.jsx';
+import LoadingCart from './LoadingCart.jsx';
+import CartError from './CartError.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3003/api";
 

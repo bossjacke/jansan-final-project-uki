@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { LoginUser, RegisterUser, GoogleLogin } from '../api.js';
+import { LoginUser, RegisterUser, GoogleLogin } from '../../api.js';
 
 const AuthContext = createContext();
 
@@ -84,7 +84,8 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     loading,
-    isAuthenticated: !!token
+    isAuthenticated: !!token,
+    isAdmin: user?.role === 'admin'
   };
 
   return (
