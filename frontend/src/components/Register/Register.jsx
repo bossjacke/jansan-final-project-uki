@@ -19,29 +19,29 @@ function Register({ onRegister, onClose }) {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!form.name.trim()) {
       newErrors.name = "Name is required";
     } else if (form.name.trim().length < 2) {
       newErrors.name = "Name must be at least 2 characters";
     }
-    
+
     if (!form.email) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(form.email)) {
       newErrors.email = "Email is invalid";
     }
-    
+
     if (!form.phone) {
       newErrors.phone = "Phone number is required";
     } else if (!/^\d{10,}$/.test(form.phone.replace(/\D/g, ''))) {
       newErrors.phone = "Phone number must be at least 10 digits";
     }
-    
+
     if (!form.locationId.trim()) {
       newErrors.locationId = "Location ID is required";
     }
-    
+
     if (!form.password) {
       newErrors.password = "Password is required";
     } else if (form.password.length < 8) {
@@ -49,17 +49,17 @@ function Register({ onRegister, onClose }) {
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(form.password)) {
       newErrors.password = "Password must contain uppercase, lowercase, and number";
     }
-    
+
     if (!form.confirmPassword) {
       newErrors.confirmPassword = "Please confirm your password";
     } else if (form.password !== form.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
-    
+
     if (!form.acceptTerms) {
       newErrors.acceptTerms = "You must accept the terms and conditions";
     }
-    
+
     return newErrors;
   };
 
@@ -73,16 +73,16 @@ function Register({ onRegister, onClose }) {
 
     setLoading(true);
     setErrors({});
-    
+
     const { confirmPassword, acceptTerms, ...formData } = form;
 
     try {
       const res = await RegisterUser(formData);
       setSuccessMessage(res.message || "Registration successful! Redirecting to login...");
-      
+
       if (onRegister) onRegister(res);
       if (onClose) onClose();
-      
+
       setTimeout(() => {
         try {
           navigate('/login');
@@ -92,8 +92,8 @@ function Register({ onRegister, onClose }) {
       }, 2000);
     } catch (error) {
       console.error("Registration error:", error);
-      setErrors({ 
-        general: error.response?.data?.message || "Registration failed. Please try again." 
+      setErrors({
+        general: error.response?.data?.message || "Registration failed. Please try again."
       });
     } finally {
       setLoading(false);
@@ -112,8 +112,8 @@ function Register({ onRegister, onClose }) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
       {/* Left side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="max-w-md w-full">
+      <div className="w-1.8/4 flex items-center justify-center p-8">
+        <div className="w-1.8/4 ">
           {/* Logo/Branding */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
@@ -148,9 +148,8 @@ function Register({ onRegister, onClose }) {
                 placeholder="Enter your full name"
                 value={form.name}
                 onChange={handleInputChange('name')}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-colors duration-200 ${
-                  errors.name ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-colors duration-200 ${errors.name ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
+                  }`}
                 aria-invalid={errors.name ? 'true' : 'false'}
                 aria-describedby={errors.name ? 'name-error' : undefined}
               />
@@ -172,9 +171,8 @@ function Register({ onRegister, onClose }) {
                 placeholder="Enter your email"
                 value={form.email}
                 onChange={handleInputChange('email')}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-colors duration-200 ${
-                  errors.email ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-colors duration-200 ${errors.email ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
+                  }`}
                 aria-invalid={errors.email ? 'true' : 'false'}
                 aria-describedby={errors.email ? 'email-error' : undefined}
               />
@@ -196,9 +194,8 @@ function Register({ onRegister, onClose }) {
                 placeholder="Enter your phone number"
                 value={form.phone}
                 onChange={handleInputChange('phone')}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-colors duration-200 ${
-                  errors.phone ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-colors duration-200 ${errors.phone ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
+                  }`}
                 aria-invalid={errors.phone ? 'true' : 'false'}
                 aria-describedby={errors.phone ? 'phone-error' : undefined}
               />
@@ -220,9 +217,8 @@ function Register({ onRegister, onClose }) {
                 placeholder="Enter your location ID"
                 value={form.locationId}
                 onChange={handleInputChange('locationId')}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-colors duration-200 ${
-                  errors.locationId ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-colors duration-200 ${errors.locationId ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
+                  }`}
                 aria-invalid={errors.locationId ? 'true' : 'false'}
                 aria-describedby={errors.locationId ? 'locationId-error' : undefined}
               />
@@ -244,9 +240,8 @@ function Register({ onRegister, onClose }) {
                 placeholder="Create a strong password"
                 value={form.password}
                 onChange={handleInputChange('password')}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-colors duration-200 ${
-                  errors.password ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-colors duration-200 ${errors.password ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
+                  }`}
                 aria-invalid={errors.password ? 'true' : 'false'}
                 aria-describedby={errors.password ? 'password-error' : undefined}
               />
@@ -268,9 +263,8 @@ function Register({ onRegister, onClose }) {
                 placeholder="Confirm your password"
                 value={form.confirmPassword}
                 onChange={handleInputChange('confirmPassword')}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-colors duration-200 ${
-                  errors.confirmPassword ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-colors duration-200 ${errors.confirmPassword ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
+                  }`}
                 aria-invalid={errors.confirmPassword ? 'true' : 'false'}
                 aria-describedby={errors.confirmPassword ? 'confirmPassword-error' : undefined}
               />
@@ -333,7 +327,7 @@ function Register({ onRegister, onClose }) {
       </div>
 
       {/* Right side - Image */}
-      <div className="hidden lg:block lg:w-1/2 relative">
+      <div className="flex-1 hidden lg:block lg:w-3/4 relative">
         <div className="absolute inset-0 bg-gradient-to-br from-green-600 to-teal-700">
           <img
             src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"

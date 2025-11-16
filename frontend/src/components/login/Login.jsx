@@ -85,7 +85,7 @@ function Login({ onLogin, onClose }) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
       {/* Left side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
+      <div className="w-1.8/4 flex items-center justify-center p-8">
         <div className="max-w-md w-full">
           {/* Logo/Branding */}
           <div className="text-center mb-8">
@@ -226,7 +226,7 @@ function Login({ onLogin, onClose }) {
       </div>
 
       {/* Right side - Image */}
-      <div className="hidden lg:block lg:w-1/2 relative">
+      <div className="hidden lg:block flex-1 relative">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-700">
           <img
             src="https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"
