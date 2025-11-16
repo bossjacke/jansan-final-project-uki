@@ -1,12 +1,12 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext.jsx';
+import { AuthProvider } from './components/context/AuthContext.jsx';
 import './App.css';
 import Navbar from './components/navbar/navbar.jsx';
 import Home from './components/home/Home.jsx';
 import About from './components/about/About.jsx';
 import Products from './components/products/Products.jsx';
-import Cart from './components/pages/Cart.jsx';
+import Cart from './components/cart/Cart.jsx';
 import Login from './components/login/Login.jsx';
 import Register from './components/Register/Register.jsx';
 import ForgotPassword from './components/password/ForgotPassword.jsx';
