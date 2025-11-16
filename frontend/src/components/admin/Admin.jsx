@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
-import AdminLayout from '../admin/AdminLayout.jsx';
-import AdminHeader from '../admin/AdminHeader.jsx';
-import LoadingState from '../admin/LoadingState.jsx';
-import ErrorDisplay from '../admin/ErrorDisplay.jsx';
-import ProductTab from '../admin/ProductTab.jsx';
-import UsersTab from '../admin/UsersTab.jsx';
-import OrderManagement from '../admin/OrderManagement.jsx';
+import AdminLayout from './AdminLayout.jsx';
+import AdminHeader from './AdminHeader.jsx';
+import LoadingState from './LoadingState.jsx';
+import ErrorDisplay from './ErrorDisplay.jsx';
+import ProductTab from './ProductTab.jsx';
+import UsersTab from './UsersTab.jsx';
+import OrderManagement from './OrderManagement.jsx';
 
 const API_URL = "http://localhost:3003/api";
 

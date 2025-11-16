@@ -2,20 +2,20 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.jsx';
 import './App.css';
-import Navbar from './components/pages/navbar.jsx';
-import Home from './components/pages/Home.jsx';
-import About from './components/pages/About.jsx';
-import Products from './components/pages/Products.jsx';
+import Navbar from './components/navbar/navbar.jsx';
+import Home from './components/home/Home.jsx';
+import About from './components/about/About.jsx';
+import Products from './components/products/Products.jsx';
 import Cart from './components/pages/Cart.jsx';
-import Login from './components/pages/Login.jsx';
-import Register from './components/pages/Register.jsx';
-import ForgotPassword from './components/pages/password/ForgotPassword.jsx';
-import ResetPassword from './components/pages/password/ResetPassword.jsx';
-import Admin from './components/pages/Admin.jsx';
-import Orders from './components/pages/Orders.jsx';
+import Login from './components/login/Login.jsx';
+import Register from './components/Register/Register.jsx';
+import ForgotPassword from './components/password/ForgotPassword.jsx';
+import ResetPassword from './components/password/ResetPassword.jsx';
+import Admin from './components/admin/Admin.jsx';
+import Orders from './components/orders/Orders.jsx';
 import OrderDetail from './components/orders/OrderDetail.jsx';
 import Checkout from './components/orders/Checkout.jsx';
-import Contact from './components/pages/Contact.jsx';
+import Contact from './components/Contact/Contact.jsx';
 
 function App() {
   return (
