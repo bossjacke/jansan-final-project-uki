@@ -5,7 +5,7 @@ import './App.css';
 import Navbar from './components/navbar/navbar.jsx';
 import Home from './components/home/Home.jsx';
 import About from './components/about/About.jsx';
-import Products from './components/products/Products.jsx';
+import ProductsPage from './components/products/ProductsPage.jsx';
 import Cart from './components/cart/Cart.jsx';
 import Login from './components/login/Login.jsx';
 import Register from './components/Register/Register.jsx';
@@ -24,7 +24,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
-        <Route path="/products" element={<Products />} />
+        <Route path="/products" element={<ProductsPage />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
