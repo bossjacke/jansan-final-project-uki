@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllProducts } from '../../api.js';
-import ShootingStars from '../ShootingStars.jsx';
+
 
 function Home() {
 	const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -25,8 +25,7 @@ function Home() {
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
-			{/* Shooting Stars Effect */}
-			<ShootingStars />
+			
 			
 			{/* Hero Section */}
 			<div className="relative overflow-hidden">

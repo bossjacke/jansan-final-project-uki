@@ -4,6 +4,7 @@ import { AuthProvider } from './components/context/AuthContext.jsx';
 import './App.css';
 import Navbar from './components/navbar/navbar.jsx';
 import Footer from './components/Footer.jsx';
+import SmokeDemo from './components/smoke/SmokeDemo.jsx';
 import Home from './components/home/Home.jsx';
 import About from './components/about/About.jsx';
 import ProductsPage from './components/products/ProductsPage.jsx';
@@ -21,23 +22,28 @@ import Contact from './components/Contact/Contact.jsx';
 function App() {
   return (
     <AuthProvider>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/products" element={<ProductsPage />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/order/:orderId" element={<OrderDetail />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/contact" element={<Contact />} />
-      </Routes>
-      <Footer/>
+      <div style={{ position: 'relative', minHeight: '100vh' }}>
+        <SmokeDemo />
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/order/:orderId" element={<OrderDetail />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/contact" element={<Contact />} />
+          </Routes>
+          <Footer/>
+        </div>
+      </div>
     </AuthProvider>
     
   );
