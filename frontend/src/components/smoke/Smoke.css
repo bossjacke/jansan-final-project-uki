@@ -18,7 +18,7 @@
 .puff {
   width: 60px;
   height: 60px;
-  background: radial-gradient(circle, rgba(50,255,50,0.7) 0%, rgba(0,200,0,0.4) 50%, transparent 70%);
+  background: radial-gradient(circle, rgba(50,255,50,0.8) 0%, rgba(63, 200, 0, 0.692) 25%, rgba(57, 200, 0, 0.534) 50%, rgba(255,150,0,0.5) 75%, rgba(255,50,0,0.4) 90%, transparent 100%);
   filter: blur(8px);
   animation: fadeUp 1s ease-out forwards;
 }
