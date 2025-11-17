@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { getCart, updateCartItem, removeFromCart } from '../../api.js';
 import CartLayout from './CartLayout.jsx';
 import CartItem from './CartItem.jsx';
 import CartSummary from './CartSummary.jsx';
 import EmptyCart from './EmptyCart.jsx';
 import LoadingCart from './LoadingCart.jsx';
 import CartError from './CartError.jsx';
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3003/api";
 
 function Cart() {
     const { user, token } = useAuth();
@@ -25,9 +23,7 @@ function Cart() {
 
     const fetchCart = async () => {
         try {
-            const { data } = await axios.get(`${API_URL}/cart/`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const data = await getCart();
             setCart(data.data);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to fetch cart');
@@ -41,9 +37,7 @@ function Cart() {
         if (qty < 1) return removeItem(id);
         
         try {
-            const { data } = await axios.put(`${API_URL}/cart/item/${id}`, { quantity: qty }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const data = await updateCartItem(id, qty);
             setCart(data.data);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to update cart');
@@ -53,9 +47,7 @@ function Cart() {
     const removeItem = async (id) => {
         if (!user || !token) return alert('Please login');
         try {
-            const { data } = await axios.delete(`${API_URL}/cart/item/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const data = await removeFromCart(id);
             setCart(data.data);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to remove item');

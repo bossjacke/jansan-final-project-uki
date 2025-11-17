@@ -10,7 +10,7 @@ function Register({ onRegister, onClose }) {
     phone: "",
     password: "",
     confirmPassword: "",
-    locationId: "",
+    location: "",
     acceptTerms: false,
   });
   const [loading, setLoading] = useState(false);
@@ -38,8 +38,8 @@ function Register({ onRegister, onClose }) {
       newErrors.phone = "Phone number must be at least 10 digits";
     }
 
-    if (!form.locationId.trim()) {
-      newErrors.locationId = "Location ID is required";
+    if (!form.location.trim()) {
+      newErrors.location = "Location is required";
     }
 
     if (!form.password) {
@@ -206,25 +206,25 @@ function Register({ onRegister, onClose }) {
               )}
             </div>
 
-            {/* Location ID Field */}
+            {/* Location Field */}
             <div>
-              <label htmlFor="locationId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Location ID
+              <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Location
               </label>
               <input
-                id="locationId"
+                id="location"
                 type="text"
-                placeholder="Enter your location ID"
-                value={form.locationId}
-                onChange={handleInputChange('locationId')}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-colors duration-200 ${errors.locationId ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
+                placeholder="Enter your location (e.g., Colombo, Sri Lanka)"
+                value={form.location}
+                onChange={handleInputChange('location')}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white transition-colors duration-200 ${errors.location ? 'border-red-500 dark:border-red-500' : 'border-gray-300'
                   }`}
-                aria-invalid={errors.locationId ? 'true' : 'false'}
-                aria-describedby={errors.locationId ? 'locationId-error' : undefined}
+                aria-invalid={errors.location ? 'true' : 'false'}
+                aria-describedby={errors.location ? 'location-error' : undefined}
               />
-              {errors.locationId && (
-                <p id="locationId-error" className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {errors.locationId}
+              {errors.location && (
+                <p id="location-error" className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {errors.location}
                 </p>
               )}
             </div>

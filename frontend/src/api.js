@@ -208,7 +208,7 @@ export const getCartSummary = async () => {
 // Order API functions
 export const createOrder = async (orderData) => {
   try {
-    const res = await axios.post(`${API_URL}/order/create`, orderData, {
+    const res = await axios.post(`${API_URL}/orders/create`, orderData, {
       headers: getAuthHeaders()
     });
     return res.data;
@@ -220,7 +220,7 @@ export const createOrder = async (orderData) => {
 
 export const confirmOrder = async (paymentIntentId) => {
   try {
-    const res = await axios.post(`${API_URL}/order/confirm`, {
+    const res = await axios.post(`${API_URL}/orders/confirm`, {
       paymentIntentId
     }, {
       headers: getAuthHeaders()
@@ -235,7 +235,7 @@ export const confirmOrder = async (paymentIntentId) => {
 export const getMyOrders = async (params = {}) => {
   try {
     const queryString = new URLSearchParams(params).toString();
-    const url = queryString ? `${API_URL}/order/my?${queryString}` : `${API_URL}/order/my`;
+    const url = queryString ? `${API_URL}/orders/my?${queryString}` : `${API_URL}/orders/my`;
     const res = await axios.get(url, {
       headers: getAuthHeaders()
     });
@@ -248,7 +248,7 @@ export const getMyOrders = async (params = {}) => {
 
 export const getOrderById = async (orderId) => {
   try {
-    const res = await axios.get(`${API_URL}/order/${orderId}`, {
+    const res = await axios.get(`${API_URL}/orders/${orderId}`, {
       headers: getAuthHeaders()
     });
     return res.data;
@@ -260,7 +260,7 @@ export const getOrderById = async (orderId) => {
 
 export const cancelOrder = async (orderId) => {
   try {
-    const res = await axios.delete(`${API_URL}/order/${orderId}/cancel`, {
+    const res = await axios.delete(`${API_URL}/orders/${orderId}/cancel`, {
       headers: getAuthHeaders()
     });
     return res.data;

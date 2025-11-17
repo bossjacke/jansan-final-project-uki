@@ -59,9 +59,7 @@ export const createPaymentIntent = async (req, res) => {
                 userId: req.user.id,
                 ...metadata
             },
-            automatic_payment_methods: {
-                enabled: true
-            }
+            payment_method_types: ['card']
         });
 
         // Save payment record to database
