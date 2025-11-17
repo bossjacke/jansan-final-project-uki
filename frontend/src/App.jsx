@@ -23,8 +23,9 @@ function App() {
   return (
     <AuthProvider>
       <div style={{ position: 'relative', minHeight: '100vh' }}>
-        <SmokeDemo />
         <div style={{ position: 'relative', zIndex: 1 }}>
+          <SmokeDemo />
+
           <Navbar />
           <Routes>
             <Route path="/" element={<Home />} />
@@ -41,11 +42,12 @@ function App() {
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/contact" element={<Contact />} />
           </Routes>
-          <Footer/>
+          <Footer />
+
         </div>
       </div>
     </AuthProvider>
-    
+
   );
 }
 
