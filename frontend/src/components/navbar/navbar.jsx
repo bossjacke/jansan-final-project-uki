@@ -95,31 +95,31 @@ function Navbar() {
           <div className="hidden md:flex items-center gap-1">
             <Link 
               to="/" 
-              className="text-gray-700 hover:text-purple-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              className=" text-white hover:text-purple-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             >
               Home
             </Link>
             <Link 
               to="/about" 
-              className="text-gray-700 hover:text-purple-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              className="text-white hover:text-purple-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             >
               About
             </Link>
             <Link 
               to="/products" 
-              className="text-gray-700 hover:text-purple-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              className="text-white hover:text-purple-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             >
               Products
             </Link>
             <Link 
               to="/contact" 
-              className="text-gray-700 hover:text-purple-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              className="text-white hover:text-purple-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             >
               Contact
             </Link>
             <Link 
               to="/cart" 
-              className="relative text-gray-700 hover:text-purple-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              className="relative text-white hover:text-purple-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             >
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,7 +131,7 @@ function Navbar() {
             {isAuthenticated && user?.role === 'admin' && (
               <Link 
                 to="/admin" 
-                className="text-gray-700 hover:text-purple-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                className="text-white hover:text-purple-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
               >
                 Admin
               </Link>
@@ -146,13 +146,13 @@ function Navbar() {
                   <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-indigo-600 text-white text-sm font-bold rounded-full flex items-center justify-center">
                     {initial || 'U'}
                   </div>
-                  <span className="text-sm text-gray-700 font-medium">
+                  <span className="text-sm text-white-700 font-medium">
                     {user?.name || user?.email}
                   </span>
                 </div>
                 <button 
                   onClick={handleLogout}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  className="bg-gray-100 hover:bg-gray-200 text-white-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                 >
                   Logout
                 </button>
@@ -161,7 +161,7 @@ function Navbar() {
               <div className="flex items-center gap-3">
                 <Link 
                   to="/login" 
-                  className="text-gray-700 hover:text-purple-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  className="text-white hover:text-purple-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                 >
                   Login
                 </Link>
@@ -174,10 +174,10 @@ function Navbar() {
               </div>
             )}
           </div>
-
+{/* mobile works */}
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <button className="text-gray-700 hover:text-purple-600 p-2">
+            <button className="text-white hover:text-purple-600 p-2">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
@@ -191,38 +191,38 @@ function Navbar() {
         <div className="px-4 py-2 space-y-1">
           <Link 
             to="/" 
-            className="block text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-base font-medium"
+            className="block text-white hover:text-purple-600 px-3 py-2 rounded-md text-base font-medium"
           >
             Home
           </Link>
           <Link 
             to="/about" 
-            className="block text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-base font-medium"
+            className="block text-white hover:text-purple-600 px-3 py-2 rounded-md text-base font-medium"
           >
             About
           </Link>
           <Link 
             to="/products" 
-            className="block text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-base font-medium"
+            className="block text-white hover:text-purple-600 px-3 py-2 rounded-md text-base font-medium"
           >
             Products
           </Link>
           <Link 
             to="/contact" 
-            className="block text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-base font-medium"
+            className="block text-white hover:text-purple-600 px-3 py-2 rounded-md text-base font-medium"
           >
             Contact
           </Link>
           <Link 
             to="/cart" 
-            className="block text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-base font-medium"
+            className="block text-white hover:text-purple-600 px-3 py-2 rounded-md text-base font-medium"
           >
             Cart
           </Link>
           {isAuthenticated && user?.role === 'admin' && (
             <Link 
               to="/admin" 
-              className="block text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-base font-medium"
+              className="block text-white hover:text-purple-600 px-3 py-2 rounded-md text-base font-medium"
             >
               Admin
             </Link>
