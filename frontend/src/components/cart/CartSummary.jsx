@@ -17,14 +17,14 @@ const CartSummary = ({ totalAmount, onContinueShopping, onCheckout }) => {
       
       <div className="summary-buttons">
         <button 
-          className="continue-shopping-btn"
+          className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200"
           onClick={onContinueShopping}
         >
           Continue Shopping
         </button>
         
         <button 
-          className="checkout-btn"
+          className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200 btn-primary-gradient text-white focus:ring-4 focus:ring-purple-200/50"
           onClick={onCheckout}
         >
           Proceed to Checkout

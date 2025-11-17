@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { getAllProducts } from '../../api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import axios from 'axios';
-import ProductCard from './ProductCard';
-import CategoryFilter from './CategoryFilter';
-import LoadingState from './LoadingState';
-import ErrorState from './ErrorState';
-import EmptyState from './EmptyState';
-import ProductSummary from './ProductSummary';
+import ProductCard from './ProductCard.jsx';
+import CategoryFilter from './CategoryFilter.jsx';
+import LoadingState from './LoadingState.jsx';
+import ErrorState from './ErrorState.jsx';
+import EmptyState from './EmptyState.jsx';
+import ProductSummary from './ProductSummary.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3003/api";
 

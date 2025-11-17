@@ -6,7 +6,7 @@ const EmptyCart = ({ onStartShopping }) => (
 		<h3 className="text-xl font-semibold text-gray-700 mb-2">Your cart is empty</h3>
 		<p className="text-gray-500 mb-6">Add some products to get started!</p>
 		<button 
-			className="btn btn-primary"
+			className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200 btn-primary-gradient text-white focus:ring-4 focus:ring-purple-200/50"
 			onClick={onStartShopping}
 		>
 			Start Shopping

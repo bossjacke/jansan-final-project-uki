@@ -103,21 +103,21 @@ function Orders() {
   };
 
   if (loading) return (
-    <div className="simple-page">
-      <div className="card">
-        <h1 className="title">My Orders</h1>
+    <div className="min-h-[calc(100vh-64px)] p-8 bg-gradient-to-br from-indigo-500 to-purple-600">
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl p-8 shadow-lg shadow-gray-900/5">
+        <h1 className="gradient-text">My Orders</h1>
         <div className="text-center py-10">Loading...</div>
       </div>
     </div>
   );
 
   if (error) return (
-    <div className="simple-page">
-      <div className="card">
-        <h1 className="title">My Orders</h1>
+    <div className="min-h-[calc(100vh-64px)] p-8 bg-gradient-to-br from-indigo-500 to-purple-600">
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl p-8 shadow-lg shadow-gray-900/5">
+        <h1 className="gradient-text">My Orders</h1>
         <div className="text-center py-10">
           <div className="text-red-500 mb-5">{error}</div>
-          <button className="btn" onClick={fetchOrders}>Retry</button>
+          <button className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200" onClick={fetchOrders}>Retry</button>
         </div>
       </div>
     </div>
@@ -125,7 +125,7 @@ function Orders() {
 
   const CheckoutForm = () => (
     <div>
-      <h1 className="title">Checkout</h1>
+      <h1 className="gradient-text">Checkout</h1>
       
       <div className="mb-8 p-5 bg-gray-50 rounded-lg">
         <h3 className="mb-4 font-bold">Order Summary</h3>
@@ -172,8 +172,8 @@ function Orders() {
       </div>
 
       <div className="flex gap-4 justify-end">
-        <button className="btn" onClick={cancelCheckout} disabled={paymentProcessing}>Cancel</button>
-        <button className="btn btn-primary" onClick={createOrderHandler} disabled={paymentProcessing}>
+        <button className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200" onClick={cancelCheckout} disabled={paymentProcessing}>Cancel</button>
+        <button className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200 btn-primary-gradient text-white focus:ring-4 focus:ring-purple-200/50" onClick={createOrderHandler} disabled={paymentProcessing}>
           {paymentProcessing ? 'Processing...' : `Pay ₹${cart.totalAmount.toLocaleString('en-IN')}`}
         </button>
       </div>
@@ -217,11 +217,11 @@ function Orders() {
       )}
 
       <div className="flex gap-3 mt-4">
-        <button className="btn text-xs px-4 py-2" onClick={() => alert('Order details feature coming soon!')}>
+        <button className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200 text-xs px-4 py-2" onClick={() => alert('Order details feature coming soon!')}>
           View Details
         </button>
         {order.orderStatus === 'delivered' && (
-          <button className="btn btn-primary text-xs px-4 py-2" onClick={() => alert('Review feature coming soon!')}>
+          <button className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200 btn-primary-gradient text-white focus:ring-4 focus:ring-purple-200/50 text-xs px-4 py-2" onClick={() => alert('Review feature coming soon!')}>
             Write Review
           </button>
         )}
@@ -230,12 +230,12 @@ function Orders() {
   );
 
   return (
-    <div className="simple-page">
-      <div className="card">
+    <div className="min-h-[calc(100vh-64px)] p-8 bg-gradient-to-br from-indigo-500 to-purple-600">
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl p-8 shadow-lg shadow-gray-900/5">
         {showCheckout && cart ? <CheckoutForm /> : (
           <div>
             <div className="flex justify-between items-center mb-8">
-              <h1 className="title">My Orders</h1>
+              <h1 className="gradient-text">My Orders</h1>
               <div className="text-sm text-gray-600">{orders.length} {orders.length === 1 ? 'Order' : 'Orders'}</div>
             </div>
 
@@ -244,7 +244,7 @@ function Orders() {
                 <div className="text-5xl mb-5">📦</div>
                 <h3 className="text-gray-600 mb-3">No orders yet</h3>
                 <p className="text-gray-400 mb-5">Start shopping to see your orders here!</p>
-                <button className="btn btn-primary" onClick={() => window.location.href = '/shop'}>
+                <button className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200 btn-primary-gradient text-white focus:ring-4 focus:ring-purple-200/50" onClick={() => window.location.href = '/shop'}>
                   Start Shopping
                 </button>
               </div>
