@@ -25,7 +25,7 @@ function App() {
       <div style={{ position: 'relative', minHeight: '100vh' }}>
         <div style={{ position: 'relative', zIndex: 1 }}>
           <SmokeDemo />
-          <dev>
+          <div>
             <Navbar />
             <Routes>
               <Route path="/" element={<Home />} />
@@ -43,7 +43,7 @@ function App() {
               <Route path="/contact" element={<Contact />} />
             </Routes>
             <Footer />
-          </dev>
+          </div>
         </div>
       </div>
     </AuthProvider>

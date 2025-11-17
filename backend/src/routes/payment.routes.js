@@ -23,6 +23,6 @@ router.get('/history', authMiddleware, getPaymentHistory);
 router.get('/:paymentId', authMiddleware, getPaymentById);
 
 // Cancel payment
-router.patch('/:paymentId/cancel', authMiddleware, cancelPayment);
+router.delete('/:paymentId/cancel', authMiddleware, cancelPayment);
 
 export default router;

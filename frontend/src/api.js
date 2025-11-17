@@ -15,7 +15,7 @@ const getAuthHeaders = () => {
 // User API functions
 export const RegisterUser = async (userData) => {
   try {
-    const res = await axios.post(`${API_URL}/users/register`, userData);
+    const res = await axios.post(`${API_URL}/auth/register`, userData);
     return res.data;
   } catch (err) {
     console.error("Register Error:", err.response?.data || err.message);
@@ -25,7 +25,7 @@ export const RegisterUser = async (userData) => {
 
 export const LoginUser = async (credentials) => {
   try {
-    const res = await axios.post(`${API_URL}/users/login`, credentials);
+    const res = await axios.post(`${API_URL}/auth/login`, credentials);
     return res.data;
   } catch (err) {
     console.error("Login Error:", err.response?.data || err.message);
@@ -35,7 +35,7 @@ export const LoginUser = async (credentials) => {
 
 export const GoogleLogin = async (credential) => {
   try {
-    const res = await axios.post(`${API_URL}/users/google-login`, { credential });
+    const res = await axios.post(`${API_URL}/auth/google-login`, { credential });
     return res.data;
   } catch (err) {
     console.error("Google Login Error:", err.response?.data || err.message);
