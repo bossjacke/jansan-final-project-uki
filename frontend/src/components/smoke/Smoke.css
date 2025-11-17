@@ -16,15 +16,15 @@
 }
 
 .puff {
-  width: 20px;
-  height: 20px;
+  width: 60px;
+  height: 60px;
   background: radial-gradient(circle, rgba(50,255,50,0.7) 0%, rgba(0,200,0,0.4) 50%, transparent 70%);
-  filter: blur(6px);
+  filter: blur(8px);
   animation: fadeUp 1s ease-out forwards;
 }
 
 @keyframes fadeUp {
-  0%   { transform: scale(0.5) translateY(0); opacity: 1; }
-  50%  { transform: scale(1.2) translateY(-20px); opacity: 0.6; }
-  100% { transform: scale(1.5) translateY(-40px); opacity: 0; }
+  0%   { transform: scale(0.3) translateY(0); opacity: 1; }
+  50%  { transform: scale(1.5) translateY(-30px); opacity: 0.6; }
+  100% { transform: scale(2.5) translateY(-60px); opacity: 0; }
 }

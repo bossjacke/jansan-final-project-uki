@@ -25,25 +25,25 @@ function App() {
       <div style={{ position: 'relative', minHeight: '100vh' }}>
         <div style={{ position: 'relative', zIndex: 1 }}>
           <SmokeDemo />
-
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/products" element={<ProductsPage />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/order/:orderId" element={<OrderDetail />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/contact" element={<Contact />} />
-          </Routes>
-          <Footer />
-
+          <dev>
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/products" element={<ProductsPage />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/order/:orderId" element={<OrderDetail />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/contact" element={<Contact />} />
+            </Routes>
+            <Footer />
+          </dev>
         </div>
       </div>
     </AuthProvider>
