@@ -45,7 +45,7 @@ export const GoogleLogin = async (credential) => {
 
 export const ForgotPassword = async (email) => {
   try {
-    const res = await axios.post(`${API_URL}/user/forgot-password`, { email });
+    const res = await axios.post(`${API_URL}/password/forgot-password`, { email });
     return res.data;
   } catch (err) {
     console.error('Forgot password error:', err.response?.data || err.message);
@@ -55,7 +55,7 @@ export const ForgotPassword = async (email) => {
 
 export const ResetPassword = async (email, otp, newPassword) => {
   try {
-    const res = await axios.post(`${API_URL}/user/reset-password`, {
+    const res = await axios.post(`${API_URL}/password/reset-password`, {
       email,
       otp,
       newPassword
@@ -87,6 +87,42 @@ export const getProductById = async (productId) => {
     return res.data;
   } catch (err) {
     console.error('Get product error:', err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export const createProduct = async (productData) => {
+  try {
+    const res = await axios.post(`${API_URL}/products`, productData, {
+      headers: getAuthHeaders()
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Create product error:', err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export const updateProduct = async (productId, productData) => {
+  try {
+    const res = await axios.put(`${API_URL}/products/${productId}`, productData, {
+      headers: getAuthHeaders()
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Update product error:', err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export const deleteProduct = async (productId) => {
+  try {
+    const res = await axios.delete(`${API_URL}/products/${productId}`, {
+      headers: getAuthHeaders()
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Delete product error:', err.response?.data || err.message);
     throw err;
   }
 };
