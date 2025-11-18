@@ -2,10 +2,10 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
+import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
-import authRoutes from "./routes/auth.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
@@ -16,7 +16,7 @@ const app = express();
 // Enable CORS
 app.use(
   cors({
-    origin: "http://localhost:5173", // For development, allows all. Change to frontend URL in production.
+    origin: ["http://localhost:5173", "http://localhost:5175"], // For development, allows all. Change to frontend URL in production.
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -26,8 +26,8 @@ app.use(
 app.use(express.json());
 
 // Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/auth", authRoutes); // Auth routes for register/login
 app.use("/api/password", passwordRoutes); // Password reset routes
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);

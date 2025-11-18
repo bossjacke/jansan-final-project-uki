@@ -1,20 +1,14 @@
 import express from "express";
-import { 
-  registerUser, 
-  loginUser, 
-  getUserProfile, 
-  updateUserProfile, 
-  deleteUser, 
-  getAllUsers 
+import {
+  getUserProfile,
+  updateUserProfile,
+  deleteUser,
+  getAllUsers
 } from "../controllers/user.controller.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { roleCheck } from "../middleware/roleCheck.js";
 
 const router = express.Router();
-
-// Public routes
-router.post("/register", registerUser);
-router.post("/login", loginUser);
 
 // Protected routes
 router.get("/profile", authMiddleware, getUserProfile);

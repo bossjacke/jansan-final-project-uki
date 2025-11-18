@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema(
         country: { type: String, default: "India" },
 
 
+        // Google OAuth fields
+        googleId: { type: String, unique: true, sparse: true },
+
         // OTP fields for password reset
         otp: { type: String, default: null },
         otpExpires: { type: Date, default: null },

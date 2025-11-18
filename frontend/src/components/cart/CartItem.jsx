@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './CartItem.css';
 
 const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
   const [quantity, setQuantity] = useState(item.quantity);

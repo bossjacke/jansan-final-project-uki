@@ -15,7 +15,7 @@ const getAuthHeaders = () => {
 // User API functions
 export const RegisterUser = async (userData) => {
   try {
-    const res = await axios.post(`${API_URL}/users/register`, userData);
+    const res = await axios.post(`${API_URL}/auth/register`, userData);
     return res.data;
   } catch (err) {
     console.error("Register Error:", err.response?.data || err.message);
@@ -25,7 +25,7 @@ export const RegisterUser = async (userData) => {
 
 export const LoginUser = async (credentials) => {
   try {
-    const res = await axios.post(`${API_URL}/users/login`, credentials);
+    const res = await axios.post(`${API_URL}/auth/login`, credentials);
     return res.data;
   } catch (err) {
     console.error("Login Error:", err.response?.data || err.message);
@@ -35,7 +35,7 @@ export const LoginUser = async (credentials) => {
 
 export const GoogleLogin = async (credential) => {
   try {
-    const res = await axios.post(`${API_URL}/users/google-login`, { credential });
+    const res = await axios.post(`${API_URL}/auth/google-login`, { credential });
     return res.data;
   } catch (err) {
     console.error("Google Login Error:", err.response?.data || err.message);
@@ -45,7 +45,7 @@ export const GoogleLogin = async (credential) => {
 
 export const ForgotPassword = async (email) => {
   try {
-    const res = await axios.post(`${API_URL}/user/forgot-password`, { email });
+    const res = await axios.post(`${API_URL}/password/forgot-password`, { email });
     return res.data;
   } catch (err) {
     console.error('Forgot password error:', err.response?.data || err.message);
@@ -55,7 +55,7 @@ export const ForgotPassword = async (email) => {
 
 export const ResetPassword = async (email, otp, newPassword) => {
   try {
-    const res = await axios.post(`${API_URL}/user/reset-password`, {
+    const res = await axios.post(`${API_URL}/password/reset-password`, {
       email,
       otp,
       newPassword
@@ -87,6 +87,42 @@ export const getProductById = async (productId) => {
     return res.data;
   } catch (err) {
     console.error('Get product error:', err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export const createProduct = async (productData) => {
+  try {
+    const res = await axios.post(`${API_URL}/products`, productData, {
+      headers: getAuthHeaders()
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Create product error:', err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export const updateProduct = async (productId, productData) => {
+  try {
+    const res = await axios.put(`${API_URL}/products/${productId}`, productData, {
+      headers: getAuthHeaders()
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Update product error:', err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export const deleteProduct = async (productId) => {
+  try {
+    const res = await axios.delete(`${API_URL}/products/${productId}`, {
+      headers: getAuthHeaders()
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Delete product error:', err.response?.data || err.message);
     throw err;
   }
 };
@@ -172,7 +208,7 @@ export const getCartSummary = async () => {
 // Order API functions
 export const createOrder = async (orderData) => {
   try {
-    const res = await axios.post(`${API_URL}/order/create`, orderData, {
+    const res = await axios.post(`${API_URL}/orders/create`, orderData, {
       headers: getAuthHeaders()
     });
     return res.data;
@@ -184,7 +220,7 @@ export const createOrder = async (orderData) => {
 
 export const confirmOrder = async (paymentIntentId) => {
   try {
-    const res = await axios.post(`${API_URL}/order/confirm`, {
+    const res = await axios.post(`${API_URL}/orders/confirm`, {
       paymentIntentId
     }, {
       headers: getAuthHeaders()
@@ -199,7 +235,7 @@ export const confirmOrder = async (paymentIntentId) => {
 export const getMyOrders = async (params = {}) => {
   try {
     const queryString = new URLSearchParams(params).toString();
-    const url = queryString ? `${API_URL}/order/my?${queryString}` : `${API_URL}/order/my`;
+    const url = queryString ? `${API_URL}/orders/my?${queryString}` : `${API_URL}/orders/my`;
     const res = await axios.get(url, {
       headers: getAuthHeaders()
     });
@@ -212,7 +248,7 @@ export const getMyOrders = async (params = {}) => {
 
 export const getOrderById = async (orderId) => {
   try {
-    const res = await axios.get(`${API_URL}/order/${orderId}`, {
+    const res = await axios.get(`${API_URL}/orders/${orderId}`, {
       headers: getAuthHeaders()
     });
     return res.data;
@@ -224,7 +260,7 @@ export const getOrderById = async (orderId) => {
 
 export const cancelOrder = async (orderId) => {
   try {
-    const res = await axios.delete(`${API_URL}/order/${orderId}/cancel`, {
+    const res = await axios.delete(`${API_URL}/orders/${orderId}/cancel`, {
       headers: getAuthHeaders()
     });
     return res.data;
@@ -237,7 +273,7 @@ export const cancelOrder = async (orderId) => {
 // Payment API functions
 export const createPaymentIntent = async (paymentData) => {
   try {
-    const res = await axios.post(`${API_URL}/payment/create-intent`, paymentData, {
+    const res = await axios.post(`${API_URL}/payments/create-intent`, paymentData, {
       headers: getAuthHeaders()
     });
     return res.data;
@@ -249,7 +285,7 @@ export const createPaymentIntent = async (paymentData) => {
 
 export const confirmPayment = async (paymentData) => {
   try {
-    const res = await axios.post(`${API_URL}/payment/confirm`, paymentData, {
+    const res = await axios.post(`${API_URL}/payments/confirm`, paymentData, {
       headers: getAuthHeaders()
     });
     return res.data;
@@ -261,7 +297,7 @@ export const confirmPayment = async (paymentData) => {
 
 export const getPaymentHistory = async () => {
   try {
-    const res = await axios.get(`${API_URL}/payment/history`, {
+    const res = await axios.get(`${API_URL}/payments/history`, {
       headers: getAuthHeaders()
     });
     return res.data;
@@ -273,7 +309,7 @@ export const getPaymentHistory = async () => {
 
 export const getPaymentById = async (paymentId) => {
   try {
-    const res = await axios.get(`${API_URL}/payment/${paymentId}`, {
+    const res = await axios.get(`${API_URL}/payments/${paymentId}`, {
       headers: getAuthHeaders()
     });
     return res.data;

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getOrderById, cancelOrder } from '../../api.js';
-import './Orders.css';
 
 const OrderDetail = () => {
   const { orderId } = useParams();

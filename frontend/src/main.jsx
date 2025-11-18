@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import './index.css';
 import App from './App.jsx';
 
@@ -15,7 +16,9 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {/* Also pass the future flag to RouterProvider as a prop to ensure the opt-in is recognized */}
-    <RouterProvider router={router} future={{ v7_startTransition: true }} />
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      {/* Also pass the future flag to RouterProvider as a prop to ensure the opt-in is recognized */}
+      <RouterProvider router={router} future={{ v7_startTransition: true }} />
+    </GoogleOAuthProvider>
   </StrictMode>
 );
