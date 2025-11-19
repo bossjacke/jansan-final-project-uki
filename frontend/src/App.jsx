@@ -18,6 +18,7 @@ import Orders from './components/orders/Orders.jsx';
 import OrderDetail from './components/orders/OrderDetail.jsx';
 import Checkout from './components/orders/Checkout.jsx';
 import Contact from './components/Contact/Contact.jsx';
+import PaymentSystemTailwind from './components/payment/PaymentSystemTailwind.jsx';
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
               <Route path="/order/:orderId" element={<OrderDetail />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/payment-test" element={<PaymentSystem />} />
             </Routes>
             <Footer />
           </div>

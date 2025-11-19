@@ -1,10 +1,5 @@
 import express from "express";
-import {
-  getUserProfile,
-  updateUserProfile,
-  deleteUser,
-  getAllUsers
-} from "../controllers/user.controller.js";
+import {getUserProfile,updateUserProfile,deleteUser,getAllUsers} from "../controllers/user.controller.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { roleCheck } from "../middleware/roleCheck.js";
 
