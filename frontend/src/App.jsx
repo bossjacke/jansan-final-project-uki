@@ -4,7 +4,6 @@ import { AuthProvider } from './components/context/AuthContext.jsx';
 import './App.css';
 import Navbar from './components/navbar/navbar.jsx';
 import Footer from './components/footery/Footer.jsx';
-import SmokeDemo from './components/smoke/SmokeDemo.jsx';
 import Home from './components/home/Home.jsx';
 import About from './components/about/About.jsx';
 import ProductsPage from './components/products/ProductsPage.jsx';
@@ -23,9 +22,8 @@ import PaymentSystem from './components/payment/PaymentSystem.jsx';
 function App() {
   return (
     <AuthProvider>
-      <div style={{ position: 'relative', minHeight: '100vh' }}>
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <SmokeDemo />
+      
+         
           <div>
             <Navbar />
             <Routes>
@@ -46,8 +44,8 @@ function App() {
             </Routes>
             <Footer />
           </div>
-        </div>
-      </div>
+        
+
     </AuthProvider>
 
   );

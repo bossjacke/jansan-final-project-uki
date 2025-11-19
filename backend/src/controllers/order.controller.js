@@ -145,7 +145,7 @@ export const createOrder = async (req, res) => {
       // Create Stripe payment intent
       const intent = await stripe.paymentIntents.create({
         amount: Math.round(cart.totalAmount * 100),
-        currency: "usd",
+        currency: "inr",
         description: `Payment for order ${order.orderNumber}`,
         metadata: { orderId: order._id.toString(), userId: req.user.id },
         automatic_payment_methods: { enabled: true },

@@ -282,16 +282,15 @@ styleSheet.textContent = styles;
 document.head.appendChild(styleSheet);
 
 // Payment Form Component
-const StripePaymentForm = ({ amount, onSuccess, onError, onClose }) => {
+const StripePaymentForm = ({ amount, clientSecret, onSuccess, onError, onClose }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
-  const [clientSecret, setClientSecret] = useState(null);
   const [userInfo, setUserInfo] = useState({ name: '', email: '' });
 
   useEffect(() => {
-    const initializePayment = async () => {
+    const fetchUserInfo = async () => {
       try {
         // Fetch user information
         const token = localStorage.getItem('token');
@@ -309,28 +308,13 @@ const StripePaymentForm = ({ amount, onSuccess, onError, onClose }) => {
             });
           }
         }
-
-        // Create payment intent
-        const paymentResponse = await createPaymentIntent({
-          amount: amount,
-          currency: 'inr',
-          description: 'Order payment'
-        });
-
-        if (paymentResponse.success) {
-          setClientSecret(paymentResponse.data.clientSecret);
-        } else {
-          setError(paymentResponse.message || 'Failed to initialize payment');
-        }
       } catch (err) {
-        setError('Failed to initialize payment. Please try again.');
+        console.error('Error fetching user info:', err);
       }
     };
 
-    if (amount > 0) {
-      initializePayment();
-    }
-  }, [amount]);
+    fetchUserInfo();
+  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -435,12 +419,13 @@ const StripePaymentForm = ({ amount, onSuccess, onError, onClose }) => {
 };
 
 // Main Payment Component
-const PaymentSystem = ({ mode = 'test', amount, onSuccess, onError, onClose }) => {
+const PaymentSystem = ({ mode = 'test', amount, clientSecret, onSuccess, onError, onClose }) => {
   if (mode === 'payment') {
     return (
       <Elements stripe={stripePromise}>
         <StripePaymentForm 
           amount={amount} 
+          clientSecret={clientSecret}
           onSuccess={onSuccess} 
           onError={onError} 
           onClose={onClose} 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCart, createOrder, confirmOrder } from '../../api.js';
-import StripePayment from '../payment/PaymentSystem.jsx'
+import { getCart, createStripeCheckout } from '../../api.js';
+import './Checkout.css'
 
 const Checkout = () => {
   const [cart, setCart] = useState(null);
@@ -17,7 +17,6 @@ const Checkout = () => {
     country: 'India'
   });
   const [user, setUser] = useState(null);
-  const [showStripePayment, setShowStripePayment] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -100,11 +99,35 @@ const Checkout = () => {
     }
 
     if (paymentMethod === 'card') {
-      // Show Stripe payment form for card payments
-      setShowStripePayment(true);
+      // For card payments, redirect to Stripe Checkout
+      await handleStripeCheckout();
     } else {
       // Handle cash on delivery
       handleCashOnDelivery();
+    }
+  };
+
+  const handleStripeCheckout = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      // Create Stripe checkout session
+      const checkoutData = await createStripeCheckout({
+        shippingAddress
+      });
+
+      if (checkoutData.success) {
+        // Redirect to Stripe Checkout URL
+        window.location.href = checkoutData.data.checkoutUrl;
+      } else {
+        setError(checkoutData.message || 'Failed to create payment session');
+      }
+    } catch (err) {
+      console.error('Error creating Stripe checkout:', err);
+      setError('Failed to initialize payment. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -113,7 +136,7 @@ const Checkout = () => {
     setError('');
 
     try {
-      const data = await createOrder({
+      const data = await createStripeCheckout({
         paymentMethod: 'cash_on_delivery',
         shippingAddress
       });
@@ -130,36 +153,6 @@ const Checkout = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handlePaymentSuccess = async (paymentIntent) => {
-    try {
-      // Create order with successful payment
-      const data = await createOrder({
-        paymentMethod: 'card',
-        shippingAddress,
-        paymentIntentId: paymentIntent.id
-      });
-
-      if (data.success) {
-        alert('Payment successful! Order confirmed.');
-        navigate('/orders');
-      } else {
-        setError('Order creation failed after payment. Please contact support.');
-      }
-    } catch (err) {
-      console.error('Error creating order after payment:', err);
-      setError('Order creation error. Please contact support.');
-    }
-  };
-
-  const handlePaymentError = (error) => {
-    setError(error.message || 'Payment failed. Please try again.');
-    setShowStripePayment(false);
-  };
-
-  const handlePaymentClose = () => {
-    setShowStripePayment(false);
   };
 
   if (!cart || cart.items.length === 0) {
@@ -224,7 +217,7 @@ const Checkout = () => {
               />
               <span className="payment-label">
                 <span className="payment-icon">💳</span>
-                Card Payment
+                Card Payment (via Stripe)
               </span>
             </label>
             <label className="payment-option">
@@ -362,20 +355,6 @@ const Checkout = () => {
           </form>
         </div>
       </div>
-
-      {/* Stripe Payment Modal */}
-      {showStripePayment && (
-        <div className="payment-modal-overlay">
-          <div className="payment-modal">
-            <StripePayment
-              amount={cart.totalAmount}
-              onSuccess={handlePaymentSuccess}
-              onError={handlePaymentError}
-              onClose={handlePaymentClose}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 };
