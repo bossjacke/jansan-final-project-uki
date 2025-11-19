@@ -70,7 +70,7 @@ function Login({ onLogin, onClose }) {
   useEffect(() => {
     if (window.google && window.google.accounts) {
       window.google.accounts.id.initialize({
-        client_id: "367194647798-0qjrumukncrmjj543lv31q5gop97elfk.apps.googleusercontent.com",
+        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || "367194647798-0qjrumukncrmjj543lv31q5gop97elfk.apps.googleusercontent.com",
         callback: handleGoogleLogin
       });
 
@@ -186,7 +186,7 @@ function Login({ onLogin, onClose }) {
             {/* Google Login */}
             {oneTapSkipped && (
               <div className="mt-4">
-                <GoogleOAuthProvider clientId="367194647798-0qjrumukncrmjj543lv31q5gop97elfk.apps.googleusercontent.com">
+                <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || "367194647798-0qjrumukncrmjj543lv31q5gop97elfk.apps.googleusercontent.com"}>
                   <div className="flex justify-center">
                     <GoogleLogin
                       onSuccess={handleGoogleLogin}

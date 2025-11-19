@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCart, createStripeCheckout } from '../../api.js';
-import './Checkout.css'
+import { getCart, createOrder } from '../../api.js';
 
 const Checkout = () => {
   const [cart, setCart] = useState(null);
@@ -112,19 +111,34 @@ const Checkout = () => {
     setError('');
 
     try {
-      // Create Stripe checkout session
-      const checkoutData = await createStripeCheckout({
+      // Create order with card payment
+      const orderData = {
+        paymentMethod: 'card',
         shippingAddress
-      });
+      };
 
-      if (checkoutData.success) {
-        // Redirect to Stripe Checkout URL
-        window.location.href = checkoutData.data.checkoutUrl;
+      const orderResponse = await createOrder(orderData);
+
+      if (orderResponse.success) {
+        if (orderResponse.data.clientSecret) {
+          // Redirect to payment processing or handle payment
+          navigate('/payment', { 
+            state: { 
+              clientSecret: orderResponse.data.clientSecret,
+              amount: cart.totalAmount,
+              orderId: orderResponse.data.order._id
+            } 
+          });
+        } else {
+          // For demo/success case
+          alert('Order placed successfully!');
+          navigate('/orders');
+        }
       } else {
-        setError(checkoutData.message || 'Failed to create payment session');
+        setError(orderResponse.message || 'Failed to create order');
       }
     } catch (err) {
-      console.error('Error creating Stripe checkout:', err);
+      console.error('Error creating order:', err);
       setError('Failed to initialize payment. Please try again.');
     } finally {
       setLoading(false);
@@ -136,10 +150,12 @@ const Checkout = () => {
     setError('');
 
     try {
-      const data = await createStripeCheckout({
-        paymentMethod: 'cash_on_delivery',
+      const orderData = {
+        paymentMethod: 'cash',
         shippingAddress
-      });
+      };
+
+      const data = await createOrder(orderData);
 
       if (data.success) {
         alert('Order placed successfully! Cash on delivery selected.');

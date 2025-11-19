@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { createPaymentIntent, confirmPayment } from '../../api.js';
@@ -419,7 +420,27 @@ const StripePaymentForm = ({ amount, clientSecret, onSuccess, onError, onClose }
 };
 
 // Main Payment Component
-const PaymentSystem = ({ mode = 'test', amount, clientSecret, onSuccess, onError, onClose }) => {
+const PaymentSystem = ({ mode = 'test', amount: propAmount, clientSecret: propClientSecret, onSuccess: propOnSuccess, onError: propOnError, onClose: propOnClose }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Get props from location state if in payment mode
+  const { state } = location || {};
+  const amount = propAmount || state?.amount || 100;
+  const clientSecret = propClientSecret || state?.clientSecret;
+  const onSuccess = propOnSuccess || (() => {
+    if (state?.orderId) {
+      navigate('/orders');
+    }
+  });
+  const onError = propOnError || ((error) => {
+    console.error('Payment error:', error);
+    alert('Payment failed. Please try again.');
+    navigate('/checkout');
+  });
+  const onClose = propOnClose || (() => {
+    navigate('/checkout');
+  });
   if (mode === 'payment') {
     return (
       <Elements stripe={stripePromise}>
