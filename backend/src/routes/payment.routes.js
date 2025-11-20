@@ -1,5 +1,5 @@
 import express from 'express';
-import { auth } from '../middleware/auth.js';
+import { authMiddleware } from '../middleware/auth.js';
 import {
   createPaymentIntent,
   confirmPayment,
@@ -10,15 +10,15 @@ import {
 const router = express.Router();
 
 // 💳 Create Payment Intent
-router.post('/create-payment-intent', auth, createPaymentIntent);
+router.post('/create-payment-intent', authMiddleware, createPaymentIntent);
 
 // ✅ Confirm Payment and Create Order
-router.post('/confirm-payment', auth, confirmPayment);
+router.post('/confirm-payment', authMiddleware, confirmPayment);
 
 // 🔍 Get Payment Status
-router.get('/status/:paymentIntentId', auth, getPaymentStatus);
+router.get('/status/:paymentIntentId', authMiddleware, getPaymentStatus);
 
 // 💰 Process Refund (Admin only)
-router.post('/refund/:orderId', auth, processRefund);
+router.post('/refund/:orderId', authMiddleware, processRefund);
 
 export default router;
