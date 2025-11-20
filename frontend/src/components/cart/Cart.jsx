@@ -33,22 +33,30 @@ function Cart() {
     };
 
     const updateQty = async (id, qty) => {
-        if (!user || !token) return alert('Please login');
+        if (!user || !token) {
+            setError('Please login to update cart');
+            return;
+        }
         if (qty < 1) return removeItem(id);
-        
+
         try {
             const data = await updateCartItem(id, qty);
-            setCart(data.data);
+            setCart({ ...data.data });
+            setError(null);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to update cart');
         }
     };
 
     const removeItem = async (id) => {
-        if (!user || !token) return alert('Please login');
+        if (!user || !token) {
+            setError('Please login to remove items');
+            return;
+        }
         try {
             const data = await removeFromCart(id);
-            setCart(data.data);
+            setCart({ ...data.data });
+            setError(null);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to remove item');
         }
@@ -72,11 +80,11 @@ function Cart() {
                 <>
                     <div className="space-y-4 mb-6">
                         {cart.items.map(item => (
-                            <CartItem 
-                                key={item.productId?._id || item.productId} 
-                                item={item} 
-                                onUpdateQty={updateQty} 
-                                onRemove={removeItem} 
+                            <CartItem
+                                key={item.productId?._id || item.productId}
+                                item={item}
+                                onUpdateQuantity={updateQty}
+                                onRemove={removeItem}
                             />
                         ))}
                     </div>

@@ -37,14 +37,14 @@ export const addToCart = async (req, res) => {
 // 🔄 Update Quantity
 export const updateCartItem = async (req, res) => {
   try {
-    const { productId } = req.params;
+    const { itemId } = req.params;
     const { quantity } = req.body;
 
-    if (!productId || quantity < 1)
+    if (!itemId || quantity < 1)
       return res.status(400).json({ success: false, message: "Invalid input" });
 
     const cart = await Cart.getOrCreateCart(req.user.id);
-    const item = cart.items.find(i => i.productId.toString() === productId);
+    const item = cart.items.id(itemId);
     if (!item) return res.status(404).json({ success: false, message: "Item not found" });
 
     item.quantity = quantity;
@@ -60,10 +60,10 @@ export const updateCartItem = async (req, res) => {
 // ❌ Remove Item
 export const removeFromCart = async (req, res) => {
   try {
-    const { productId } = req.params;
+    const { itemId } = req.params;
     const cart = await Cart.getOrCreateCart(req.user.id);
 
-    cart.items = cart.items.filter(i => i.productId.toString() !== productId);
+    cart.items.pull(itemId);
     await cart.save();
 
     const updated = await Cart.findById(cart._id).populate("items.productId", "name type description images image");

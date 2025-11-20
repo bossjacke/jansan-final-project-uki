@@ -155,9 +155,9 @@ export const addToCart = async (productId, quantity = 1) => {
   }
 };
 
-export const updateCartItem = async (productId, quantity) => {
+export const updateCartItem = async (itemId, quantity) => {
   try {
-    const res = await axios.put(`${API_URL}/cart/item/${productId}`, {
+    const res = await axios.put(`${API_URL}/cart/item/${itemId}`, {
       quantity
     }, {
       headers: getAuthHeaders()
@@ -169,9 +169,9 @@ export const updateCartItem = async (productId, quantity) => {
   }
 };
 
-export const removeFromCart = async (productId) => {
+export const removeFromCart = async (itemId) => {
   try {
-    const res = await axios.delete(`${API_URL}/cart/item/${productId}`, {
+    const res = await axios.delete(`${API_URL}/cart/item/${itemId}`, {
       headers: getAuthHeaders()
     });
     return res.data;

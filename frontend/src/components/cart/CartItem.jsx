@@ -6,19 +6,19 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
   const handleIncrease = () => {
     const newQuantity = quantity + 1;
     setQuantity(newQuantity);
-    onUpdateQuantity(item.productId._id, newQuantity);
+    onUpdateQuantity(item._id, newQuantity);
   };
 
   const handleDecrease = () => {
     if (quantity > 1) {
       const newQuantity = quantity - 1;
       setQuantity(newQuantity);
-      onUpdateQuantity(item.productId._id, newQuantity);
+      onUpdateQuantity(item._id, newQuantity);
     }
   };
 
   const handleRemove = () => {
-    onRemove(item.productId._id);
+    onRemove(item._id);
   };
 
   return (
@@ -57,7 +57,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
 
         <p className="text-sm font-medium mt-2 text-gray-800">Total: ₹{(item.price * quantity).toLocaleString()}</p>
 
-        <button className="mt-2 text-red-500 hover:text-red-700 text-sm underline" onClick={handleRemove}>
+        <button type="button" className="mt-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700 text-sm font-medium" onClick={handleRemove}>
           Remove
         </button>
       </div>
