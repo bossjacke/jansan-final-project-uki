@@ -17,13 +17,12 @@ import Orders from './components/orders/Orders.jsx';
 import OrderDetail from './components/orders/OrderDetail.jsx';
 import Checkout from './components/orders/Checkout.jsx';
 import Contact from './components/Contact/Contact.jsx';
-import PaymentSystem from './components/payment/PaymentSystem.jsx';
 
 function App() {
   return (
     <AuthProvider>
-      
-         
+
+
           <div>
             <Navbar />
             <Routes>
@@ -40,12 +39,10 @@ function App() {
               <Route path="/order/:orderId" element={<OrderDetail />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/contact" element={<Contact />} />
-              <Route path="/payment-test" element={<PaymentSystem />} />
-              <Route path="/payment" element={<PaymentSystem mode="payment" />} />
             </Routes>
             <Footer />
           </div>
-        
+
 
     </AuthProvider>
 

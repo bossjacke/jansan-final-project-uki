@@ -6,7 +6,6 @@ const Checkout = () => {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('card');
   const [shippingAddress, setShippingAddress] = useState({
     fullName: '',
     phone: '',
@@ -97,61 +96,11 @@ const Checkout = () => {
       return;
     }
 
-    if (paymentMethod === 'card') {
-      // For card payments, redirect to Stripe Checkout
-      await handleStripeCheckout();
-    } else {
-      // Handle cash on delivery
-      handleCashOnDelivery();
-    }
-  };
-
-  const handleStripeCheckout = async () => {
-    setLoading(true);
-    setError('');
-
-    try {
-      // Create order with card payment
-      const orderData = {
-        paymentMethod: 'card',
-        shippingAddress
-      };
-
-      const orderResponse = await createOrder(orderData);
-
-      if (orderResponse.success) {
-        if (orderResponse.data.clientSecret) {
-          // Redirect to payment processing or handle payment
-          navigate('/payment', { 
-            state: { 
-              clientSecret: orderResponse.data.clientSecret,
-              amount: cart.totalAmount,
-              orderId: orderResponse.data.order._id
-            } 
-          });
-        } else {
-          // For demo/success case
-          alert('Order placed successfully!');
-          navigate('/orders');
-        }
-      } else {
-        setError(orderResponse.message || 'Failed to create order');
-      }
-    } catch (err) {
-      console.error('Error creating order:', err);
-      setError('Failed to initialize payment. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCashOnDelivery = async () => {
     setLoading(true);
     setError('');
 
     try {
       const orderData = {
-        paymentMethod: 'cash',
         shippingAddress
       };
 
@@ -223,32 +172,15 @@ const Checkout = () => {
         <div className="payment-section">
           <h3>Payment Method</h3>
           <div className="payment-options">
-            <label className="payment-option">
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="card"
-                checked={paymentMethod === 'card'}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-              />
-              <span className="payment-label">
-                <span className="payment-icon">💳</span>
-                Card Payment (via Stripe)
-              </span>
-            </label>
-            <label className="payment-option">
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="cash"
-                checked={paymentMethod === 'cash'}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-              />
+            <div className="payment-option selected">
               <span className="payment-label">
                 <span className="payment-icon">💵</span>
                 Cash on Delivery
               </span>
-            </label>
+            </div>
+            <p style={{ marginTop: '10px', color: '#666', fontSize: '14px' }}>
+              Pay when you receive your order. Delivery typically takes 3-5 days.
+            </p>
           </div>
         </div>
 

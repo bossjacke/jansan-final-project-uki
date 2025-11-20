@@ -77,10 +77,10 @@ const OrderDetail = () => {
 
   const getPaymentStatusText = (status) => {
     switch (status) {
+      case 'pending':
+        return '⏳ Cash on Delivery';
       case 'paid':
         return '✅ Paid';
-      case 'pending':
-        return '⏳ Pending';
       case 'failed':
         return '❌ Failed';
       case 'cancelled':
@@ -158,7 +158,7 @@ const OrderDetail = () => {
               {getStatusText(order.orderStatus)}
             </span>
             <span className="payment-status">
-              {getPaymentStatusText(order.paymentStatus)}
+              {getPaymentStatusText('pending')}
             </span>
           </div>
         </div>
@@ -197,11 +197,11 @@ const OrderDetail = () => {
               </div>
               <div className="info-item">
                 <label>Payment Method:</label>
-                <span>{order.paymentMethod}</span>
+                <span>Cash on Delivery</span>
               </div>
               <div className="info-item">
                 <label>Payment Status:</label>
-                <span>{getPaymentStatusText(order.paymentStatus)}</span>
+                <span>{getPaymentStatusText('pending')}</span>
               </div>
               <div className="info-item">
                 <label>Order Status:</label>
@@ -295,31 +295,27 @@ const OrderDetail = () => {
         </div>
 
         {/* Payment Information */}
-        {order.paymentId && (
-          <div className="payment-info-card">
-            <h3>Payment Information</h3>
-            <div className="payment-details">
-              <div className="payment-item">
-                <label>Payment Method:</label>
-                <span>{order.paymentId.paymentMethod}</span>
-              </div>
-              <div className="payment-item">
-                <label>Payment Status:</label>
-                <span>{getPaymentStatusText(order.paymentId.status)}</span>
-              </div>
-              <div className="payment-item">
-                <label>Amount:</label>
-                <span>₹{order.paymentId.amount?.toLocaleString()}</span>
-              </div>
-              {order.paymentId.stripePaymentIntentId && (
-                <div className="payment-item">
-                  <label>Transaction ID:</label>
-                  <span>{order.paymentId.stripePaymentIntentId}</span>
-                </div>
-              )}
+        <div className="payment-info-card">
+          <h3>Payment Information</h3>
+          <div className="payment-details">
+            <div className="payment-item">
+              <label>Payment Method:</label>
+              <span>Cash on Delivery</span>
+            </div>
+            <div className="payment-item">
+              <label>Payment Status:</label>
+              <span>{getPaymentStatusText('pending')}</span>
+            </div>
+            <div className="payment-item">
+              <label>Amount:</label>
+              <span>₹{order.totalAmount?.toLocaleString()}</span>
+            </div>
+            <div className="payment-item">
+              <label>Payment Instructions:</label>
+              <span>Please pay when you receive your order</span>
             </div>
           </div>
-        )}
+        </div>
 
         {/* Admin Notes */}
         {order.adminNotes && (

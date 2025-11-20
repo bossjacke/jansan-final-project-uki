@@ -262,10 +262,10 @@ const OrderManagement = () => {
                   </td>
                   <td className="payment-info">
                     <div>
-                      <span className="payment-method">{order.paymentMethod}</span>
+                      <span className="payment-method">Cash on Delivery</span>
                       <br />
-                      <small className={`payment-status ${order.paymentStatus}`}>
-                        {order.paymentStatus}
+                      <small className={`payment-status pending`}>
+                        Pending
                       </small>
                     </div>
                   </td>
@@ -350,8 +350,8 @@ const OrderManagement = () => {
                   <h3>Order Information</h3>
                   <p><strong>Order Date:</strong> {formatDate(selectedOrder.createdAt)}</p>
                   <p><strong>Total Amount:</strong> ₹{selectedOrder.totalAmount?.toLocaleString()}</p>
-                  <p><strong>Payment Method:</strong> {selectedOrder.paymentMethod}</p>
-                  <p><strong>Payment Status:</strong> {selectedOrder.paymentStatus}</p>
+                  <p><strong>Payment Method:</strong> Cash on Delivery</p>
+                  <p><strong>Payment Status:</strong> Pending</p>
                   <p><strong>Order Status:</strong> {getStatusText(selectedOrder.orderStatus)}</p>
                 </div>
               </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getCart, getMyOrders, createOrder, confirmOrder } from '../../api.js';
+import { getCart, getMyOrders, createOrder } from '../../api.js';
 
 
 
@@ -16,7 +16,7 @@ function Orders() {
   const [shippingAddress, setShippingAddress] = useState({
     street: '', city: '', state: '', postalCode: '', country: 'sri lanka'
   });
-  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [orderProcessing, setOrderProcessing] = useState(false);
 
   useEffect(() => {
     if (location.state?.fromCart && user) {
@@ -75,16 +75,12 @@ function Orders() {
     }
 
     try {
-      setPaymentProcessing(true);
+      setOrderProcessing(true);
 
       const data = await createOrder({ shippingAddress });
       const order = data.data.order;
 
-      // Note: The payment endpoints in this component seem to be different from backend routes
-      // This might need adjustment based on actual backend implementation
-      await confirmOrder('simulated_success');
-
-      alert('Order placed successfully!');
+      alert('Order placed successfully! Cash on delivery selected.');
       setShowCheckout(false);
       setCart(null);
       fetchOrders();
@@ -92,7 +88,7 @@ function Orders() {
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to create order');
     } finally {
-      setPaymentProcessing(false);
+      setOrderProcessing(false);
     }
   };
 
@@ -168,13 +164,14 @@ function Orders() {
       </div>
 
       <div className="mb-8 p-5 bg-green-50 rounded-lg text-center">
-        <div><strong>Payment Method:</strong> Online Payment (Secure)</div>
+        <div><strong>Payment Method:</strong> Cash on Delivery</div>
+        <div className="text-sm text-gray-600 mt-2">Pay when you receive your order</div>
       </div>
 
       <div className="flex gap-4 justify-end">
-        <button className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200" onClick={cancelCheckout} disabled={paymentProcessing}>Cancel</button>
-        <button className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200 btn-primary-gradient text-white focus:ring-4 focus:ring-purple-200/50" onClick={createOrderHandler} disabled={paymentProcessing}>
-          {paymentProcessing ? 'Processing...' : `Pay ₹${cart.totalAmount.toLocaleString('en-IN')}`}
+        <button className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200" onClick={cancelCheckout} disabled={orderProcessing}>Cancel</button>
+        <button className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200 btn-primary-gradient text-white focus:ring-4 focus:ring-purple-200/50" onClick={createOrderHandler} disabled={orderProcessing}>
+          {orderProcessing ? 'Processing...' : `Place Order • ₹${cart.totalAmount.toLocaleString('en-IN')}`}
         </button>
       </div>
     </div>

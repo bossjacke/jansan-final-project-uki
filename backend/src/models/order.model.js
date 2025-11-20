@@ -41,9 +41,9 @@ const orderSchema = new mongoose.Schema(
 
     paymentMethod: {
       type: String,
-      enum: ["card", "cash"],
+      enum: ["cash_on_delivery"],
       required: true,
-      default: "card"
+      default: "cash_on_delivery"
     },
 
     paymentStatus: {
@@ -63,10 +63,6 @@ const orderSchema = new mongoose.Schema(
       default: "Processing"
     },
 
-    paymentId: { 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: "Payment" 
-    },
 
     shippingAddress: {
       fullName: {

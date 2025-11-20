@@ -218,19 +218,6 @@ export const createOrder = async (orderData) => {
   }
 };
 
-export const confirmOrder = async (paymentIntentId) => {
-  try {
-    const res = await axios.post(`${API_URL}/orders/confirm`, {
-      paymentIntentId
-    }, {
-      headers: getAuthHeaders()
-    });
-    return res.data;
-  } catch (err) {
-    console.error('Confirm order error:', err.response?.data || err.message);
-    throw err;
-  }
-};
 
 export const getMyOrders = async (params = {}) => {
   try {
@@ -266,55 +253,6 @@ export const cancelOrder = async (orderId) => {
     return res.data;
   } catch (err) {
     console.error('Cancel order error:', err.response?.data || err.message);
-    throw err;
-  }
-};
-
-// Payment API functions
-export const createPaymentIntent = async (paymentData) => {
-  try {
-    const res = await axios.post(`${API_URL}/payments/create-intent`, paymentData, {
-      headers: getAuthHeaders()
-    });
-    return res.data;
-  } catch (err) {
-    console.error('Create payment intent error:', err.response?.data || err.message);
-    throw err;
-  }
-};
-
-export const confirmPayment = async (paymentData) => {
-  try {
-    const res = await axios.post(`${API_URL}/payments/confirm`, paymentData, {
-      headers: getAuthHeaders()
-    });
-    return res.data;
-  } catch (err) {
-    console.error('Confirm payment error:', err.response?.data || err.message);
-    throw err;
-  }
-};
-
-export const getPaymentHistory = async () => {
-  try {
-    const res = await axios.get(`${API_URL}/payments/history`, {
-      headers: getAuthHeaders()
-    });
-    return res.data;
-  } catch (err) {
-    console.error('Get payment history error:', err.response?.data || err.message);
-    throw err;
-  }
-};
-
-export const getPaymentById = async (paymentId) => {
-  try {
-    const res = await axios.get(`${API_URL}/payments/${paymentId}`, {
-      headers: getAuthHeaders()
-    });
-    return res.data;
-  } catch (err) {
-    console.error('Get payment by ID error:', err.response?.data || err.message);
     throw err;
   }
 };
