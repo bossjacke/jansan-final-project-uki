@@ -310,3 +310,81 @@ export const processRefund = async (orderId) => {
     throw err;
   }
 };
+
+// Admin API functions
+export const getAllUsers = async () => {
+  try {
+    const res = await axios.get(`${API_URL}/admin/users`, {
+      headers: getAuthHeaders()
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Get all users error:', err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export const updateUserRole = async (userId, role) => {
+  try {
+    const res = await axios.put(`${API_URL}/admin/users/${userId}/role`, {
+      role
+    }, {
+      headers: getAuthHeaders()
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Update user role error:', err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export const deleteUser = async (userId) => {
+  try {
+    const res = await axios.delete(`${API_URL}/admin/users/${userId}`, {
+      headers: getAuthHeaders()
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Delete user error:', err.response?.data || err.message);
+    throw err;
+  }
+};
+
+// Admin Order Management API functions
+export const getAdminOrders = async (params = {}) => {
+  try {
+    const queryString = new URLSearchParams(params).toString();
+    const url = queryString ? `${API_URL}/order/admin/orders?${queryString}` : `${API_URL}/order/admin/orders`;
+    const res = await axios.get(url, {
+      headers: getAuthHeaders()
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Get admin orders error:', err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export const getOrderDetails = async (orderId) => {
+  try {
+    const res = await axios.get(`${API_URL}/order/${orderId}`, {
+      headers: getAuthHeaders()
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Get order details error:', err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export const updateOrderStatus = async (orderId, statusData) => {
+  try {
+    const res = await axios.put(`${API_URL}/order/${orderId}/status`, statusData, {
+      headers: getAuthHeaders()
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Update order status error:', err.response?.data || err.message);
+    throw err;
+  }
+};

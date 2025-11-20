@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { getAdminOrders, getOrderDetails, updateOrderStatus } from '../../api.js';
+import './OrderManagement.css';
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
@@ -21,28 +23,21 @@ const OrderManagement = () => {
   const fetchAllOrders = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const queryParams = new URLSearchParams({
+      const params = {
         page: currentPage,
         limit: 10,
         ...(filter !== 'all' && { status: filter }),
         ...(searchTerm && { search: searchTerm })
-      });
+      };
 
-      const response = await fetch(`http://localhost:3003/api/order/admin/orders?${queryParams}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await getAdminOrders(params);
 
-      const data = await response.json();
-
-      if (data.success) {
-        setOrders(data.data.orders);
-        setPagination(data.data.pagination);
+      if (response.success) {
+        setOrders(response.data.orders);
+        setPagination(response.data.pagination);
         setError('');
       } else {
-        setError(data.message || 'Failed to fetch orders');
+        setError(response.message || 'Failed to fetch orders');
         setOrders([]);
       }
     } catch (err) {
@@ -54,24 +49,14 @@ const OrderManagement = () => {
     }
   };
 
-  const updateOrderStatus = async (orderId, status, notes) => {
+  const handleUpdateOrderStatus = async (orderId, status, notes) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3003/api/order/${orderId}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          orderStatus: status,
-          adminNotes: notes
-        })
+      const response = await updateOrderStatus(orderId, {
+        orderStatus: status,
+        adminNotes: notes
       });
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.success) {
         alert('Order status updated successfully');
         setStatusUpdateModal(false);
         setAdminNotes('');
@@ -81,7 +66,7 @@ const OrderManagement = () => {
           fetchOrderDetails(orderId); // Refresh order details if open
         }
       } else {
-        alert(data.message || 'Failed to update order status');
+        alert(response.message || 'Failed to update order status');
       }
     } catch (err) {
       console.error('Error updating order status:', err);
@@ -91,20 +76,13 @@ const OrderManagement = () => {
 
   const fetchOrderDetails = async (orderId) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3003/api/order/${orderId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await getOrderDetails(orderId);
 
-      const data = await response.json();
-
-      if (data.success) {
-        setSelectedOrder(data.data);
+      if (response.success) {
+        setSelectedOrder(response.data);
         setShowOrderDetails(true);
       } else {
-        alert(data.message || 'Failed to fetch order details');
+        alert(response.message || 'Failed to fetch order details');
       }
     } catch (err) {
       console.error('Error fetching order details:', err);
@@ -460,7 +438,7 @@ const OrderManagement = () => {
             <div className="modal-actions">
               <button 
                 className="save-btn"
-                onClick={() => updateOrderStatus(selectedOrder._id, selectedStatus, adminNotes)}
+                onClick={() => handleUpdateOrderStatus(selectedOrder._id, selectedStatus, adminNotes)}
               >
                 Update Status
               </button>
