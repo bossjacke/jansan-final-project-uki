@@ -256,3 +256,57 @@ export const cancelOrder = async (orderId) => {
     throw err;
   }
 };
+
+// Payment API functions
+export const createPaymentIntent = async (shippingAddress) => {
+  try {
+    const res = await axios.post(`${API_URL}/payments/create-payment-intent`, {
+      shippingAddress
+    }, {
+      headers: getAuthHeaders()
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Create payment intent error:', err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export const confirmPayment = async (paymentIntentId, shippingAddress) => {
+  try {
+    const res = await axios.post(`${API_URL}/payments/confirm-payment`, {
+      paymentIntentId,
+      shippingAddress
+    }, {
+      headers: getAuthHeaders()
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Confirm payment error:', err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export const getPaymentStatus = async (paymentIntentId) => {
+  try {
+    const res = await axios.get(`${API_URL}/payments/status/${paymentIntentId}`, {
+      headers: getAuthHeaders()
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Get payment status error:', err.response?.data || err.message);
+    throw err;
+  }
+};
+
+export const processRefund = async (orderId) => {
+  try {
+    const res = await axios.post(`${API_URL}/payments/refund/${orderId}`, {}, {
+      headers: getAuthHeaders()
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Process refund error:', err.response?.data || err.message);
+    throw err;
+  }
+};

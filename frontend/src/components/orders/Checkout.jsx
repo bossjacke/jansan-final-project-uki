@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCart, createOrder } from '../../api.js';
+import { getCart, createOrder, createPaymentIntent } from '../../api.js';
+import PaymentSystem from '../payment/PaymentSystem.jsx';
 
 const Checkout = () => {
   const [cart, setCart] = useState(null);
@@ -15,6 +16,9 @@ const Checkout = () => {
     country: 'India'
   });
   const [user, setUser] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('cod'); // 'cod' or 'stripe'
+  const [clientSecret, setClientSecret] = useState('');
+  const [paymentLoading, setPaymentLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -70,6 +74,47 @@ const Checkout = () => {
       ...shippingAddress,
       [name]: value
     });
+  };
+
+  const handlePaymentMethodChange = (method) => {
+    setPaymentMethod(method);
+    setError('');
+    if (method === 'cod') {
+      setClientSecret('');
+    }
+  };
+
+  const initializeStripePayment = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setPaymentLoading(true);
+    setError('');
+
+    try {
+      const response = await createPaymentIntent(shippingAddress);
+      if (response.success) {
+        setClientSecret(response.data.clientSecret);
+      } else {
+        setError(response.message || 'Failed to initialize payment');
+      }
+    } catch (err) {
+      console.error('Error initializing payment:', err);
+      setError('Failed to initialize payment. Please try again.');
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  const handlePaymentSuccess = (order) => {
+    alert('Payment successful! Order placed successfully.');
+    navigate('/orders');
+  };
+
+  const handlePaymentError = (error) => {
+    console.error('Payment error:', error);
+    setError('Payment failed. Please try again.');
   };
 
   const validateForm = () => {
@@ -172,16 +217,63 @@ const Checkout = () => {
         <div className="payment-section">
           <h3>Payment Method</h3>
           <div className="payment-options">
-            <div className="payment-option selected">
+            <div 
+              className={`payment-option ${paymentMethod === 'cod' ? 'selected' : ''}`}
+              onClick={() => handlePaymentMethodChange('cod')}
+            >
               <span className="payment-label">
                 <span className="payment-icon">💵</span>
                 Cash on Delivery
               </span>
+              <span className="payment-description">
+                Pay when you receive your order. Delivery typically takes 3-5 days.
+              </span>
             </div>
-            <p style={{ marginTop: '10px', color: '#666', fontSize: '14px' }}>
-              Pay when you receive your order. Delivery typically takes 3-5 days.
-            </p>
+            
+            <div 
+              className={`payment-option ${paymentMethod === 'stripe' ? 'selected' : ''}`}
+              onClick={() => handlePaymentMethodChange('stripe')}
+            >
+              <span className="payment-label">
+                <span className="payment-icon">💳</span>
+                Credit/Debit Card
+              </span>
+              <span className="payment-description">
+                Pay instantly with your card. Secure payment powered by Stripe.
+              </span>
+            </div>
           </div>
+
+          {paymentMethod === 'stripe' && !clientSecret && (
+            <div className="stripe-init-section">
+              <button 
+                onClick={initializeStripePayment}
+                disabled={paymentLoading || !validateForm()}
+                className="init-payment-btn"
+              >
+                {paymentLoading ? (
+                  <>
+                    <span className="spinner"></span>
+                    Initializing Payment...
+                  </>
+                ) : (
+                  'Continue to Payment'
+                )}
+              </button>
+            </div>
+          )}
+
+          {paymentMethod === 'stripe' && clientSecret && (
+            <div className="stripe-payment-section">
+              <PaymentSystem
+                clientSecret={clientSecret}
+                onPaymentSuccess={handlePaymentSuccess}
+                onPaymentError={handlePaymentError}
+                shippingAddress={shippingAddress}
+                amount={cart.totalAmount}
+              />
+            </div>
+          )}
         </div>
 
         <div className="shipping-section">
