@@ -60,7 +60,7 @@ function Admin() {
 			{error && <ErrorDisplay error={error} />}
 
 			{activeTab === 'products' && <ProductTab />}
-			{activeTab === 'users' && <UsersTab users={users} />}
+			{activeTab === 'users' && <UsersTab users={users} onUserUpdate={fetchUsers} />}
 			{activeTab === 'orders' && <OrderManagement />}
 		</AdminLayout>
 	);
