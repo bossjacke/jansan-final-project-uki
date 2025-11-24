@@ -17,6 +17,7 @@ import Orders from './components/orders/Orders.jsx';
 import OrderDetail from './components/orders/OrderDetail.jsx';
 import Checkout from './components/orders/Checkout.jsx';
 import Contact from './components/Contact/Contact.jsx';
+import ChatButton from './components/chat/ChatButton.jsx';
 
 function App() {
   return (
@@ -40,8 +41,12 @@ function App() {
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/contact" element={<Contact />} />
             </Routes>
+             {/* Chat Button - Global Component */}
+          <ChatButton />
             <Footer />
           </div>
+          
+         
 
 
     </AuthProvider>

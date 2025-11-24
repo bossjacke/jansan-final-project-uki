@@ -9,6 +9,7 @@ import passwordRoutes from "./routes/password.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
+import chatRoutes from "./routes/chat.routes.js";
 
 dotenv.config();
 const app = express();
@@ -33,6 +34,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/chat", chatRoutes);
 
 // Database connection
 console.log('🔗 Initializing database connection...');
