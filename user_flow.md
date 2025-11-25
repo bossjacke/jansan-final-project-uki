@@ -1,6 +1,6 @@
-# User Flow on Jansan Eco Solutions Website
+# User Flow on  Eco Solutions Website
 
-This document outlines the typical user journey on the Jansan Eco Solutions website, integrating frontend pages and backend API interactions. The website is an e-commerce platform for biogas systems and organic fertilizers.
+This document outlines the typical user journey on the  Eco Solutions website, integrating frontend pages and backend API interactions. The website is an e-commerce platform for biogas systems and organic fertilizers.
 
 ## 1. Landing on the Website (Home Page)
 
