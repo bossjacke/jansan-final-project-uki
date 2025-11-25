@@ -27,7 +27,7 @@ export const addToCart = async (req, res) => {
     else cart.items.push({ productId, quantity, price: product.price });
 
     await cart.save();
-    const updated = await Cart.findById(cart._id).populate("items.productId", "name type description images image");
+    const updated = await Cart.findById(cart._id).populate("items.productId", "name type description capacity warrantyPeriod images image");
     res.status(200).json({ success: true, message: "Item added", data: updated });
   } catch (err) {
     res.status(500).json({ success: false, message: "Error adding item", error: err.message });
@@ -50,7 +50,7 @@ export const updateCartItem = async (req, res) => {
     item.quantity = quantity;
     await cart.save();
 
-    const updated = await Cart.findById(cart._id).populate("items.productId", "name type description images image");
+    const updated = await Cart.findById(cart._id).populate("items.productId", "name type description capacity warrantyPeriod images image");
     res.status(200).json({ success: true, message: "Quantity updated", data: updated });
   } catch (err) {
     res.status(500).json({ success: false, message: "Error updating cart", error: err.message });
@@ -66,7 +66,7 @@ export const removeFromCart = async (req, res) => {
     cart.items.pull(itemId);
     await cart.save();
 
-    const updated = await Cart.findById(cart._id).populate("items.productId", "name type description images image");
+    const updated = await Cart.findById(cart._id).populate("items.productId", "name type description capacity warrantyPeriod images image");
     res.status(200).json({ success: true, message: "Item removed", data: updated });
   } catch (err) {
     res.status(500).json({ success: false, message: "Error removing item", error: err.message });

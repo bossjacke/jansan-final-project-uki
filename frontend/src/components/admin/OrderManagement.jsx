@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { getAdminOrders, getOrderDetails, updateOrderStatus } from '../../api.js';
-import './OrderManagement.css';
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
@@ -61,9 +60,9 @@ const OrderManagement = () => {
         setStatusUpdateModal(false);
         setAdminNotes('');
         setSelectedStatus('');
-        fetchAllOrders(); // Refresh orders
+        fetchAllOrders();
         if (showOrderDetails) {
-          fetchOrderDetails(orderId); // Refresh order details if open
+          fetchOrderDetails(orderId);
         }
       } else {
         alert(response.message || 'Failed to update order status');
@@ -119,7 +118,7 @@ const OrderManagement = () => {
   const formatDate = (dateString) => {
     const options = { 
       year: 'numeric', 
-      month: 'short', 
+      month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
@@ -127,174 +126,133 @@ const OrderManagement = () => {
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
 
-  const handleStatusUpdate = (order) => {
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  const openStatusUpdateModal = (order, status) => {
     setSelectedOrder(order);
-    setSelectedStatus(order.orderStatus);
-    setAdminNotes(order.adminNotes || '');
+    setSelectedStatus(status);
+    setAdminNotes('');
     setStatusUpdateModal(true);
   };
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  const openOrderDetails = (order) => {
-    fetchOrderDetails(order._id);
-  };
-
-  if (loading && orders.length === 0) {
+  if (loading) {
     return (
-      <div className="order-management-container">
-        <div className="loading">Loading orders...</div>
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading orders...</p>
       </div>
     );
   }
 
   return (
-    <div className="order-management-container">
-      <div className="order-management-header">
-        <h1>Order Management</h1>
-        <p>Manage and evaluate all customer orders</p>
-      </div>
-
-      {/* Filters and Search */}
-      <div className="order-filters-section">
-        <div className="filter-row">
-          <div className="search-box">
-            <input
-              type="text"
-              placeholder="Search by order number, customer name, or email..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="search-input"
-            />
-          </div>
-          
-          <div className="filter-dropdown">
-            <label htmlFor="status-filter">Filter by Status:</label>
-            <select 
-              id="status-filter"
-              value={filter} 
-              onChange={(e) => {
-                setFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-            >
-              <option value="all">All Orders</option>
-              <option value="Processing">Processing</option>
-              <option value="Delivered">Delivered</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
-          </div>
+    <div className="order-management">
+      <div className="order-header">
+        <h2>Order Management</h2>
+        <div className="order-controls">
+          <input
+            type="text"
+            placeholder="Search orders..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="filter-select"
+          >
+            <option value="all">All Orders</option>
+            <option value="Processing">Processing</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
         </div>
       </div>
 
       {error && (
         <div className="error-message">
           {error}
-          <button onClick={fetchAllOrders} className="retry-btn">Retry</button>
         </div>
       )}
 
-      {/* Orders Table */}
-      {orders.length === 0 && !loading ? (
-        <div className="no-orders">
-          <h2>No orders found</h2>
-          <p>{filter !== 'all' || searchTerm ? 'No orders match your search criteria.' : 'No orders available.'}</p>
-        </div>
-      ) : (
-        <div className="orders-table-container">
-          <table className="orders-table">
-            <thead>
-              <tr>
-                <th>Order Number</th>
-                <th>Customer</th>
-                <th>Date</th>
-                <th>Total</th>
-                <th>Payment</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order) => (
-                <tr key={order._id} className="order-row">
-                  <td className="order-number">
-                    <strong>#{order.orderNumber}</strong>
-                  </td>
-                  <td className="customer-info">
-                    <div>
-                      <strong>{order.userId?.name || 'N/A'}</strong>
-                      <br />
-                      <small>{order.userId?.email || 'N/A'}</small>
-                    </div>
-                  </td>
-                  <td className="order-date">
-                    {formatDate(order.createdAt)}
-                  </td>
-                  <td className="order-total">
-                    <strong>₹{order.totalAmount?.toLocaleString()}</strong>
-                  </td>
-                  <td className="payment-info">
-                    <div>
-                      <span className="payment-method">Cash on Delivery</span>
-                      <br />
-                      <small className={`payment-status pending`}>
-                        Pending
-                      </small>
-                    </div>
-                  </td>
-                  <td className="order-status">
-                    <span 
-                      className="status-badge"
-                      style={{ backgroundColor: getStatusColor(order.orderStatus) }}
-                    >
-                      {getStatusText(order.orderStatus)}
-                    </span>
-                  </td>
-                  <td className="order-actions">
-                    <button 
-                      className="view-btn"
-                      onClick={() => openOrderDetails(order)}
-                    >
-                      View
-                    </button>
-                    <button 
-                      className="update-btn"
-                      onClick={() => handleStatusUpdate(order)}
-                    >
-                      Update
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <div className="orders-list">
+        {orders.length === 0 ? (
+          <div className="no-orders">
+            <p>No orders found</p>
+          </div>
+        ) : (
+          orders.map((order) => (
+            <div key={order._id} className="order-card">
+              <div className="order-header-info">
+                <div className="order-id">
+                  <strong>Order ID:</strong> {order._id}
+                </div>
+                <div className="order-date">
+                  <strong>Date:</strong> {formatDate(order.createdAt)}
+                </div>
+                <div className="order-status">
+                  <span 
+                    className="status-badge"
+                    style={{ backgroundColor: getStatusColor(order.orderStatus) }}
+                  >
+                    {getStatusText(order.orderStatus)}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="order-details">
+                <div className="customer-info">
+                  <strong>Customer:</strong> {order.userId?.name || 'N/A'}
+                </div>
+                <div className="order-total">
+                  <strong>Total:</strong> ₹{order.totalAmount}
+                </div>
+                <div className="order-items">
+                  <strong>Items:</strong> {order.products?.length || 0}
+                </div>
+              </div>
 
-      {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && (
+              <div className="order-actions">
+                <button
+                  onClick={() => fetchOrderDetails(order._id)}
+                  className="btn btn-primary"
+                >
+                  View Details
+                </button>
+                <select
+                  onChange={(e) => openStatusUpdateModal(order, e.target.value)}
+                  value=""
+                  className="status-select"
+                >
+                  <option value="">Update Status</option>
+                  <option value="Processing">Processing</option>
+                  <option value="Delivered">Delivered</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {pagination && (
         <div className="pagination">
-          <button 
-            disabled={!pagination.hasPrevPage}
+          <button
             onClick={() => handlePageChange(currentPage - 1)}
-            className="pagination-btn"
+            disabled={currentPage === 1}
+            className="btn btn-secondary"
           >
             Previous
           </button>
-          
-          <span className="pagination-info">
-            Page {pagination.currentPage} of {pagination.totalPages} ({pagination.totalOrders} total)
+          <span className="page-info">
+            Page {currentPage} of {pagination.totalPages}
           </span>
-          
-          <button 
-            disabled={!pagination.hasNextPage}
+          <button
             onClick={() => handlePageChange(currentPage + 1)}
-            className="pagination-btn"
+            disabled={currentPage === pagination.totalPages}
+            className="btn btn-secondary"
           >
             Next
           </button>
@@ -303,88 +261,45 @@ const OrderManagement = () => {
 
       {/* Order Details Modal */}
       {showOrderDetails && selectedOrder && (
-        <div className="modal-overlay" onClick={() => setShowOrderDetails(false)}>
-          <div className="modal-content order-details-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay">
+          <div className="modal-content">
             <div className="modal-header">
-              <h2>Order Details - #{selectedOrder.orderNumber}</h2>
-              <button 
-                className="close-btn"
+              <h3>Order Details</h3>
+              <button
                 onClick={() => setShowOrderDetails(false)}
+                className="close-btn"
               >
                 ×
               </button>
             </div>
-            
-            <div className="order-details-content">
-              <div className="order-info-grid">
-                <div className="info-section">
-                  <h3>Customer Information</h3>
-                  <p><strong>Name:</strong> {selectedOrder.userId?.name || 'N/A'}</p>
-                  <p><strong>Email:</strong> {selectedOrder.userId?.email || 'N/A'}</p>
-                  <p><strong>Phone:</strong> {selectedOrder.shippingAddress?.phone || 'N/A'}</p>
-                </div>
-                
-                <div className="info-section">
-                  <h3>Order Information</h3>
-                  <p><strong>Order Date:</strong> {formatDate(selectedOrder.createdAt)}</p>
-                  <p><strong>Total Amount:</strong> ₹{selectedOrder.totalAmount?.toLocaleString()}</p>
-                  <p><strong>Payment Method:</strong> Cash on Delivery</p>
-                  <p><strong>Payment Status:</strong> Pending</p>
-                  <p><strong>Order Status:</strong> {getStatusText(selectedOrder.orderStatus)}</p>
-                </div>
+            <div className="modal-body">
+              <div className="order-info">
+                <p><strong>Order ID:</strong> {selectedOrder._id}</p>
+                <p><strong>Date:</strong> {formatDate(selectedOrder.createdAt)}</p>
+                <p><strong>Status:</strong> {getStatusText(selectedOrder.orderStatus)}</p>
+                <p><strong>Total:</strong> ₹{selectedOrder.totalAmount}</p>
+                <p><strong>Payment Method:</strong> {selectedOrder.paymentMethod}</p>
+                <p><strong>Payment Status:</strong> {selectedOrder.paymentStatus}</p>
               </div>
               
-              <div className="info-section">
-                <h3>Shipping Address</h3>
-                {selectedOrder.shippingAddress ? (
-                  <p>
-                    {selectedOrder.shippingAddress.fullName}<br />
-                    {selectedOrder.shippingAddress.addressLine1}<br />
-                    {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.postalCode}<br />
-                    {selectedOrder.shippingAddress.country}
-                  </p>
-                ) : (
-                  <p>{selectedOrder.deliveryLocation}</p>
-                )}
+              <div className="customer-details">
+                <h4>Customer Information</h4>
+                <p><strong>Name:</strong> {selectedOrder.userId?.name || 'N/A'}</p>
+                <p><strong>Email:</strong> {selectedOrder.userId?.email || 'N/A'}</p>
+                <p><strong>Phone:</strong> {selectedOrder.userId?.phone || 'N/A'}</p>
+                <p><strong>Address:</strong> {selectedOrder.shippingAddress?.addressLine1 || 'N/A'}</p>
               </div>
-              
-              <div className="info-section">
-                <h3>Products ({selectedOrder.products.length})</h3>
-                <div className="products-list">
-                  {selectedOrder.products.map((product, index) => (
-                    <div key={index} className="product-item">
-                      <span><strong>{product.productId?.name || 'Product'}</strong></span>
-                      <span>Qty: {product.quantity} × ₹{product.price?.toLocaleString()}</span>
-                      <span><strong>₹{(product.price * product.quantity)?.toLocaleString()}</strong></span>
-                    </div>
-                  ))}
-                </div>
+
+              <div className="order-products">
+                <h4>Products</h4>
+                {selectedOrder.products?.map((product, index) => (
+                  <div key={index} className="product-item">
+                    <p><strong>Product:</strong> {product.productId?.name || 'N/A'}</p>
+                    <p><strong>Quantity:</strong> {product.quantity}</p>
+                    <p><strong>Price:</strong> ₹{product.price}</p>
+                  </div>
+                ))}
               </div>
-              
-              {selectedOrder.adminNotes && (
-                <div className="info-section">
-                  <h3>Admin Notes</h3>
-                  <p className="admin-notes">{selectedOrder.adminNotes}</p>
-                </div>
-              )}
-            </div>
-            
-            <div className="modal-actions">
-              <button 
-                className="update-btn"
-                onClick={() => {
-                  setShowOrderDetails(false);
-                  handleStatusUpdate(selectedOrder);
-                }}
-              >
-                Update Status
-              </button>
-              <button 
-                className="close-btn"
-                onClick={() => setShowOrderDetails(false)}
-              >
-                Close
-              </button>
             </div>
           </div>
         </div>
@@ -392,61 +307,59 @@ const OrderManagement = () => {
 
       {/* Status Update Modal */}
       {statusUpdateModal && selectedOrder && (
-        <div className="modal-overlay" onClick={() => setStatusUpdateModal(false)}>
-          <div className="modal-content status-update-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay">
+          <div className="modal-content">
             <div className="modal-header">
-              <h2>Update Order Status</h2>
-              <button 
-                className="close-btn"
+              <h3>Update Order Status</h3>
+              <button
                 onClick={() => setStatusUpdateModal(false)}
+                className="close-btn"
               >
                 ×
               </button>
             </div>
-            
-            <div className="status-update-content">
-              <p><strong>Order:</strong> #{selectedOrder.orderNumber}</p>
+            <div className="modal-body">
+              <p><strong>Order ID:</strong> {selectedOrder._id}</p>
               <p><strong>Current Status:</strong> {getStatusText(selectedOrder.orderStatus)}</p>
               
               <div className="form-group">
-                <label htmlFor="order-status">New Status:</label>
-                <select 
-                  id="order-status"
+                <label>New Status:</label>
+                <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="status-select"
+                  className="form-control"
                 >
+                  <option value="">Select Status</option>
                   <option value="Processing">Processing</option>
                   <option value="Delivered">Delivered</option>
                   <option value="Cancelled">Cancelled</option>
                 </select>
               </div>
-              
+
               <div className="form-group">
-                <label htmlFor="admin-notes">Admin Notes:</label>
+                <label>Admin Notes:</label>
                 <textarea
-                  id="admin-notes"
                   value={adminNotes}
                   onChange={(e) => setAdminNotes(e.target.value)}
+                  className="form-control"
+                  rows="3"
                   placeholder="Add any notes about this status update..."
-                  rows="4"
-                  className="notes-textarea"
-                />
+                ></textarea>
               </div>
             </div>
-            
-            <div className="modal-actions">
-              <button 
-                className="save-btn"
-                onClick={() => handleUpdateOrderStatus(selectedOrder._id, selectedStatus, adminNotes)}
-              >
-                Update Status
-              </button>
-              <button 
-                className="cancel-btn"
+            <div className="modal-footer">
+              <button
                 onClick={() => setStatusUpdateModal(false)}
+                className="btn btn-secondary"
               >
                 Cancel
+              </button>
+              <button
+                onClick={() => handleUpdateOrderStatus(selectedOrder._id, selectedStatus, adminNotes)}
+                className="btn btn-primary"
+                disabled={!selectedStatus}
+              >
+                Update Status
               </button>
             </div>
           </div>

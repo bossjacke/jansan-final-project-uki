@@ -19,7 +19,7 @@ const app = express();
 // Enable CORS
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5175"], // For development, allows all. Change to frontend URL in production.
+    origin: ["http://localhost:5173", "http://localhost:5175", "http://localhost:5177", "http://localhost:5178", "http://localhost:5179"], // For development, allows all. Change to frontend URL in production.
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })

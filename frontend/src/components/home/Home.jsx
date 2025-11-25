@@ -33,7 +33,7 @@ function Home() {
  					<SmokeDemo />
 					{/* Hero Section */}
 					<div className="relative overflow-hidden">
-						<div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 opacity-90"></div>
+						<div className="absolute inset-0 bg-gradient-to-r from-bulu-600 via-indigo-600 to-purple-700 opacity-90"></div>
 						<div className="absolute inset-0 bg-black/20"></div>
 						<div className="relative px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
 							<div className="max-w-7xl mx-auto text-center">

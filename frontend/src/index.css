@@ -4,7 +4,7 @@
 .simple-page {
   min-height: calc(100vh - 64px);
   padding: 2rem 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #02013d 100%);
 }
 
 .card {
@@ -28,16 +28,16 @@
 }
 
 .btn-primary {
-  background: linear-gradient(to right, #9333ea, #4f46e5);
+  background: linear-gradient(to right, #0b0130, #110246);
   color: #ffffff;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(to right, #7c3aed, #4338ca);
+  background: linear-gradient(to right, #0b0130, #110246);
 }
 
 .btn-primary:focus {
-  box-shadow: 0 0 0 4px rgba(196, 181, 253, 0.5);
+  box-shadow: 0 0 0 4px rgba(95, 80, 155, 0.5);
 }
 
 .btn-secondary {
@@ -64,7 +64,7 @@
 }
 
 .form-input:focus {
-  box-shadow: 0 0 0 2px #a855f7;
+  box-shadow: 0 0 0 2px #0b0130;
   border-color: transparent;
 }
 
@@ -102,7 +102,7 @@
 /* Product specific styles */
 .product-image-placeholder {
   height: 12rem;
-  background: linear-gradient(to bottom right, #e9d5ff, #c7d2fe);
+  background: linear-gradient(to bottom right, #311c80, #6751b6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -143,11 +143,11 @@
 }
 
 .nav-link:hover {
-  color: #9333ea;
+  color: #0b0130;
 }
 
 .nav-link-active {
-  color: #9333ea;
+  color: #0b0130;
   background-color: #faf5ff;
 }
 
@@ -179,7 +179,7 @@
 .title {
   font-size: 2.5rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #311c80 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -209,7 +209,7 @@
 
 /* Hero section styles */
 .hero {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #311c80 100%);
   color: white;
   padding: 4rem 2rem;
   text-align: center;

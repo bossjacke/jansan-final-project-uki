@@ -16,7 +16,7 @@ const Checkout = () => {
     country: 'India'
   });
   const [user, setUser] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('cod'); // 'cod', 'stripe', or 'checkout'
+  const [paymentMethod, setPaymentMethod] = useState('cod');
   const [clientSecret, setClientSecret] = useState('');
   const [paymentLoading, setPaymentLoading] = useState(false);
   const navigate = useNavigate();
@@ -52,7 +52,6 @@ const Checkout = () => {
       let data;
 
       if (!response.ok) {
-        // If response not ok, try to get text for debug, then throw error
         const errorText = await response.text();
         console.error(`Error response from server: ${response.status} - ${errorText}`);
         setError('Failed to fetch user data. Please login again.');
@@ -70,7 +69,6 @@ const Checkout = () => {
 
       if (data.success) {
         setUser(data.user || data.data);
-        // Pre-fill shipping address with user data
         setShippingAddress(prev => ({
           ...prev,
           fullName: (data.user?.fullName || data.user?.name || data.data?.fullName || data.data?.name) || '',
@@ -115,19 +113,17 @@ const Checkout = () => {
     setError('');
 
     try {
-      // Convert cart items to the format expected by checkout session
       const items = cart.items.map(item => ({
         id: item.productId._id || item.productId,
         name: item.productId.name || 'Product',
         unitPrice: item.price,
         unit: item.productId.type || 'unit',
         quantity: item.quantity,
-        currency: 'usd' // or 'inr' depending on your setup
+        currency: 'usd'
       }));
 
       const response = await createCheckoutSession(items);
       if (response.success) {
-        // Redirect to Stripe Checkout
         window.location.href = response.data.url;
       } else {
         setError(response.message || 'Failed to create checkout session');
@@ -223,11 +219,14 @@ const Checkout = () => {
 
   if (!cart || cart.items.length === 0) {
     return (
-      <div className="checkout-container">
-        <div className="empty-checkout">
-          <h2>Your cart is empty</h2>
-          <p>Add some products to get started!</p>
-          <button onClick={() => navigate('/products')}>
+      <div className="max-w-7xl mx-auto p-5 font-sans">
+        <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200">
+          <h2 className="text-2xl font-semibold text-gray-700 mb-4">Your cart is empty</h2>
+          <p className="text-gray-500 mb-6">Add some products to get started!</p>
+          <button 
+            onClick={() => navigate('/products')}
+            className="bg-gradient-to-r from-purple-500 to-purple-700 text-white px-6 py-3 rounded-lg font-medium hover:transform hover:-translate-y-0.5 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/40"
+          >
             Continue Shopping
           </button>
         </div>
@@ -236,93 +235,105 @@ const Checkout = () => {
   }
 
   return (
-    <div className="checkout-container">
-      <h1>Checkout</h1>
+    <div className="max-w-7xl mx-auto p-5 font-sans">
+      <h1 className="text-center text-gray-800 mb-8 text-4xl font-semibold">Checkout</h1>
       
       {error && (
-        <div className="error-message">
+        <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded-lg mb-5 flex justify-between items-center">
           {error}
-          <button onClick={() => setError('')} className="close-error">×</button>
+          <button onClick={() => setError('')} className="text-xl cursor-pointer text-red-800 bg-transparent border-none p-0 w-5 h-5 flex items-center justify-center">×</button>
         </div>
       )}
       
-      <div className="checkout-content">
-        <div className="order-summary">
-          <h3>Order Summary</h3>
-          <div className="summary-items">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-8">
+        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm h-fit">
+          <h3 className="text-gray-800 mb-5 text-xl font-semibold">Order Summary</h3>
+          <div className="mb-5">
             {cart.items.map((item, index) => (
-              <div key={index} className="summary-item">
-                <div className="item-info">
-                  <span className="item-name">{item.productId?.name || 'Product'}</span>
-                  <span className="item-quantity">Qty: {item.quantity}</span>
+              <div key={index} className="flex justify-between items-center py-3 border-b border-gray-100">
+                <div className="flex-1">
+                  <span className="block font-medium text-gray-800 mb-1">{item.productId?.name || 'Product'}</span>
+                  <span className="text-sm text-gray-500">Qty: {item.quantity}</span>
                 </div>
-                <span className="item-price">₹{(item.price * item.quantity).toLocaleString()}</span>
+                <span className="font-semibold text-gray-800">₹{(item.price * item.quantity).toLocaleString()}</span>
               </div>
             ))}
           </div>
-          <div className="summary-total">
-            <span>Total Amount:</span>
-            <span className="total-amount">₹{cart.totalAmount.toLocaleString()}</span>
+          <div className="flex justify-between items-center py-4 border-t-2 border-gray-200 border-b border-gray-200 mb-3">
+            <span className="font-semibold text-gray-800">Total Amount:</span>
+            <span className="text-xl font-bold text-blue-600">₹{cart.totalAmount.toLocaleString()}</span>
           </div>
-          <div className="summary-delivery">
+          <div className="flex justify-between items-center text-green-600 font-medium">
             <span>Delivery:</span>
             <span>Free (3-5 days)</span>
           </div>
         </div>
 
-        <div className="payment-section">
-          <h3>Payment Method</h3>
-          <div className="payment-options">
+        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
+          <h3 className="text-gray-800 mb-5 text-xl font-semibold">Payment Method</h3>
+          <div className="flex flex-col gap-3">
             <div 
-              className={`payment-option ${paymentMethod === 'cod' ? 'selected' : ''}`}
+              className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${
+                paymentMethod === 'cod' 
+                  ? 'border-blue-500 bg-blue-50' 
+                  : 'border-gray-200 hover:border-blue-500 hover:bg-gray-50'
+              }`}
               onClick={() => handlePaymentMethodChange('cod')}
             >
-              <span className="payment-label">
-                <span className="payment-icon">💵</span>
+              <span className="flex items-center font-medium text-gray-800 mb-2 transition-colors duration-300">
+                <span className="mr-2 text-xl">💵</span>
                 Cash on Delivery
               </span>
-              <span className="payment-description">
+              <span className="text-sm text-gray-500 leading-relaxed">
                 Pay when you receive your order. Delivery typically takes 3-5 days.
               </span>
             </div>
             
             <div
-              className={`payment-option ${paymentMethod === 'stripe' ? 'selected' : ''}`}
+              className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${
+                paymentMethod === 'stripe' 
+                  ? 'border-blue-500 bg-blue-50' 
+                  : 'border-gray-200 hover:border-blue-500 hover:bg-gray-50'
+              }`}
               onClick={() => handlePaymentMethodChange('stripe')}
             >
-              <span className="payment-label">
-                <span className="payment-icon">💳</span>
+              <span className="flex items-center font-medium text-gray-800 mb-2 transition-colors duration-300">
+                <span className="mr-2 text-xl">💳</span>
                 Credit/Debit Card (Elements)
               </span>
-              <span className="payment-description">
+              <span className="text-sm text-gray-500 leading-relaxed">
                 Pay instantly with your card. Secure payment powered by Stripe Elements.
               </span>
             </div>
 
             <div
-              className={`payment-option ${paymentMethod === 'checkout' ? 'selected' : ''}`}
+              className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${
+                paymentMethod === 'checkout' 
+                  ? 'border-blue-500 bg-blue-50' 
+                  : 'border-gray-200 hover:border-blue-500 hover:bg-gray-50'
+              }`}
               onClick={() => handlePaymentMethodChange('checkout')}
             >
-              <span className="payment-label">
-                <span className="payment-icon">🛒</span>
+              <span className="flex items-center font-medium text-gray-800 mb-2 transition-colors duration-300">
+                <span className="mr-2 text-xl">🛒</span>
                 Stripe Checkout
               </span>
-              <span className="payment-description">
+              <span className="text-sm text-gray-500 leading-relaxed">
                 Redirect to Stripe's secure checkout page. Fast and secure payment processing.
               </span>
             </div>
           </div>
 
           {paymentMethod === 'stripe' && !clientSecret && (
-            <div className="stripe-init-section">
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
               <button 
                 onClick={initializeStripePayment}
                 disabled={paymentLoading || !validateForm()}
-                className="init-payment-btn"
+                className="w-full p-3.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-lg font-semibold cursor-pointer transition-all duration-300 flex items-center justify-center gap-2 hover:from-blue-700 hover:to-blue-900 hover:transform hover:-translate-y-0.5 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {paymentLoading ? (
                   <>
-                    <span className="spinner"></span>
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                     Initializing Payment...
                   </>
                 ) : (
@@ -333,7 +344,7 @@ const Checkout = () => {
           )}
 
           {paymentMethod === 'stripe' && clientSecret && (
-            <div className="stripe-payment-section">
+            <div className="mt-5 pt-5 border-t border-gray-200">
               <PaymentSystem
                 clientSecret={clientSecret}
                 onPaymentSuccess={handlePaymentSuccess}
@@ -345,34 +356,34 @@ const Checkout = () => {
           )}
 
           {paymentMethod === 'checkout' && (
-            <div className="checkout-session-section">
+            <div className="mt-4">
               <button
                 onClick={handleCheckoutSession}
                 disabled={loading}
-                className="checkout-session-btn"
+                className="w-full p-3.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-lg font-semibold cursor-pointer transition-all duration-300 flex items-center justify-center gap-2 hover:from-blue-700 hover:to-blue-900 hover:transform hover:-translate-y-0.5 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none mb-3"
               >
                 {loading ? (
                   <>
-                    <span className="spinner"></span>
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                     Creating Checkout Session...
                   </>
                 ) : (
                   `Proceed to Stripe Checkout • $${cart.totalAmount.toLocaleString()}`
                 )}
               </button>
-              <p className="checkout-info">
+              <p className="text-sm text-gray-500 text-center">
                 You will be redirected to Stripe's secure checkout page to complete your payment.
               </p>
             </div>
           )}
         </div>
 
-        <div className="shipping-section">
-          <h3>Shipping Address</h3>
+        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm lg:col-span-2">
+          <h3 className="text-gray-800 mb-5 text-xl font-semibold">Shipping Address</h3>
           <form onSubmit={handleSubmit}>
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="fullName">Full Name *</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="flex flex-col">
+                <label htmlFor="fullName" className="font-medium text-gray-800 mb-2 text-sm">Full Name *</label>
                 <input
                   id="fullName"
                   type="text"
@@ -381,13 +392,12 @@ const Checkout = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="Enter your full name"
+                  className="p-3 border-2 border-gray-200 rounded-lg text-base transition-colors duration-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
                 />
               </div>
-            </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="phone">Phone Number *</label>
+              <div className="flex flex-col">
+                <label htmlFor="phone" className="font-medium text-gray-800 mb-2 text-sm">Phone Number *</label>
                 <input
                   id="phone"
                   type="tel"
@@ -397,13 +407,12 @@ const Checkout = () => {
                   required
                   placeholder="10-digit phone number"
                   pattern="[0-9]{10}"
+                  className="p-3 border-2 border-gray-200 rounded-lg text-base transition-colors duration-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
                 />
               </div>
-            </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="addressLine1">Address Line 1 *</label>
+              <div className="flex flex-col md:col-span-2">
+                <label htmlFor="addressLine1" className="font-medium text-gray-800 mb-2 text-sm">Address Line 1 *</label>
                 <input
                   id="addressLine1"
                   type="text"
@@ -412,13 +421,12 @@ const Checkout = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="Street address, apartment, suite, etc."
+                  className="p-3 border-2 border-gray-200 rounded-lg text-base transition-colors duration-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
                 />
               </div>
-            </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="city">City *</label>
+              <div className="flex flex-col">
+                <label htmlFor="city" className="font-medium text-gray-800 mb-2 text-sm">City *</label>
                 <input
                   id="city"
                   type="text"
@@ -427,13 +435,12 @@ const Checkout = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="City name"
+                  className="p-3 border-2 border-gray-200 rounded-lg text-base transition-colors duration-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
                 />
               </div>
-            </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="postalCode">Postal Code *</label>
+              <div className="flex flex-col">
+                <label htmlFor="postalCode" className="font-medium text-gray-800 mb-2 text-sm">Postal Code *</label>
                 <input
                   id="postalCode"
                   type="text"
@@ -442,13 +449,12 @@ const Checkout = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="PIN code"
+                  className="p-3 border-2 border-gray-200 rounded-lg text-base transition-colors duration-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
                 />
               </div>
-            </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="country">Country *</label>
+              <div className="flex flex-col">
+                <label htmlFor="country" className="font-medium text-gray-800 mb-2 text-sm">Country *</label>
                 <input
                   id="country"
                   type="text"
@@ -456,26 +462,27 @@ const Checkout = () => {
                   value={shippingAddress.country}
                   onChange={handleInputChange}
                   required
+                  className="p-3 border-2 border-gray-200 rounded-lg text-base transition-colors duration-300 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
                 />
               </div>
             </div>
 
-            <div className="order-actions">
+            <div className="flex gap-4 mt-8 pt-6 border-t border-gray-200">
               <button 
                 type="button" 
-                className="back-btn"
                 onClick={() => navigate('/cart')}
+                className="flex-1 p-3.5 bg-gray-600 text-white rounded-lg font-medium cursor-pointer transition-all duration-300 hover:bg-gray-700 hover:transform hover:-translate-y-0.5"
               >
                 Back to Cart
               </button>
               <button 
                 type="submit" 
                 disabled={loading}
-                className="place-order-btn"
+                className="flex-2 p-3.5 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg font-semibold cursor-pointer transition-all duration-300 hover:from-green-700 hover:to-teal-700 hover:transform hover:-translate-y-0.5 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
-                    <span className="spinner"></span>
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                     Processing...
                   </>
                 ) : (
