@@ -48,23 +48,45 @@ const Checkout = () => {
         }
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type');
+      let data;
+
+      if (!response.ok) {
+        // If response not ok, try to get text for debug, then throw error
+        const errorText = await response.text();
+        console.error(`Error response from server: ${response.status} - ${errorText}`);
+        setError('Failed to fetch user data. Please login again.');
+        return;
+      }
+
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        console.error('Expected JSON but received:', text);
+        setError('Unexpected response from server while fetching user data.');
+        return;
+      }
 
       if (data.success) {
-        setUser(data.data);
+        setUser(data.user || data.data);
         // Pre-fill shipping address with user data
         setShippingAddress(prev => ({
           ...prev,
-          fullName: data.data.fullName || data.data.name || '',
-          phone: data.data.phone || '',
-          addressLine1: data.data.location || '',
-          city: data.data.city || '',
-          postalCode: data.data.postalCode || '',
-          country: data.data.country || 'India'
+          fullName: (data.user?.fullName || data.user?.name || data.data?.fullName || data.data?.name) || '',
+          phone: data.user?.phone || data.data?.phone || '',
+          addressLine1: data.user?.location || data.data?.location || '',
+          city: data.user?.city || data.data?.city || '',
+          postalCode: data.user?.postalCode || data.data?.postalCode || '',
+          country: data.user?.country || data.data?.country || 'India'
         }));
+      } else {
+        setError(data.message || 'Failed to fetch user data');
       }
+
     } catch (err) {
       console.error('Error fetching user data:', err);
+      setError('Error fetching user data');
     }
   };
 

@@ -1,3 +1,4 @@
+import logger from "../utils/logger.js";
 import Order from "../models/order.model.js";
 import Cart from "../models/cart.model.js";
 import Product from "../models/product.model.js";
@@ -10,10 +11,10 @@ export const createOrder = async (req, res) => {
   try {
     const { shippingAddress } = req.body;
 
-    console.log("🛒 Creating order for user:", req.user.id);
+    logger.info("🛒 Creating order for user:", req.user.id);
 
     const cart = await Cart.getOrCreateCart(req.user.id);
-    console.log("🛍️ Cart items:", cart.items.length, cart.items);
+    logger.info("🛍️ Cart items:", cart.items.length, cart.items);
     
     if (cart.items.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty" });
@@ -31,10 +32,10 @@ export const createOrder = async (req, res) => {
 
     // Check product availability and stock
     const productIds = cart.items.map(i => i.productId);
-    console.log("🔍 Product IDs to check:", productIds);
+    logger.info("🔍 Product IDs to check:", productIds);
     
     const products = await Product.find({ _id: { $in: productIds } });
-    console.log("📦 Found products:", products.length, products.map(p => ({ id: p._id, name: p.name, stock: p.stock })));
+    logger.info("📦 Found products:", products.length, products.map(p => ({ id: p._id, name: p.name, stock: p.stock })));
 
     if (products.length !== cart.items.length) {
       return res.status(400).json({ 
@@ -46,8 +47,8 @@ export const createOrder = async (req, res) => {
     // Check stock availability
     for (const cartItem of cart.items) {
       const product = products.find(p => p._id.toString() === cartItem.productId.toString());
-      console.log("🔍 Checking stock for cart item:", cartItem);
-      console.log("📦 Found product:", product ? { id: product._id, name: product.name, stock: product.stock } : 'NOT FOUND');
+      logger.info("🔍 Checking stock for cart item:", cartItem);
+      logger.info("📦 Found product:", product ? { id: product._id, name: product.name, stock: product.stock } : 'NOT FOUND');
       
       if (!product) {
         return res.status(400).json({ 
@@ -132,7 +133,7 @@ export const createOrder = async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ Error creating order:", err);
+    logger.error("❌ Error creating order:", err);
     res.status(500).json({ 
       success: false, 
       message: "Error creating order", 
@@ -178,7 +179,7 @@ export const getMyOrders = async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ Error fetching orders:", err);
+    logger.error("❌ Error fetching orders:", err);
     res.status(500).json({ 
       success: false, 
       message: "Error fetching orders", 
@@ -225,7 +226,7 @@ export const getOrderById = async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ Error getting order:", err);
+    logger.error("❌ Error getting order:", err);
     res.status(500).json({ 
       success: false, 
       message: "Error getting order", 
@@ -279,7 +280,7 @@ export const updateOrderStatus = async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ Error updating order status:", err);
+    logger.error("❌ Error updating order status:", err);
     res.status(500).json({
       success: false,
       message: 'Error updating order status',
@@ -344,7 +345,7 @@ export const cancelOrder = async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ Error cancelling order:", err);
+    logger.error("❌ Error cancelling order:", err);
     res.status(500).json({
       success: false,
       message: 'Error cancelling order',
@@ -399,7 +400,7 @@ export const getAllOrders = async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ Error fetching all orders:", err);
+    logger.error("❌ Error fetching all orders:", err);
     res.status(500).json({ 
       success: false, 
       message: "Error fetching orders", 

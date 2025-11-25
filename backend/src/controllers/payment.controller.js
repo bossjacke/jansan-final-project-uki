@@ -354,7 +354,45 @@ export const handleWebhook = async (req, res) => {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     console.log('✅ Payment successful for session:', session.id);
-    // TODO: mark order as paid in DB
+
+    try {
+      // Retrieve the order by metadata or session id (assumption: session id in metadata or external_reference)
+      // If you have saved order id or user info in metadata, use that to find order
+      // Here assuming you saved userId or orderId in session.metadata or session.client_reference_id
+
+      // Example: Assuming client_reference_id stores order id or user id
+      const stripeInstance = getStripeInstance();
+      
+      // We will try to get the order by userId from session metadata and update its payment status
+      const userId = session.client_reference_id || (session.metadata && session.metadata.userId);
+      if (!userId) {
+        console.warn('Webhook: No userId or client_reference_id found in session');
+        return res.status(400).json({ message: 'Missing user reference in session' });
+      }
+      
+      // Find unpaid order for this user with paymentMethod 'checkout' and paymentStatus 'pending'
+      const orderToUpdate = await Order.findOne({
+        userId,
+        paymentMethod: 'checkout',
+        paymentStatus: 'pending',
+      }).sort({ createdAt: -1 });
+
+      if (!orderToUpdate) {
+        console.warn('Webhook: No matching order found for user:', userId);
+      } else {
+        orderToUpdate.paymentStatus = 'paid';
+        orderToUpdate.orderStatus = 'Processing'; // or 'Paid', depending on your flow
+        orderToUpdate.paymentId = session.id;
+        // Set delivery date (3 days from now) or configurable
+        const deliveryDate = new Date();
+        deliveryDate.setDate(deliveryDate.getDate() + 3);
+        orderToUpdate.deliveryDate = deliveryDate;
+        await orderToUpdate.save();
+        console.log('✅ Order updated as paid for webhook:', orderToUpdate._id);
+      }
+    } catch (err) {
+      console.error('❌ Error handling checkout.session.completed webhook:', err);
+    }
   }
 
   res.sendStatus(200);
@@ -366,5 +404,7 @@ export default {
   getPaymentStatus,
   processRefund,
   createCheckoutSession,
+  handleWebhook,
+};
   handleWebhook,
 };
