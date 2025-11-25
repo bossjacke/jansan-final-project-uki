@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCart, createOrder, createPaymentIntent } from '../../api.js';
+import { getCart, createOrder, createPaymentIntent, createCheckoutSession } from '../../api.js';
 import PaymentSystem from '../payment/PaymentSystem.jsx';
 
 const Checkout = () => {
@@ -16,7 +16,7 @@ const Checkout = () => {
     country: 'India'
   });
   const [user, setUser] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('cod'); // 'cod' or 'stripe'
+  const [paymentMethod, setPaymentMethod] = useState('cod'); // 'cod', 'stripe', or 'checkout'
   const [clientSecret, setClientSecret] = useState('');
   const [paymentLoading, setPaymentLoading] = useState(false);
   const navigate = useNavigate();
@@ -81,6 +81,40 @@ const Checkout = () => {
     setError('');
     if (method === 'cod') {
       setClientSecret('');
+    }
+  };
+
+  const handleCheckoutSession = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      // Convert cart items to the format expected by checkout session
+      const items = cart.items.map(item => ({
+        id: item.productId._id || item.productId,
+        name: item.productId.name || 'Product',
+        unitPrice: item.price,
+        unit: item.productId.type || 'unit',
+        quantity: item.quantity,
+        currency: 'usd' // or 'inr' depending on your setup
+      }));
+
+      const response = await createCheckoutSession(items);
+      if (response.success) {
+        // Redirect to Stripe Checkout
+        window.location.href = response.data.url;
+      } else {
+        setError(response.message || 'Failed to create checkout session');
+      }
+    } catch (err) {
+      console.error('Error creating checkout session:', err);
+      setError('Failed to create checkout session. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -230,16 +264,29 @@ const Checkout = () => {
               </span>
             </div>
             
-            <div 
+            <div
               className={`payment-option ${paymentMethod === 'stripe' ? 'selected' : ''}`}
               onClick={() => handlePaymentMethodChange('stripe')}
             >
               <span className="payment-label">
                 <span className="payment-icon">💳</span>
-                Credit/Debit Card
+                Credit/Debit Card (Elements)
               </span>
               <span className="payment-description">
-                Pay instantly with your card. Secure payment powered by Stripe.
+                Pay instantly with your card. Secure payment powered by Stripe Elements.
+              </span>
+            </div>
+
+            <div
+              className={`payment-option ${paymentMethod === 'checkout' ? 'selected' : ''}`}
+              onClick={() => handlePaymentMethodChange('checkout')}
+            >
+              <span className="payment-label">
+                <span className="payment-icon">🛒</span>
+                Stripe Checkout
+              </span>
+              <span className="payment-description">
+                Redirect to Stripe's secure checkout page. Fast and secure payment processing.
               </span>
             </div>
           </div>
@@ -272,6 +319,28 @@ const Checkout = () => {
                 shippingAddress={shippingAddress}
                 amount={cart.totalAmount}
               />
+            </div>
+          )}
+
+          {paymentMethod === 'checkout' && (
+            <div className="checkout-session-section">
+              <button
+                onClick={handleCheckoutSession}
+                disabled={loading}
+                className="checkout-session-btn"
+              >
+                {loading ? (
+                  <>
+                    <span className="spinner"></span>
+                    Creating Checkout Session...
+                  </>
+                ) : (
+                  `Proceed to Stripe Checkout • $${cart.totalAmount.toLocaleString()}`
+                )}
+              </button>
+              <p className="checkout-info">
+                You will be redirected to Stripe's secure checkout page to complete your payment.
+              </p>
             </div>
           )}
         </div>

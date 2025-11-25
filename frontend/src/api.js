@@ -311,6 +311,20 @@ export const processRefund = async (orderId) => {
   }
 };
 
+export const createCheckoutSession = async (items) => {
+  try {
+    const res = await axios.post(`${API_URL}/payments/create-checkout-session`, {
+      items
+    }, {
+      headers: getAuthHeaders()
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Create checkout session error:', err.response?.data || err.message);
+    throw err;
+  }
+};
+
 // Admin API functions
 export const getAllUsers = async () => {
   try {

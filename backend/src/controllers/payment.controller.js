@@ -295,9 +295,76 @@ export const processRefund = async (req, res) => {
   }
 };
 
+// 🛒 Create Checkout Session
+export const createCheckoutSession = async (req, res) => {
+  try {
+    const { items } = req.body;
+
+    // Validate and compute line_items
+    const line_items = items.map(it => ({
+      price_data: {
+        currency: it.currency || 'usd',
+        product_data: { name: `${it.name} (${it.unit})` },
+        unit_amount: Math.round(it.unitPrice * 100) // convert to cents
+      },
+      quantity: it.quantity
+    }));
+
+    const stripeInstance = getStripeInstance();
+    const session = await stripeInstance.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items,
+      success_url: `${process.env.CLIENT_URL}/success`,
+      cancel_url: `${process.env.CLIENT_URL}/cancel`
+    });
+
+    console.log("✅ Checkout session created:", session.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Checkout session created successfully",
+      data: { url: session.url }
+    });
+
+  } catch (err) {
+    console.error("❌ Error creating checkout session:", err);
+    res.status(500).json({
+      success: false,
+      message: "Error creating checkout session",
+      error: err.message
+    });
+  }
+};
+
+// 🔔 Handle Stripe Webhook
+export const handleWebhook = async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+
+  try {
+    const stripeInstance = getStripeInstance();
+    event = stripeInstance.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err.message);
+    return res.sendStatus(400);
+  }
+
+  // Handle event types
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    console.log('✅ Payment successful for session:', session.id);
+    // TODO: mark order as paid in DB
+  }
+
+  res.sendStatus(200);
+};
+
 export default {
   createPaymentIntent,
   confirmPayment,
   getPaymentStatus,
   processRefund,
+  createCheckoutSession,
+  handleWebhook,
 };
