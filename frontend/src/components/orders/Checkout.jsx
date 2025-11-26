@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCart, createOrder, createPaymentIntent, createCheckoutSession } from '../../api.js';
-import PaymentSystem from '../payment/PaymentSystem.jsx';
+import DualPaymentSystem from '../payment/DualPaymentSystem.jsx';
 
 const Checkout = () => {
   const [cart, setCart] = useState(null);
@@ -299,28 +299,16 @@ const Checkout = () => {
             >
               <span className="flex items-center font-medium text-gray-800 mb-2 transition-colors duration-300">
                 <span className="mr-2 text-xl">💳</span>
-                Credit/Debit Card (Elements)
+                Credit/Debit Card & Stripe Checkout
               </span>
               <span className="text-sm text-gray-500 leading-relaxed">
-                Pay instantly with your card. Secure payment powered by Stripe Elements.
+                Choose between direct card payment or Stripe Checkout. Both methods are secure and instant.
               </span>
-            </div>
-
-            <div
-              className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${
-                paymentMethod === 'checkout' 
-                  ? 'border-blue-500 bg-blue-50' 
-                  : 'border-gray-200 hover:border-blue-500 hover:bg-gray-50'
-              }`}
-              onClick={() => handlePaymentMethodChange('checkout')}
-            >
-              <span className="flex items-center font-medium text-gray-800 mb-2 transition-colors duration-300">
-                <span className="mr-2 text-xl">🛒</span>
-                Stripe Checkout
-              </span>
-              <span className="text-sm text-gray-500 leading-relaxed">
-                Redirect to Stripe's secure checkout page. Fast and secure payment processing.
-              </span>
+              <div className="mt-2 flex gap-2">
+                <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded">Credit/Debit Cards</span>
+                <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">UPI</span>
+                <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded">NetBanking</span>
+              </div>
             </div>
           </div>
 
@@ -345,35 +333,14 @@ const Checkout = () => {
 
           {paymentMethod === 'stripe' && clientSecret && (
             <div className="mt-5 pt-5 border-t border-gray-200">
-              <PaymentSystem
+              <DualPaymentSystem
                 clientSecret={clientSecret}
                 onPaymentSuccess={handlePaymentSuccess}
                 onPaymentError={handlePaymentError}
                 shippingAddress={shippingAddress}
                 amount={cart.totalAmount}
+                cartItems={cart.items}
               />
-            </div>
-          )}
-
-          {paymentMethod === 'checkout' && (
-            <div className="mt-4">
-              <button
-                onClick={handleCheckoutSession}
-                disabled={loading}
-                className="w-full p-3.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-lg font-semibold cursor-pointer transition-all duration-300 flex items-center justify-center gap-2 hover:from-blue-700 hover:to-blue-900 hover:transform hover:-translate-y-0.5 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none mb-3"
-              >
-                {loading ? (
-                  <>
-                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    Creating Checkout Session...
-                  </>
-                ) : (
-                  `Proceed to Stripe Checkout • $${cart.totalAmount.toLocaleString()}`
-                )}
-              </button>
-              <p className="text-sm text-gray-500 text-center">
-                You will be redirected to Stripe's secure checkout page to complete your payment.
-              </p>
             </div>
           )}
         </div>

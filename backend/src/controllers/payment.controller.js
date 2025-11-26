@@ -63,6 +63,12 @@ export const createPaymentIntent = async (req, res) => {
 
     // Create a PaymentIntent with the order amount and currency
     const stripeInstance = getStripeInstance();
+    
+    // Handle HTTP/HTTPS for return URLs
+    const baseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    const successUrl = `${baseUrl}/payment-success`;
+    const cancelUrl = `${baseUrl}/payment-cancel`;
+    
     const paymentIntent = await stripeInstance.paymentIntents.create({
       amount: amountInCents,
       currency: 'inr', // Indian Rupees
@@ -72,9 +78,9 @@ export const createPaymentIntent = async (req, res) => {
         cartTotal: cart.totalAmount.toString(),
         shippingAddress: JSON.stringify(shippingAddress || {})
       },
-      automatic_payment_methods: {
-        enabled: true,
-      },
+      // Configure URLs for HTTP testing
+      confirmation_method: 'manual',
+      receipt_email: req.user?.email || null,
     });
 
     console.log("✅ Payment intent created:", paymentIntent.id);
@@ -311,12 +317,22 @@ export const createCheckoutSession = async (req, res) => {
     }));
 
     const stripeInstance = getStripeInstance();
+    
+    // Handle HTTP/HTTPS for URLs
+    const baseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    const successUrl = `${baseUrl}/success`;
+    const cancelUrl = `${baseUrl}/cancel`;
+    
     const session = await stripeInstance.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
       line_items,
-      success_url: `${process.env.CLIENT_URL}/success`,
-      cancel_url: `${process.env.CLIENT_URL}/cancel`
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      // Configure for HTTP testing
+      allow_promotion_codes: true,
+      billing_address_collection: 'required',
+      customer_email: req.user?.email || null,
     });
 
     console.log("✅ Checkout session created:", session.id);
