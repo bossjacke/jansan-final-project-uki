@@ -42,7 +42,7 @@ const Checkout = () => {
   const fetchUserData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3003/api/user/profile', {
+        const response = await fetch('http://localhost:3003/api/users/profile', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

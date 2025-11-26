@@ -22,13 +22,21 @@ function ProductsPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
+      console.log('🛍️ ProductsPage: Starting to fetch products...');
       const response = await getAllProducts();
-      console.log('Products API response:', response);
+      console.log('🛍️ ProductsPage: API response:', response);
+      console.log('🛍️ ProductsPage: Response data:', response.data);
+      
       // Backend returns { success: true, data: products }
-      setProducts(response.data || []);
+      const products = response.data || [];
+      console.log('🛍️ ProductsPage: Products to display:', products);
+      console.log('🛍️ ProductsPage: Number of products:', products.length);
+      
+      setProducts(products);
       setError(null);
     } catch (err) {
-      console.error('Error fetching products:', err);
+      console.error('🛍️ ProductsPage: Error fetching products:', err);
+      console.error('🛍️ ProductsPage: Error details:', err.response?.data || err.message);
       setError('Failed to load products from backend. Please make sure the backend server is running.');
     } finally {
       setLoading(false);

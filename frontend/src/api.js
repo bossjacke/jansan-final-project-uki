@@ -368,7 +368,7 @@ export const deleteUser = async (userId) => {
 export const getAdminOrders = async (params = {}) => {
   try {
     const queryString = new URLSearchParams(params).toString();
-    const url = queryString ? `${API_URL}/order/admin/orders?${queryString}` : `${API_URL}/order/admin/orders`;
+    const url = queryString ? `${API_URL}/orders/admin/orders?${queryString}` : `${API_URL}/orders/admin/orders`;
     const res = await axios.get(url, {
       headers: getAuthHeaders()
     });
@@ -381,7 +381,7 @@ export const getAdminOrders = async (params = {}) => {
 
 export const getOrderDetails = async (orderId) => {
   try {
-    const res = await axios.get(`${API_URL}/order/${orderId}`, {
+    const res = await axios.get(`${API_URL}/orders/${orderId}`, {
       headers: getAuthHeaders()
     });
     return res.data;
@@ -393,7 +393,7 @@ export const getOrderDetails = async (orderId) => {
 
 export const updateOrderStatus = async (orderId, statusData) => {
   try {
-    const res = await axios.put(`${API_URL}/order/${orderId}/status`, statusData, {
+    const res = await axios.put(`${API_URL}/orders/${orderId}/status`, statusData, {
       headers: getAuthHeaders()
     });
     return res.data;
