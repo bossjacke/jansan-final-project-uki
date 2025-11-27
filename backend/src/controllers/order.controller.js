@@ -33,11 +33,13 @@ export const createOrder = async (req, res) => {
     // Check product availability and stock
     const productIds = cart.items.map(i => i.productId);
     logger.info("🔍 Product IDs to check:", productIds);
+    logger.info("🛒 Cart items structure:", JSON.stringify(cart.items, null, 2));
     
     const products = await Product.find({ _id: { $in: productIds } });
     logger.info("📦 Found products:", products.length, products.map(p => ({ id: p._id, name: p.name, stock: p.stock })));
 
     if (products.length !== cart.items.length) {
+      logger.error("❌ Product count mismatch:", { cartItems: cart.items.length, foundProducts: products.length });
       return res.status(400).json({ 
         success: false, 
         message: "Some products are unavailable or have been removed" 
@@ -49,11 +51,13 @@ export const createOrder = async (req, res) => {
       const product = products.find(p => p._id.toString() === cartItem.productId.toString());
       logger.info("🔍 Checking stock for cart item:", cartItem);
       logger.info("📦 Found product:", product ? { id: product._id, name: product.name, stock: product.stock } : 'NOT FOUND');
+      logger.info("🔍 Comparing:", { cartProductId: cartItem.productId.toString(), productIds: productIds.map(id => id.toString()) });
       
       if (!product) {
+        logger.error("❌ Product not found for ID:", cartItem.productId);
         return res.status(400).json({ 
           success: false, 
-          message: `Product not found` 
+          message: `Product not found: ${cartItem.productId}` 
         });
       }
 

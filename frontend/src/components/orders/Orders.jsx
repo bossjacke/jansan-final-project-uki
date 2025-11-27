@@ -17,6 +17,7 @@ function Orders() {
     street: '', city: '', state: '', postalCode: '', country: 'sri lanka'
   });
   const [orderProcessing, setOrderProcessing] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     if (location.state?.fromCart && user) {
@@ -25,6 +26,15 @@ function Orders() {
       fetchOrders();
     }
   }, [user, location.state]);
+
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage('');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
 
   const fetchCartAndShowCheckout = async () => {
     try {
@@ -80,7 +90,7 @@ function Orders() {
       const data = await createOrder({ shippingAddress });
       const order = data.data.order;
 
-      alert('Order placed successfully! Cash on delivery selected.');
+      setSuccessMessage('Order placed successfully! Cash on delivery selected.');
       setShowCheckout(false);
       setCart(null);
       fetchOrders();
@@ -229,6 +239,12 @@ function Orders() {
   return (
     <div className="min-h-[calc(100vh-64px)] p-8 bg-gradient-to-br from-indigo-500 to-purple-600">
       <div className="max-w-4xl mx-auto bg-white rounded-2xl p-8 shadow-lg shadow-gray-900/5">
+        {successMessage && (
+          <div className="bg-green-50 border border-green-200 text-green-800 p-3 rounded-lg mb-5 flex justify-between items-center">
+            {successMessage}
+            <button onClick={() => setSuccessMessage('')} className="text-xl cursor-pointer text-green-800 bg-transparent border-none p-0 w-5 h-5 flex items-center justify-center">×</button>
+          </div>
+        )}
         {showCheckout && cart ? <CheckoutForm /> : (
           <div>
             <div className="flex justify-between items-center mb-8">

@@ -16,8 +16,6 @@ import Admin from './components/admin/Admin.jsx';
 import Orders from './components/orders/Orders.jsx';
 import OrderDetail from './components/orders/OrderDetail.jsx';
 import Checkout from './components/orders/Checkout.jsx';
-import PaymentSuccess from './components/payment/PaymentSuccess.jsx';
-import PaymentCancel from './components/payment/PaymentCancel.jsx';
 import Contact from './components/Contact/Contact.jsx';
 import ChatButton from './components/chat/ChatButton.jsx';
 
@@ -41,8 +39,6 @@ function App() {
               <Route path="/orders" element={<Orders />} />
               <Route path="/order/:orderId" element={<OrderDetail />} />
               <Route path="/checkout" element={<Checkout />} />
-              <Route path="/success" element={<PaymentSuccess />} />
-              <Route path="/cancel" element={<PaymentCancel />} />
               <Route path="/contact" element={<Contact />} />
             </Routes>
              {/* Chat Button - Global Component */}

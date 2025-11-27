@@ -11,7 +11,6 @@ import orderRoutes from "./routes/order.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
-import paymentController from "./controllers/payment.controller.js";
 
 dotenv.config();
 const app = express();
@@ -28,15 +27,6 @@ app.use(
 // Middleware
 app.use(express.json());
 
-// Stripe webhook needs the raw body, so define raw body middleware before the webhook route, and json for others
-import bodyParser from "body-parser";
-app.use(
-  "/api/payments/webhook",
-  bodyParser.raw({ type: "application/json" })
-);
-
-// Webhook route
-app.post("/api/payments/webhook", paymentController.handleWebhook);
 
 // Routes
 app.use("/api/auth", authRoutes);

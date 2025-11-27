@@ -257,73 +257,8 @@ export const cancelOrder = async (orderId) => {
   }
 };
 
-// Payment API functions
-export const createPaymentIntent = async (shippingAddress) => {
-  try {
-    const res = await axios.post(`${API_URL}/payments/create-payment-intent`, {
-      shippingAddress
-    }, {
-      headers: getAuthHeaders()
-    });
-    return res.data;
-  } catch (err) {
-    console.error('Create payment intent error:', err.response?.data || err.message);
-    throw err;
-  }
-};
-
-export const confirmPayment = async (paymentIntentId, shippingAddress) => {
-  try {
-    const res = await axios.post(`${API_URL}/payments/confirm-payment`, {
-      paymentIntentId,
-      shippingAddress
-    }, {
-      headers: getAuthHeaders()
-    });
-    return res.data;
-  } catch (err) {
-    console.error('Confirm payment error:', err.response?.data || err.message);
-    throw err;
-  }
-};
-
-export const getPaymentStatus = async (paymentIntentId) => {
-  try {
-    const res = await axios.get(`${API_URL}/payments/status/${paymentIntentId}`, {
-      headers: getAuthHeaders()
-    });
-    return res.data;
-  } catch (err) {
-    console.error('Get payment status error:', err.response?.data || err.message);
-    throw err;
-  }
-};
-
-export const processRefund = async (orderId) => {
-  try {
-    const res = await axios.post(`${API_URL}/payments/refund/${orderId}`, {}, {
-      headers: getAuthHeaders()
-    });
-    return res.data;
-  } catch (err) {
-    console.error('Process refund error:', err.response?.data || err.message);
-    throw err;
-  }
-};
-
-export const createCheckoutSession = async (items) => {
-  try {
-    const res = await axios.post(`${API_URL}/payments/create-checkout-session`, {
-      items
-    }, {
-      headers: getAuthHeaders()
-    });
-    return res.data;
-  } catch (err) {
-    console.error('Create checkout session error:', err.response?.data || err.message);
-    throw err;
-  }
-};
+// Payment functions removed - only Cash on Delivery is supported
+// All payment processing is handled through the order creation endpoint
 
 // Admin API functions
 export const getAllUsers = async () => {

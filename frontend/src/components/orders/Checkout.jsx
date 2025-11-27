@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCart, createOrder, createPaymentIntent, createCheckoutSession } from '../../api.js';
-import DualPaymentSystem from '../payment/DualPaymentSystem.jsx';
+import { getCart, createOrder } from '../../api.js';
 
 const Checkout = () => {
+  const navigate = useNavigate();
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -16,15 +16,21 @@ const Checkout = () => {
     country: 'India'
   });
   const [user, setUser] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('cod');
-  const [clientSecret, setClientSecret] = useState('');
-  const [paymentLoading, setPaymentLoading] = useState(false);
-  const navigate = useNavigate();
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     fetchCart();
     fetchUserData();
   }, []);
+
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        navigate('/orders');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage, navigate]);
 
   const fetchCart = async () => {
     try {
@@ -96,78 +102,6 @@ const Checkout = () => {
     });
   };
 
-  const handlePaymentMethodChange = (method) => {
-    setPaymentMethod(method);
-    setError('');
-    if (method === 'cod') {
-      setClientSecret('');
-    }
-  };
-
-  const handleCheckoutSession = async () => {
-    if (!validateForm()) {
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
-    try {
-      const items = cart.items.map(item => ({
-        id: item.productId._id || item.productId,
-        name: item.productId.name || 'Product',
-        unitPrice: item.price,
-        unit: item.productId.type || 'unit',
-        quantity: item.quantity,
-        currency: 'usd'
-      }));
-
-      const response = await createCheckoutSession(items);
-      if (response.success) {
-        window.location.href = response.data.url;
-      } else {
-        setError(response.message || 'Failed to create checkout session');
-      }
-    } catch (err) {
-      console.error('Error creating checkout session:', err);
-      setError('Failed to create checkout session. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const initializeStripePayment = async () => {
-    if (!validateForm()) {
-      return;
-    }
-
-    setPaymentLoading(true);
-    setError('');
-
-    try {
-      const response = await createPaymentIntent(shippingAddress);
-      if (response.success) {
-        setClientSecret(response.data.clientSecret);
-      } else {
-        setError(response.message || 'Failed to initialize payment');
-      }
-    } catch (err) {
-      console.error('Error initializing payment:', err);
-      setError('Failed to initialize payment. Please try again.');
-    } finally {
-      setPaymentLoading(false);
-    }
-  };
-
-  const handlePaymentSuccess = (order) => {
-    alert('Payment successful! Order placed successfully.');
-    navigate('/orders');
-  };
-
-  const handlePaymentError = (error) => {
-    console.error('Payment error:', error);
-    setError('Payment failed. Please try again.');
-  };
 
   const validateForm = () => {
     const required = ['fullName', 'phone', 'addressLine1', 'city', 'postalCode'];
@@ -188,11 +122,16 @@ const Checkout = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('🛒 Submitting order form...');
     
     if (!validateForm()) {
+      console.log('❌ Form validation failed');
       return;
     }
 
+    console.log('📋 Form data:', shippingAddress);
+    console.log('🛒 Cart data:', cart);
+    
     setLoading(true);
     setError('');
 
@@ -201,16 +140,19 @@ const Checkout = () => {
         shippingAddress
       };
 
+      console.log('📤 Sending order data:', orderData);
       const data = await createOrder(orderData);
+      console.log('📥 Order response:', data);
 
       if (data.success) {
         alert('Order placed successfully! Cash on delivery selected.');
         navigate('/orders');
       } else {
+        console.error('❌ Order creation failed:', data);
         setError(data.message || 'Failed to place order');
       }
     } catch (err) {
-      console.error('Error creating order:', err);
+      console.error('❌ Error creating order:', err);
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
@@ -244,6 +186,13 @@ const Checkout = () => {
           <button onClick={() => setError('')} className="text-xl cursor-pointer text-red-800 bg-transparent border-none p-0 w-5 h-5 flex items-center justify-center">×</button>
         </div>
       )}
+
+      {successMessage && (
+        <div className="bg-green-50 border border-green-200 text-green-800 p-3 rounded-lg mb-5 flex justify-between items-center">
+          {successMessage}
+          <button onClick={() => setSuccessMessage('')} className="text-xl cursor-pointer text-green-800 bg-transparent border-none p-0 w-5 h-5 flex items-center justify-center">×</button>
+        </div>
+      )}
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mt-8">
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm h-fit">
@@ -271,78 +220,15 @@ const Checkout = () => {
 
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
           <h3 className="text-gray-800 mb-5 text-xl font-semibold">Payment Method</h3>
-          <div className="flex flex-col gap-3">
-            <div 
-              className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${
-                paymentMethod === 'cod' 
-                  ? 'border-blue-500 bg-blue-50' 
-                  : 'border-gray-200 hover:border-blue-500 hover:bg-gray-50'
-              }`}
-              onClick={() => handlePaymentMethodChange('cod')}
-            >
-              <span className="flex items-center font-medium text-gray-800 mb-2 transition-colors duration-300">
-                <span className="mr-2 text-xl">💵</span>
-                Cash on Delivery
-              </span>
-              <span className="text-sm text-gray-500 leading-relaxed">
-                Pay when you receive your order. Delivery typically takes 3-5 days.
-              </span>
-            </div>
-            
-            <div
-              className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${
-                paymentMethod === 'stripe' 
-                  ? 'border-blue-500 bg-blue-50' 
-                  : 'border-gray-200 hover:border-blue-500 hover:bg-gray-50'
-              }`}
-              onClick={() => handlePaymentMethodChange('stripe')}
-            >
-              <span className="flex items-center font-medium text-gray-800 mb-2 transition-colors duration-300">
-                <span className="mr-2 text-xl">💳</span>
-                Credit/Debit Card & Stripe Checkout
-              </span>
-              <span className="text-sm text-gray-500 leading-relaxed">
-                Choose between direct card payment or Stripe Checkout. Both methods are secure and instant.
-              </span>
-              <div className="mt-2 flex gap-2">
-                <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded">Credit/Debit Cards</span>
-                <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">UPI</span>
-                <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded">NetBanking</span>
-              </div>
-            </div>
+          <div className="p-4 border-2 border-blue-500 bg-blue-50 rounded-lg">
+            <span className="flex items-center font-medium text-gray-800 mb-2">
+              <span className="mr-2 text-xl">💵</span>
+              Cash on Delivery
+            </span>
+            <span className="text-sm text-gray-500 leading-relaxed">
+              Pay when you receive your order. Delivery typically takes 3-5 days.
+            </span>
           </div>
-
-          {paymentMethod === 'stripe' && !clientSecret && (
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
-              <button 
-                onClick={initializeStripePayment}
-                disabled={paymentLoading || !validateForm()}
-                className="w-full p-3.5 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-lg font-semibold cursor-pointer transition-all duration-300 flex items-center justify-center gap-2 hover:from-blue-700 hover:to-blue-900 hover:transform hover:-translate-y-0.5 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                {paymentLoading ? (
-                  <>
-                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    Initializing Payment...
-                  </>
-                ) : (
-                  'Continue to Payment'
-                )}
-              </button>
-            </div>
-          )}
-
-          {paymentMethod === 'stripe' && clientSecret && (
-            <div className="mt-5 pt-5 border-t border-gray-200">
-              <DualPaymentSystem
-                clientSecret={clientSecret}
-                onPaymentSuccess={handlePaymentSuccess}
-                onPaymentError={handlePaymentError}
-                shippingAddress={shippingAddress}
-                amount={cart.totalAmount}
-                cartItems={cart.items}
-              />
-            </div>
-          )}
         </div>
 
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm lg:col-span-2">
