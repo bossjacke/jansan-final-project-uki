@@ -34,6 +34,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import img from '../../assets/ChatGPT Image Nov 27, 2025, 02_10_31 PM.png';
 
 function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -75,19 +76,11 @@ function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo Section */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-indigo-600 text-white font-bold rounded-full flex items-center justify-center shadow-lg">
-              {initial ? (
-                <span style={{ fontSize: 16 }}>{initial}</span>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                  <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5z" fill="currentColor" />
-                  <path d="M4 20c0-4 4-6 8-6s8 2 8 6v1H4v-1z" fill="currentColor" />
-                </svg>
-              )}
-            </div>
             <Link to="/" className="flex items-center">
-              <span className="text-2xl font-bold bg-gradient-to-r from-white to-white bg-clip-text text-transparent">Jansan</span>
-              <span className="text-sm bg-slate-900 text-white p-6 rounded-lg ml-2">Eco Solutions</span>
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-indigo-600 text-white font-bold rounded-full flex items-center justify-center shadow-lg">
+             <img src={img} alt="" />
+            </div>
+              <span className="text-sm bg-slate-900 text-white p-6 rounded-lg ml-2">Adams Fire</span>
             </Link>
           </div>
 

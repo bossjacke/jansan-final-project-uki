@@ -47,7 +47,7 @@ function Home() {
 						<div className="relative px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
 							<div className="max-w-7xl mx-auto text-center">
 								<h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 animate-fade-in-up">
-									Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-400">Jansan</span> Eco Solutions
+									Welcome to Adams Fire Eco Solutions
 								</h1>
 								<p className="text-xl lg:text-2xl text-blue-100 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in-up animation-delay-200">
 									Your trusted partner for sustainable biogas systems and premium organic fertilizers
