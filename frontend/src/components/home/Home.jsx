@@ -85,9 +85,9 @@ function Home() {
 						<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 							<div className="text-center mb-16">
 								<h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-									Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Jansan</span>?
+									Why Choose Adams Fire ?
 								</h2>
-								<p className="text-xl text-gray-600 max-w-2xl mx-auto">Discover what makes us the preferred choice for sustainable solutions</p>
+								<p className="text-xl text-gray-600 max-w-2xl mx-auto">Discover what makes us the preferred choice for sustainable solutions <p className='text-green-600'><strong>Green path--global growth</strong></p> </p>
 							</div>
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
 								<div className="group relative bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 text-center transition-all duration-500 hover:shadow-2xl hover:shadow-green-500/20 hover:-translate-y-2 border border-green-100">
@@ -129,7 +129,7 @@ function Home() {
 						<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 							<div className="text-center mb-16">
 								<h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-									Featured <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Products</span>
+									Featured Products
 								</h2>
 								<p className="text-xl text-gray-600 max-w-2xl mx-auto">Check out our most popular biogas systems and premium fertilizers</p>
 							</div>
@@ -223,7 +223,7 @@ function Home() {
 							{featuredProducts.length > 0 && (
 								<div className="text-center mt-16">
 									<Link to="/products" className="group relative inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25 focus:outline-none focus:ring-4 focus:ring-blue-300">
-										<span className="flex items-center gap-3 text-lg">
+										<span className="flex items-center gap-3 text-lg text-gray-600">
 											View All Products
 											<svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -242,7 +242,7 @@ function Home() {
 						<div className="relative py-20 lg:py-24">
 							<div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
 								<h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
-									Ready to <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-400">Go Green</span>?
+									Ready to Go Green ?
 								</h2>
 								<p className="text-xl lg:text-2xl text-blue-100 mb-12 max-w-2xl mx-auto leading-relaxed">
 									Join thousands of satisfied customers who have switched to sustainable solutions

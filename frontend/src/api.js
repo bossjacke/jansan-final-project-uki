@@ -6,55 +6,103 @@ console.log("Using API URL:", API_URL);
 // Helper function to get auth headers
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
+  if (!token) {
+    console.warn('No auth token found in localStorage');
+  }
   return {
     'Authorization': `Bearer ${token}`,
     'Content-Type': 'application/json'
   };
 };
 
+// Helper function to handle API errors consistently
+const handleApiError = (error, operation) => {
+  console.error(`${operation} Error:`, error.response?.data || error.message);
+  
+  // Handle network errors
+  if (!error.response) {
+    throw new Error('Network error. Please check your connection and try again.');
+  }
+  
+  // Handle specific HTTP status codes
+  switch (error.response.status) {
+    case 401:
+      throw new Error('Unauthorized. Please login again.');
+    case 403:
+      throw new Error('Access denied. You do not have permission to perform this action.');
+    case 404:
+      throw new Error('Resource not found.');
+    case 422:
+      throw new Error(error.response.data?.message || 'Invalid data provided.');
+    case 500:
+      throw new Error('Server error. Please try again later.');
+    default:
+      throw new Error(error.response.data?.message || `An error occurred during ${operation}.`);
+  }
+};
+
+// Helper function to validate required parameters
+const validateRequired = (value, paramName) => {
+  if (value === undefined || value === null || value === '') {
+    throw new Error(`${paramName} is required`);
+  }
+};
+
 // User API functions
 export const RegisterUser = async (userData) => {
   try {
+    validateRequired(userData, 'User data');
+    validateRequired(userData.email, 'Email');
+    validateRequired(userData.password, 'Password');
+    
     const res = await axios.post(`${API_URL}/auth/register`, userData);
     return res.data;
   } catch (err) {
-    console.error("Register Error:", err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'User Registration');
   }
 };
 
 export const LoginUser = async (credentials) => {
   try {
+    validateRequired(credentials, 'Credentials');
+    validateRequired(credentials.email, 'Email');
+    validateRequired(credentials.password, 'Password');
+    
     const res = await axios.post(`${API_URL}/auth/login`, credentials);
     return res.data;
   } catch (err) {
-    console.error("Login Error:", err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'User Login');
   }
 };
 
 export const GoogleLogin = async (credential) => {
   try {
+    validateRequired(credential, 'Google credential');
+    
     const res = await axios.post(`${API_URL}/auth/google-login`, { credential });
     return res.data;
   } catch (err) {
-    console.error("Google Login Error:", err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Google Login');
   }
 };
 
 export const ForgotPassword = async (email) => {
   try {
+    validateRequired(email, 'Email');
+    
     const res = await axios.post(`${API_URL}/password/forgot-password`, { email });
     return res.data;
   } catch (err) {
-    console.error('Forgot password error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Forgot Password');
   }
 };
 
 export const ResetPassword = async (email, otp, newPassword) => {
   try {
+    validateRequired(email, 'Email');
+    validateRequired(otp, 'OTP');
+    validateRequired(newPassword, 'New password');
+    
     const res = await axios.post(`${API_URL}/password/reset-password`, {
       email,
       otp,
@@ -62,8 +110,7 @@ export const ResetPassword = async (email, otp, newPassword) => {
     });
     return res.data;
   } catch (err) {
-    console.error('Reset password error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Reset Password');
   }
 };
 
@@ -75,55 +122,60 @@ export const getAllProducts = async () => {
     console.log('Products response:', res.data);
     return res.data;
   } catch (err) {
-    console.error('Get products error:', err.response?.data || err.message);
-    console.error('Full error:', err);
-    throw err;
+    handleApiError(err, 'Get All Products');
   }
 };
 
 export const getProductById = async (productId) => {
   try {
+    validateRequired(productId, 'Product ID');
+    
     const res = await axios.get(`${API_URL}/products/${productId}`);
     return res.data;
   } catch (err) {
-    console.error('Get product error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Get Product by ID');
   }
 };
 
 export const createProduct = async (productData) => {
   try {
+    validateRequired(productData, 'Product data');
+    validateRequired(productData.name, 'Product name');
+    validateRequired(productData.price, 'Product price');
+    
     const res = await axios.post(`${API_URL}/products`, productData, {
       headers: getAuthHeaders()
     });
     return res.data;
   } catch (err) {
-    console.error('Create product error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Create Product');
   }
 };
 
 export const updateProduct = async (productId, productData) => {
   try {
+    validateRequired(productId, 'Product ID');
+    validateRequired(productData, 'Product data');
+    
     const res = await axios.put(`${API_URL}/products/${productId}`, productData, {
       headers: getAuthHeaders()
     });
     return res.data;
   } catch (err) {
-    console.error('Update product error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Update Product');
   }
 };
 
 export const deleteProduct = async (productId) => {
   try {
+    validateRequired(productId, 'Product ID');
+    
     const res = await axios.delete(`${API_URL}/products/${productId}`, {
       headers: getAuthHeaders()
     });
     return res.data;
   } catch (err) {
-    console.error('Delete product error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Delete Product');
   }
 };
 
@@ -135,13 +187,19 @@ export const getCart = async () => {
     });
     return res.data;
   } catch (err) {
-    console.error('Get cart error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Get Cart');
   }
 };
 
 export const addToCart = async (productId, quantity = 1) => {
   try {
+    validateRequired(productId, 'Product ID');
+    validateRequired(quantity, 'Quantity');
+    
+    if (quantity <= 0) {
+      throw new Error('Quantity must be greater than 0');
+    }
+    
     const res = await axios.post(`${API_URL}/cart/add`, {
       productId,
       quantity
@@ -150,13 +208,19 @@ export const addToCart = async (productId, quantity = 1) => {
     });
     return res.data;
   } catch (err) {
-    console.error('Add to cart error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Add to Cart');
   }
 };
 
 export const updateCartItem = async (itemId, quantity) => {
   try {
+    validateRequired(itemId, 'Item ID');
+    validateRequired(quantity, 'Quantity');
+    
+    if (quantity <= 0) {
+      throw new Error('Quantity must be greater than 0');
+    }
+    
     const res = await axios.put(`${API_URL}/cart/item/${itemId}`, {
       quantity
     }, {
@@ -164,20 +228,20 @@ export const updateCartItem = async (itemId, quantity) => {
     });
     return res.data;
   } catch (err) {
-    console.error('Update cart item error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Update Cart Item');
   }
 };
 
 export const removeFromCart = async (itemId) => {
   try {
+    validateRequired(itemId, 'Item ID');
+    
     const res = await axios.delete(`${API_URL}/cart/item/${itemId}`, {
       headers: getAuthHeaders()
     });
     return res.data;
   } catch (err) {
-    console.error('Remove from cart error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Remove from Cart');
   }
 };
 
@@ -188,8 +252,7 @@ export const clearCart = async () => {
     });
     return res.data;
   } catch (err) {
-    console.error('Clear cart error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Clear Cart');
   }
 };
 
@@ -200,24 +263,63 @@ export const getCartSummary = async () => {
     });
     return res.data;
   } catch (err) {
-    console.error('Get cart summary error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Get Cart Summary');
   }
 };
 
 // Order API functions
 export const createOrder = async (orderData) => {
   try {
+    validateRequired(orderData, 'Order data');
+    validateRequired(orderData.items, 'Order items');
+    validateRequired(orderData.shippingAddress, 'Shipping address');
+    
+    if (!Array.isArray(orderData.items) || orderData.items.length === 0) {
+      throw new Error('Order must contain at least one item');
+    }
+    
+    // Validate each item in the order
+    orderData.items.forEach((item, index) => {
+      validateRequired(item.productId, `Item ${index + 1} - Product ID`);
+      validateRequired(item.quantity, `Item ${index + 1} - Quantity`);
+      validateRequired(item.price, `Item ${index + 1} - Price`);
+      
+      if (item.quantity <= 0) {
+        throw new Error(`Item ${index + 1} - Quantity must be greater than 0`);
+      }
+      if (item.price <= 0) {
+        throw new Error(`Item ${index + 1} - Price must be greater than 0`);
+      }
+    });
+    
+    // Validate shipping address structure
+    const requiredAddressFields = ['fullName', 'phone', 'addressLine1', 'city', 'postalCode', 'country'];
+    requiredAddressFields.forEach(field => {
+      validateRequired(orderData.shippingAddress[field], `Shipping address - ${field}`);
+    });
+
+    // Map field names if needed (frontend might send 'street' instead of 'addressLine1')
+    if (orderData.shippingAddress.street && !orderData.shippingAddress.addressLine1) {
+      orderData.shippingAddress.addressLine1 = orderData.shippingAddress.street;
+    }
+    
+    console.log('📤 Sending order data to backend:', JSON.stringify(orderData, null, 2));
     const res = await axios.post(`${API_URL}/orders/create`, orderData, {
       headers: getAuthHeaders()
     });
+    console.log('📥 Order creation response:', res.data);
     return res.data;
   } catch (err) {
-    console.error('Create order error:', err.response?.data || err.message);
-    throw err;
+    // If it's a validation error, re-throw it directly
+    if (err.message.includes('is required') || 
+        err.message.includes('must be greater than 0') || 
+        err.message.includes('Order must contain')) {
+      throw err;
+    }
+    // For API errors, use the error handler
+    handleApiError(err, 'Create Order');
   }
 };
-
 
 export const getMyOrders = async (params = {}) => {
   try {
@@ -228,32 +330,33 @@ export const getMyOrders = async (params = {}) => {
     });
     return res.data;
   } catch (err) {
-    console.error('Get my orders error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Get My Orders');
   }
 };
 
 export const getOrderById = async (orderId) => {
   try {
+    validateRequired(orderId, 'Order ID');
+    
     const res = await axios.get(`${API_URL}/orders/${orderId}`, {
       headers: getAuthHeaders()
     });
     return res.data;
   } catch (err) {
-    console.error('Get order by ID error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Get Order by ID');
   }
 };
 
 export const cancelOrder = async (orderId) => {
   try {
+    validateRequired(orderId, 'Order ID');
+    
     const res = await axios.delete(`${API_URL}/orders/${orderId}/cancel`, {
       headers: getAuthHeaders()
     });
     return res.data;
   } catch (err) {
-    console.error('Cancel order error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Cancel Order');
   }
 };
 
@@ -263,39 +366,46 @@ export const cancelOrder = async (orderId) => {
 // Admin API functions
 export const getAllUsers = async () => {
   try {
-    const res = await axios.get(`${API_URL}/admin/users`, {
+    const res = await axios.get(`${API_URL}/users`, {
       headers: getAuthHeaders()
     });
     return res.data;
   } catch (err) {
-    console.error('Get all users error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Get All Users');
   }
 };
 
 export const updateUserRole = async (userId, role) => {
   try {
-    const res = await axios.put(`${API_URL}/admin/users/${userId}/role`, {
+    validateRequired(userId, 'User ID');
+    validateRequired(role, 'Role');
+    
+    const validRoles = ['user', 'admin'];
+    if (!validRoles.includes(role)) {
+      throw new Error('Role must be either "user" or "admin"');
+    }
+    
+    const res = await axios.put(`${API_URL}/users/${userId}/role`, {
       role
     }, {
       headers: getAuthHeaders()
     });
     return res.data;
   } catch (err) {
-    console.error('Update user role error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Update User Role');
   }
 };
 
 export const deleteUser = async (userId) => {
   try {
-    const res = await axios.delete(`${API_URL}/admin/users/${userId}`, {
+    validateRequired(userId, 'User ID');
+    
+    const res = await axios.delete(`${API_URL}/users/${userId}`, {
       headers: getAuthHeaders()
     });
     return res.data;
   } catch (err) {
-    console.error('Delete user error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Delete User');
   }
 };
 
@@ -309,31 +419,39 @@ export const getAdminOrders = async (params = {}) => {
     });
     return res.data;
   } catch (err) {
-    console.error('Get admin orders error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Get Admin Orders');
   }
 };
 
 export const getOrderDetails = async (orderId) => {
   try {
+    validateRequired(orderId, 'Order ID');
+    
     const res = await axios.get(`${API_URL}/orders/${orderId}`, {
       headers: getAuthHeaders()
     });
     return res.data;
   } catch (err) {
-    console.error('Get order details error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Get Order Details');
   }
 };
 
 export const updateOrderStatus = async (orderId, statusData) => {
   try {
+    validateRequired(orderId, 'Order ID');
+    validateRequired(statusData, 'Status data');
+    validateRequired(statusData.status, 'Status');
+    
+    const validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
+    if (!validStatuses.includes(statusData.status)) {
+      throw new Error(`Status must be one of: ${validStatuses.join(', ')}`);
+    }
+    
     const res = await axios.put(`${API_URL}/orders/${orderId}/status`, statusData, {
       headers: getAuthHeaders()
     });
     return res.data;
   } catch (err) {
-    console.error('Update order status error:', err.response?.data || err.message);
-    throw err;
+    handleApiError(err, 'Update Order Status');
   }
 };

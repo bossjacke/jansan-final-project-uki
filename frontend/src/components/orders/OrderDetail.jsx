@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getOrderById, cancelOrder } from '../../api.js';
+import './Checkout.css';
 
 const OrderDetail = () => {
   const { orderId } = useParams();

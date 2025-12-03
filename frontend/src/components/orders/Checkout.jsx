@@ -36,7 +36,19 @@ const Checkout = () => {
     try {
       const data = await getCart();
       if (data.success) {
-        setCart(data.data);
+        // Filter out invalid cart items
+        const validItems = data.data.items.filter(item =>
+          item.productId &&
+          item.quantity > 0 &&
+          item.price != null &&
+          item.price > 0
+        );
+        const validCart = {
+          ...data.data,
+          items: validItems,
+          totalAmount: validItems.reduce((total, item) => total + (item.price * item.quantity), 0)
+        };
+        setCart(validCart);
       } else {
         setError('Failed to fetch cart');
       }
@@ -129,6 +141,11 @@ const Checkout = () => {
       return;
     }
 
+    if (!cart || !cart.items || cart.items.length === 0) {
+      setError('Your cart is empty. Please add items before checkout.');
+      return;
+    }
+
     console.log('📋 Form data:', shippingAddress);
     console.log('🛒 Cart data:', cart);
     
@@ -136,11 +153,26 @@ const Checkout = () => {
     setError('');
 
     try {
+      // Prepare order data with all required fields
       const orderData = {
-        shippingAddress
+        items: cart.items.map(item => ({
+          productId: item.productId._id || item.productId,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        shippingAddress: {
+          fullName: shippingAddress.fullName,
+          phone: shippingAddress.phone,
+          addressLine1: shippingAddress.addressLine1,
+          city: shippingAddress.city,
+          postalCode: shippingAddress.postalCode,
+          country: shippingAddress.country
+        },
+        totalAmount: cart.totalAmount,
+        paymentMethod: 'cash_on_delivery'
       };
 
-      console.log('📤 Sending order data:', orderData);
+      console.log('📤 Sending order data:', JSON.stringify(orderData, null, 2));
       const data = await createOrder(orderData);
       console.log('📥 Order response:', data);
 
@@ -153,7 +185,7 @@ const Checkout = () => {
       }
     } catch (err) {
       console.error('❌ Error creating order:', err);
-      setError('Network error. Please try again.');
+      setError(err.message || 'Failed to place order. Please try again.');
     } finally {
       setLoading(false);
     }

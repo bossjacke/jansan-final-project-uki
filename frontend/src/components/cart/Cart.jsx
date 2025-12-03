@@ -24,7 +24,19 @@ function Cart() {
     const fetchCart = async () => {
         try {
             const data = await getCart();
-            setCart(data.data);
+            // Filter out invalid cart items
+            const validItems = data.data.items.filter(item =>
+                item.productId &&
+                item.quantity > 0 &&
+                item.price != null &&
+                item.price > 0
+            );
+            const validCart = {
+                ...data.data,
+                items: validItems,
+                totalAmount: validItems.reduce((total, item) => total + (item.price * item.quantity), 0)
+            };
+            setCart(validCart);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to fetch cart');
         } finally {
