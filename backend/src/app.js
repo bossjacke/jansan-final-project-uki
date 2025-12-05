@@ -24,9 +24,19 @@ app.use(
   })
 );
 
+// Webhook route (must be before express.json() for raw body handling)
+app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+  // Import here to avoid circular dependency
+  import('./controllers/payment.controller.js').then(module => {
+    module.handleWebhook(req, res);
+  }).catch(error => {
+    console.error('Error loading payment controller:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  });
+});
+
 // Middleware
 app.use(express.json());
-
 
 // Routes
 app.use("/api/auth", authRoutes);

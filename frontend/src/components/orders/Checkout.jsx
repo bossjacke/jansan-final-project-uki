@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCart, createOrder } from '../../api.js';
+import { getCart, createOrder, confirmPayment } from '../../api.js';
+import DualPaymentSystem from '../payment/DualPaymentSystem.jsx';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -17,6 +18,8 @@ const Checkout = () => {
   });
   const [user, setUser] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
 
   useEffect(() => {
     fetchCart();
@@ -114,7 +117,6 @@ const Checkout = () => {
     });
   };
 
-
   const validateForm = () => {
     const required = ['fullName', 'phone', 'addressLine1', 'city', 'postalCode'];
     const missing = required.filter(field => !shippingAddress[field]);
@@ -130,6 +132,58 @@ const Checkout = () => {
     }
 
     return true;
+  };
+
+  const handlePaymentSuccess = async (paymentDetails) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      // Create order with payment details
+      const orderData = {
+        items: cart.items.map(item => ({
+          productId: item.productId._id || item.productId,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        shippingAddress: {
+          fullName: shippingAddress.fullName,
+          phone: shippingAddress.phone,
+          addressLine1: shippingAddress.addressLine1,
+          city: shippingAddress.city,
+          postalCode: shippingAddress.postalCode,
+          country: shippingAddress.country
+        },
+        totalAmount: cart.totalAmount,
+        paymentMethod: paymentDetails.paymentMethod,
+        paymentDetails: paymentDetails
+      };
+
+      // Confirm payment and create order
+      const data = await confirmPayment({
+        paymentIntentId: paymentDetails.paymentIntentId,
+        orderData: orderData
+      });
+
+      if (data.success) {
+        setSuccessMessage('Payment successful! Order placed successfully.');
+        // Clear cart after successful order
+        setTimeout(() => {
+          navigate('/orders');
+        }, 2000);
+      } else {
+        setError(data.message || 'Failed to confirm payment');
+      }
+    } catch (err) {
+      console.error('Error confirming payment:', err);
+      setError(err.message || 'Failed to confirm payment');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePaymentError = (error) => {
+    setError(error.message || 'Payment failed. Please try again.');
   };
 
   const handleSubmit = async (e) => {
@@ -252,15 +306,70 @@ const Checkout = () => {
 
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
           <h3 className="text-gray-800 mb-5 text-xl font-semibold">Payment Method</h3>
-          <div className="p-4 border-2 border-blue-500 bg-blue-50 rounded-lg">
-            <span className="flex items-center font-medium text-gray-800 mb-2">
-              <span className="mr-2 text-xl">💵</span>
-              Cash on Delivery
-            </span>
-            <span className="text-sm text-gray-500 leading-relaxed">
-              Pay when you receive your order. Delivery typically takes 3-5 days.
-            </span>
+          
+          <div className="space-y-3 mb-6">
+            <button
+              onClick={() => {
+                setPaymentMethod('cod');
+                setShowPaymentForm(false);
+              }}
+              className={`w-full p-4 border-2 rounded-lg transition-all ${
+                paymentMethod === 'cod'
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center">
+                <span className="text-2xl mr-3">💵</span>
+                <div className="text-left">
+                  <div className="font-medium text-gray-800">Cash on Delivery</div>
+                  <div className="text-sm text-gray-500">Pay when you receive your order</div>
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => {
+                setPaymentMethod('stripe');
+                setShowPaymentForm(true);
+              }}
+              className={`w-full p-4 border-2 rounded-lg transition-all ${
+                paymentMethod === 'stripe'
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center">
+                <span className="text-2xl mr-3">💳</span>
+                <div className="text-left">
+                  <div className="font-medium text-gray-800">Credit/Debit Card & UPI</div>
+                  <div className="text-sm text-gray-500">Instant payment with Stripe</div>
+                </div>
+              </div>
+            </button>
           </div>
+
+          {paymentMethod === 'cod' && (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center text-green-800 mb-2">
+                <span className="mr-2">✓</span>
+                <span className="font-medium">Cash on Delivery Selected</span>
+              </div>
+              <p className="text-sm text-green-700">
+                Pay when you receive your order. Delivery typically takes 3-5 days.
+              </p>
+            </div>
+          )}
+
+          {paymentMethod === 'stripe' && showPaymentForm && (
+            <DualPaymentSystem
+              amount={cart.totalAmount}
+              items={cart.items}
+              shippingAddress={shippingAddress}
+              onPaymentSuccess={handlePaymentSuccess}
+              onPaymentError={handlePaymentError}
+            />
+          )}
         </div>
 
         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm lg:col-span-2">
@@ -362,7 +471,7 @@ const Checkout = () => {
               </button>
               <button 
                 type="submit" 
-                disabled={loading}
+                disabled={loading || paymentMethod === 'stripe'}
                 className="flex-2 p-3.5 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg font-semibold cursor-pointer transition-all duration-300 hover:from-green-700 hover:to-teal-700 hover:transform hover:-translate-y-0.5 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
               >
                 {loading ? (
