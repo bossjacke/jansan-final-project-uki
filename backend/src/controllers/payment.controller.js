@@ -2,12 +2,19 @@ import Stripe from 'stripe';
 import logger from "../utils/logger.js";
 import Order from "../models/order.model.js";
 
-// Initialize Stripe with secret key
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-if (!stripeSecretKey) {
-  throw new Error('STRIPE_SECRET_KEY environment variable is not set and no fallback key available');
-}
-const stripe = new Stripe(stripeSecretKey);
+// Initialize Stripe lazily to ensure environment variables are loaded
+let stripe = null;
+
+const getStripe = () => {
+  if (!stripe) {
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeSecretKey) {
+      throw new Error('STRIPE_SECRET_KEY environment variable is not set and no fallback key available');
+    }
+    stripe = new Stripe(stripeSecretKey);
+  }
+  return stripe;
+};
 
 // ==================== PAYMENT CONTROLLERS ====================
 
@@ -26,6 +33,7 @@ export const createPaymentIntent = async (req, res) => {
     }
 
     // Create payment intent
+    const stripe = getStripe();
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount * 100), // Convert to cents
       currency,
@@ -96,6 +104,7 @@ export const createCheckoutSession = async (req, res) => {
     }));
 
     // Create checkout session
+    const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card', 'upi', 'netbanking'],
       line_items: lineItems,
@@ -152,6 +161,7 @@ export const confirmPayment = async (req, res) => {
     }
 
     // Retrieve payment intent to confirm status
+    const stripe = getStripe();
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
     if (paymentIntent.status !== 'succeeded') {
@@ -214,6 +224,7 @@ export const getPaymentStatus = async (req, res) => {
       });
     }
 
+    const stripe = getStripe();
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
     res.status(200).json({
@@ -261,6 +272,7 @@ export const processRefund = async (req, res) => {
     }
 
     // Create refund
+    const stripe = getStripe();
     const refund = await stripe.refunds.create({
       payment_intent: order.paymentDetails.paymentIntentId,
       amount: amount ? Math.round(amount * 100) : undefined, // Convert to cents if amount provided
@@ -316,6 +328,7 @@ export const handleWebhook = async (req, res) => {
 
   try {
     // Verify webhook signature
+    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
   } catch (err) {
     logger.error(`Webhook signature verification failed: ${err.message}`);
