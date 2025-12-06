@@ -176,9 +176,10 @@ export const confirmPayment = async (req, res) => {
     if (orderData) {
       order = new Order({
         ...orderData,
+        paymentMethod: 'stripe_card',
         paymentDetails: {
           paymentIntentId: paymentIntent.id,
-          paymentMethod: 'stripe',
+          paymentMethod: 'stripe_card',
           status: 'completed',
           amount: paymentIntent.amount / 100,
           currency: paymentIntent.currency,
@@ -401,12 +402,13 @@ async function handlePaymentSucceeded(paymentIntent) {
 
       const order = new Order({
         userId: paymentIntent.metadata.userId,
-        items: items,
+        products: items,
         shippingAddress: shippingAddress,
         totalAmount: paymentIntent.amount / 100,
+        paymentMethod: 'stripe_card',
         paymentDetails: {
           paymentIntentId: paymentIntent.id,
-          paymentMethod: 'stripe',
+          paymentMethod: 'stripe_card',
           status: 'completed',
           amount: paymentIntent.amount / 100,
           currency: paymentIntent.currency,
@@ -466,12 +468,13 @@ async function handleCheckoutCompleted(session) {
 
       const order = new Order({
         userId: session.metadata.userId,
-        items: items,
+        products: items,
         shippingAddress: {
           ...shippingAddress,
           ...session.shipping_details?.address
         },
         totalAmount: session.amount_total / 100,
+        paymentMethod: 'stripe_checkout',
         paymentDetails: {
           checkoutSessionId: session.id,
           paymentIntentId: session.payment_intent,

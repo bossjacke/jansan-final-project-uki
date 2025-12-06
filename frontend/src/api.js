@@ -361,47 +361,35 @@ export const cancelOrder = async (orderId) => {
 };
 
 // Payment API functions
-export const createPaymentIntent = async (paymentData) => {
+export const createPayment = async (paymentData) => {
   try {
     validateRequired(paymentData, 'Payment data');
     validateRequired(paymentData.amount, 'Payment amount');
     
-    const res = await axios.post(`${API_URL}/payments/create-payment-intent`, paymentData, {
+    const res = await axios.post(`${API_URL}/payments`, paymentData, {
       headers: getAuthHeaders()
     });
     return res.data;
   } catch (err) {
-    handleApiError(err, 'Create Payment Intent');
-  }
-};
-
-export const createCheckoutSession = async (sessionData) => {
-  try {
-    validateRequired(sessionData, 'Session data');
-    validateRequired(sessionData.items, 'Cart items');
-    
-    const res = await axios.post(`${API_URL}/payments/create-checkout-session`, sessionData, {
-      headers: getAuthHeaders()
-    });
-    return res.data;
-  } catch (err) {
-    handleApiError(err, 'Create Checkout Session');
+    handleApiError(err, 'Create Payment');
   }
 };
 
 export const confirmPayment = async (paymentData) => {
   try {
     validateRequired(paymentData, 'Payment confirmation data');
-    validateRequired(paymentData.paymentIntentId, 'Payment Intent ID');
+    validateRequired(paymentData.sessionId, 'Session ID');
     
-    const res = await axios.post(`${API_URL}/payments/confirm-payment`, paymentData, {
-      headers: getAuthHeaders()
-    });
+    const res = await axios.post(`${API_URL}/payments/confirm`, paymentData);
     return res.data;
   } catch (err) {
     handleApiError(err, 'Confirm Payment');
   }
 };
+
+// Legacy function names for backward compatibility
+export const createPaymentIntent = createPayment;
+export const createCheckoutSession = createPayment;
 
 export const getPaymentStatus = async (paymentIntentId) => {
   try {

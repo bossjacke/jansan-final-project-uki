@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { createPaymentIntent, createCheckoutSession } from '../../api.js';
+import { createPaymentIntent, createCheckoutSession, createOrder } from '../../api.js';
 
 // Initialize Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
@@ -27,14 +27,15 @@ const PaymentForm = ({ amount, items, shippingAddress, onPaymentSuccess, onPayme
 
     const cardElement = elements.getElement(CardElement);
 
-    // Create payment intent
+    // Create payment
     try {
-      const response = await createPaymentIntent({
+      const response = await createPayment({
         amount,
-        metadata: {
-          items: JSON.stringify(items),
-          shippingAddress: JSON.stringify(shippingAddress)
-        }
+        items,
+        subtotal: amount,
+        tax: 0,
+        shipping_fee: 0,
+        delivery_address: shippingAddress
       });
 
       if (!response.success) {
@@ -43,7 +44,9 @@ const PaymentForm = ({ amount, items, shippingAddress, onPaymentSuccess, onPayme
         return;
       }
 
-      const { clientSecret, paymentIntentId } = response.data;
+      // Redirect to Stripe Checkout since we're using the simplified flow
+      window.location.href = response.checkoutUrl;
+      return;
 
       // Confirm payment with card details
       const { error: paymentError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
@@ -168,8 +171,28 @@ const DualPaymentSystem = ({ amount, items, shippingAddress, onPaymentSuccess, o
     }
   };
 
-  const handlePaymentSuccess = (paymentDetails) => {
-    onPaymentSuccess(paymentDetails);
+  const handlePaymentSuccess = async (paymentDetails) => {
+    try {
+      // Create order after successful payment
+      const orderData = {
+        items: items,
+        shippingAddress: shippingAddress,
+        totalAmount: amount,
+        paymentMethod: 'stripe_card'
+      };
+
+      const orderResponse = await createOrder(orderData);
+      console.log('Order created successfully:', orderResponse);
+      
+      // Pass both payment and order details to parent
+      onPaymentSuccess({
+        ...paymentDetails,
+        order: orderResponse.data
+      });
+    } catch (error) {
+      console.error('Error creating order:', error);
+      onPaymentError(error);
+    }
   };
 
   const handlePaymentError = (error) => {

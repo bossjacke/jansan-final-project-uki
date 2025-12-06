@@ -11,6 +11,9 @@ import {
 
 const router = express.Router();
 
+// Webhook endpoint (no authentication required - Stripe needs to access this)
+router.post('/webhook', express.raw({ type: 'application/json' }), handleWebhook);
+
 // Protected payment routes (require authentication)
 router.use(authMiddleware);
 

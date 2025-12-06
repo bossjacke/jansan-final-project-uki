@@ -18,6 +18,9 @@ import OrderDetail from './components/orders/OrderDetail.jsx';
 import Checkout from './components/orders/Checkout.jsx';
 import Contact from './components/Contact/Contact.jsx';
 import ChatButton from './components/chat/ChatButton.jsx';
+import PaymentSuccess from './pages/PaymentSuccess.jsx';
+import Success from './pages/Success.jsx';
+import Cancel from './pages/Cancel.jsx';
 
 function App() {
   return (
@@ -40,6 +43,9 @@ function App() {
               <Route path="/order/:orderId" element={<OrderDetail />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/payment-success" element={<PaymentSuccess />} />
+              <Route path="/success" element={<Success />} />
+              <Route path="/cancel" element={<Cancel />} />
             </Routes>
              {/* Chat Button - Global Component */}
           <ChatButton />
