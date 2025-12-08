@@ -38,7 +38,9 @@ function Cart() {
             };
             setCart(validCart);
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to fetch cart');
+            console.error('❌ Error fetching cart:', err);
+            const errorMsg = err?.message || err?.response?.data?.message || 'Failed to fetch cart';
+            setError(errorMsg);
         } finally {
             setLoading(false);
         }
@@ -52,11 +54,15 @@ function Cart() {
         if (qty < 1) return removeItem(id);
 
         try {
+            console.log('🔄 Updating quantity for item:', id);
             const data = await updateCartItem(id, qty);
+            console.log('✅ Updated cart:', data);
             setCart({ ...data.data });
             setError(null);
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to update cart');
+            console.error('❌ Error updating cart:', err);
+            const errorMsg = err?.message || err?.response?.data?.message || 'Failed to update cart';
+            setError(errorMsg);
         }
     };
 
@@ -66,11 +72,15 @@ function Cart() {
             return;
         }
         try {
+            console.log('🗑️ Removing item from cart:', id);
             const data = await removeFromCart(id);
+            console.log('✅ Item removed, updated cart:', data);
             setCart({ ...data.data });
             setError(null);
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to remove item');
+            console.error('❌ Error removing item:', err);
+            const errorMsg = err?.message || err?.response?.data?.message || 'Failed to remove item';
+            setError(errorMsg);
         }
     };
 

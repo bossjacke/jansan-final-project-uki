@@ -50,10 +50,14 @@ function ProductsPage() {
     }
 
     try {
-      await addToCartApi(product._id, 1);
+      console.log('🛒 Adding to cart:', product._id);
+      const result = await addToCartApi(product._id, 1);
+      console.log('✅ Add to cart result:', result);
       alert(`${product.name} added to cart`);
     } catch (err) {
-      alert(err.response?.data?.message || 'Could not add to cart');
+      console.error('❌ Add to cart error:', err);
+      const errorMsg = err?.message || err?.response?.data?.message || 'Could not add to cart';
+      alert(errorMsg);
     }
   };
 

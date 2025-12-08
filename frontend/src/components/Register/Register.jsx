@@ -77,7 +77,9 @@ function Register({ onRegister, onClose }) {
     const { confirmPassword, acceptTerms, ...formData } = form;
 
     try {
+      console.log('📝 Attempting registration with data:', { ...formData, password: '***' });
       const res = await RegisterUser(formData);
+      console.log('✅ Registration successful:', res);
       setSuccessMessage(res.message || "Registration successful! Redirecting to login...");
 
       if (onRegister) onRegister(res);
@@ -91,9 +93,10 @@ function Register({ onRegister, onClose }) {
         }
       }, 2000);
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error("❌ Registration error:", error);
+      const errorMsg = error?.message || error?.response?.data?.message || "Registration failed. Please try again.";
       setErrors({
-        general: error.response?.data?.message || "Registration failed. Please try again."
+        general: errorMsg
       });
     } finally {
       setLoading(false);

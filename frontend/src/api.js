@@ -17,15 +17,22 @@ const getAuthHeaders = () => {
 
 // Helper function to handle API errors consistently
 const handleApiError = (error, operation) => {
-  console.error(`${operation} Error:`, error.response?.data || error.message);
+  console.error(`${operation} Error:`, error);
   
   // Handle network errors
   if (!error.response) {
-    throw new Error('Network error. Please check your connection and try again.');
+    const errorMsg = error.message || 'Network error. Please check your connection and try again.';
+    console.error(`${operation} Network Error:`, errorMsg);
+    throw new Error(errorMsg);
   }
+  
+  // Get error message from response
+  const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || `An error occurred during ${operation}.`;
   
   // Handle specific HTTP status codes
   switch (error.response.status) {
+    case 400:
+      throw new Error(errorMessage || 'Invalid request. Please check your input.');
     case 401:
       throw new Error('Unauthorized. Please login again.');
     case 403:
@@ -33,11 +40,11 @@ const handleApiError = (error, operation) => {
     case 404:
       throw new Error('Resource not found.');
     case 422:
-      throw new Error(error.response.data?.message || 'Invalid data provided.');
+      throw new Error(errorMessage || 'Invalid data provided.');
     case 500:
-      throw new Error('Server error. Please try again later.');
+      throw new Error(errorMessage || 'Server error. Please try again later.');
     default:
-      throw new Error(error.response.data?.message || `An error occurred during ${operation}.`);
+      throw new Error(errorMessage);
   }
 };
 

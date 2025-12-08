@@ -40,7 +40,9 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: false, error: 'Login failed' };
     } catch (error) {
-      return { success: false, error: error.response?.data?.message || 'Login failed' };
+      console.error('Login error details:', error);
+      const errorMessage = error?.message || error?.response?.data?.message || 'Login failed';
+      return { success: false, error: errorMessage };
     }
   };
 
@@ -56,7 +58,9 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: false, error: 'Google login failed' };
     } catch (error) {
-      return { success: false, error: error.response?.data?.message || 'Google login failed' };
+      console.error('Google login error details:', error);
+      const errorMessage = error?.message || error?.response?.data?.message || 'Google login failed';
+      return { success: false, error: errorMessage };
     }
   };
 
@@ -65,7 +69,9 @@ export const AuthProvider = ({ children }) => {
       const response = await RegisterUser(userData);
       return { success: true, message: response.message };
     } catch (error) {
-      return { success: false, error: error.response?.data?.message || 'Registration failed' };
+      console.error('Registration error details:', error);
+      const errorMessage = error?.message || error?.response?.data?.message || 'Registration failed';
+      return { success: false, error: errorMessage };
     }
   };
 

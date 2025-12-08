@@ -35,17 +35,21 @@ function Login({ onLogin, onClose }) {
     setLoading(true);
     setErrors({});
     try {
+      console.log('🔐 Attempting login with email:', form.email);
       const result = await login(form);
+      console.log('✅ Login result:', result);
       if (result.success) {
+        console.log('✅ Login successful, redirecting...');
         if (onLogin) onLogin();
         if (onClose) onClose();
         navigate('/');
       } else {
+        console.error('❌ Login failed:', result.error);
         setErrors({ general: result.error });
       }
     } catch (error) {
-      console.error("Login error:", error);
-      setErrors({ general: "Login failed. Please try again." });
+      console.error("❌ Login error:", error);
+      setErrors({ general: error.message || "Login failed. Please try again." });
     } finally {
       setLoading(false);
     }
@@ -53,17 +57,21 @@ function Login({ onLogin, onClose }) {
 
   const handleGoogleLogin = async (credentialResponse) => {
     try {
+      console.log('🔐 Attempting Google login...');
       const result = await googleLogin(credentialResponse.credential);
+      console.log('✅ Google login result:', result);
       if (result.success) {
+        console.log('✅ Google login successful, redirecting...');
         if (onLogin) onLogin();
         if (onClose) onClose();
         navigate('/');
       } else {
+        console.error('❌ Google login failed:', result.error);
         setErrors({ general: result.error });
       }
     } catch (error) {
-      console.error("Google login error:", error);
-      setErrors({ general: "Google login failed. Please try again." });
+      console.error("❌ Google login error:", error);
+      setErrors({ general: error.message || "Google login failed. Please try again." });
     }
   };
 
