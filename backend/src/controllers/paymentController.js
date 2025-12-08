@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import Payment from "../models/Payment.js";
-import Order from "../models/Order.js";
+import Order from "../models/order.model.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -17,7 +17,7 @@ export const createPayment = async (req, res) => {
         {
           price_data: {
             currency: "usd",
-            product_data: { name: "Milk Soda Payment" },
+            product_data: { name: "Bio Gas and Fertilizer Payment" },
             unit_amount: amount * 100,
           },
           quantity: 1,

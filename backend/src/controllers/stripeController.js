@@ -21,7 +21,7 @@ export const createCheckoutSession = async (req, res) => {
         price_data: {
           currency: "inr",
           product_data: {
-            name: product?.name ?? it.name ?? "Milk Soda",
+            name: product?.name ?? it.name ?? "Bio Gas and Fertilizer",
             metadata: { productId: it.productId }
           },
           unit_amount: Math.round(priceNumber * 100)

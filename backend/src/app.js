@@ -26,22 +26,6 @@ app.use(
 // Middleware
 app.use(express.json());
 
-// Webhook route (must be before other payment routes for raw body handling)
-app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), (req, res) => {
-  // Import here to avoid circular dependency
-  import('./controllers/payment.controller.js').then(module => {
-    if (module.handleWebhook) {
-      module.handleWebhook(req, res);
-    } else {
-      console.log('Webhook handler not found in payment controller');
-      res.status(200).json({ received: true });
-    }
-  }).catch(error => {
-    console.error('Error loading payment controller:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  });
-});
-
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
