@@ -187,7 +187,8 @@ export const getCart = async () => {
     });
     return res.data;
   } catch (err) {
-    handleApiError(err, 'Get Cart');
+    const error = handleApiError(err, 'Get Cart');
+    throw error;
   }
 };
 
@@ -208,7 +209,8 @@ export const addToCart = async (productId, quantity = 1) => {
     });
     return res.data;
   } catch (err) {
-    handleApiError(err, 'Add to Cart');
+    const error = handleApiError(err, 'Add to Cart');
+    throw error;
   }
 };
 
@@ -228,7 +230,8 @@ export const updateCartItem = async (itemId, quantity) => {
     });
     return res.data;
   } catch (err) {
-    handleApiError(err, 'Update Cart Item');
+    const error = handleApiError(err, 'Update Cart Item');
+    throw error;
   }
 };
 
@@ -241,7 +244,8 @@ export const removeFromCart = async (itemId) => {
     });
     return res.data;
   } catch (err) {
-    handleApiError(err, 'Remove from Cart');
+    const error = handleApiError(err, 'Remove from Cart');
+    throw error;
   }
 };
 

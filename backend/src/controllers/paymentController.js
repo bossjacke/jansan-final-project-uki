@@ -16,7 +16,7 @@ export const createPayment = async (req, res) => {
       line_items: [
         {
           price_data: {
-            currency: "usd",
+            currency: "inr",
             product_data: { name: "Bio Gas and Fertilizer Payment" },
             unit_amount: amount * 100,
           },
@@ -37,9 +37,9 @@ export const createPayment = async (req, res) => {
     });
 
     await Payment.create({
-      user: req.user.id,
+      userId: req.user.id,
       amount,
-      currency: "usd",
+      currency: "inr",
       status: "pending",
       paymentIntentId: session.payment_intent,
       clientSecret: session.id
@@ -90,9 +90,9 @@ export const confirmPayment = async (req, res) => {
     // (This is the ONLY change — logic same)
     // --------------------------------------
     const existingOrder = await Order.findOne({
-      payment_status: "Paid",
-      user_id: payment.user,
-      total: session.amount_total / 100
+      paymentStatus: "paid",
+      userId: payment.userId,
+      totalAmount: session.amount_total / 100
     });
 
     if (existingOrder) {
@@ -103,18 +103,18 @@ export const confirmPayment = async (req, res) => {
     // Create Order (same logic)
     // --------------------------
     const orderData = {
-      user_id: payment.user,
-      items: session.metadata.items ? JSON.parse(session.metadata.items) : [],
-      subtotal: session.metadata.subtotal || 0,
-      tax: session.metadata.tax || 0,
-      shipping_fee: session.metadata.shipping_fee || 0,
-      total: session.amount_total / 100,
-      status: "Confirmed",
-      payment_status: "Paid",
-      delivery_address: session.metadata.delivery_address
+      userId: payment.userId,
+      products: session.metadata.items ? JSON.parse(session.metadata.items) : [],
+      totalAmount: session.amount_total / 100,
+      paymentMethod: "stripe_checkout",
+      paymentStatus: "paid",
+      orderStatus: "Processing",
+      shippingAddress: session.metadata.delivery_address
         ? JSON.parse(session.metadata.delivery_address)
         : {},
-      order_number: `ORD-${Date.now()}`,
+      deliveryLocation: session.metadata.delivery_address
+        ? JSON.parse(session.metadata.delivery_address).addressLine1 || ""
+        : "",
     };
 
     const order = await Order.create(orderData);
@@ -132,7 +132,7 @@ export const confirmPayment = async (req, res) => {
 // -------------------------
 export const getAllPayments = async (req, res) => {
   try {
-    const payments = await Payment.find().populate("user", "name email");
+    const payments = await Payment.find().populate("userId", "name email");
     res.json({ success: true, payments });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

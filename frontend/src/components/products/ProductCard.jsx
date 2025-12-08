@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import ZoomAnimation from '../transitions/ZoomAnimation.jsx';
+import gasCylinderImage from '../../assets/gascylinder.avif';
+import fertilizerImage from '../../assets/organicfertilizer.webp';
 
 const ProductCard = ({ product, addToCart }) => {
   const [isAnimating, setIsAnimating] = useState(false);
@@ -20,9 +22,15 @@ const ProductCard = ({ product, addToCart }) => {
       >
         <div className="relative overflow-hidden h-48 bg-gradient-to-br from-purple-50 to-blue-50">
           <img
-            src={product.image || '/api/placeholder/300/200'}
+            src={product.image || (product.type === 'biogas' ? gasCylinderImage : fertilizerImage)}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={(e) => {
+              // Fallback to a solid color background if image fails to load
+              e.target.style.display = 'none';
+              e.target.parentElement.className += ' flex items-center justify-center text-gray-400';
+              e.target.parentElement.innerHTML = '<div class="text-center"><div class="text-4xl mb-2">' + (product.type === 'biogas' ? '⚡' : '🌱') + '</div><div class="text-sm">No Image</div></div>';
+            }}
           />
           <div className="absolute top-4 right-4">
             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${

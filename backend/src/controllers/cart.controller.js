@@ -4,7 +4,11 @@ import Product from '../models/product.model.js';
 // 🛒 Get User Cart
 export const getCart = async (req, res) => {
   try {
-    const cart = await Cart.getOrCreateCart(req.user.id);
+    const userId = req.user?.id || req.user;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "User not authenticated" });
+    }
+    const cart = await Cart.getOrCreateCart(userId);
     res.status(200).json({ success: true, message: "Cart fetched", data: cart });
   } catch (err) {
     res.status(500).json({ success: false, message: "Error getting cart", error: err.message });
@@ -14,13 +18,24 @@ export const getCart = async (req, res) => {
 // ➕ Add Item to Cart
 export const addToCart = async (req, res) => {
   try {
+    console.log('🛒 addToCart Request body:', req.body);
+    console.log('👤 req.user:', req.user);
+    console.log('🆔 req.user?.id:', req.user?.id);
+    
     const { productId, quantity = 1 } = req.body;
     if (!productId) return res.status(400).json({ success: false, message: "Product ID required" });
+
+    const userId = req.user?.id || req.user;
+    console.log('🔑 Final userId:', userId);
+    
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "User not authenticated" });
+    }
 
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ success: false, message: "Product not found" });
 
-    const cart = await Cart.getOrCreateCart(req.user.id);
+    const cart = await Cart.getOrCreateCart(userId);
     const item = cart.items.find(i => i.productId.toString() === productId);
 
     if (item) item.quantity += quantity;
@@ -30,6 +45,8 @@ export const addToCart = async (req, res) => {
     const updated = await Cart.findById(cart._id).populate("items.productId", "name type description capacity warrantyPeriod images image");
     res.status(200).json({ success: true, message: "Item added", data: updated });
   } catch (err) {
+    console.error('🔥 addToCart Error:', err);
+    console.error('🔥 Error stack:', err.stack);
     res.status(500).json({ success: false, message: "Error adding item", error: err.message });
   }
 };
@@ -43,7 +60,12 @@ export const updateCartItem = async (req, res) => {
     if (!itemId || quantity < 1)
       return res.status(400).json({ success: false, message: "Invalid input" });
 
-    const cart = await Cart.getOrCreateCart(req.user.id);
+    const userId = req.user?.id || req.user;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "User not authenticated" });
+    }
+
+    const cart = await Cart.getOrCreateCart(userId);
     const item = cart.items.id(itemId);
     if (!item) return res.status(404).json({ success: false, message: "Item not found" });
 
@@ -61,7 +83,13 @@ export const updateCartItem = async (req, res) => {
 export const removeFromCart = async (req, res) => {
   try {
     const { itemId } = req.params;
-    const cart = await Cart.getOrCreateCart(req.user.id);
+    
+    const userId = req.user?.id || req.user;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "User not authenticated" });
+    }
+
+    const cart = await Cart.getOrCreateCart(userId);
 
     cart.items.pull(itemId);
     await cart.save();
@@ -76,7 +104,12 @@ export const removeFromCart = async (req, res) => {
 // 🧹 Clear Cart
 export const clearCart = async (req, res) => {
   try {
-    const cart = await Cart.getOrCreateCart(req.user.id);
+    const userId = req.user?.id || req.user;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "User not authenticated" });
+    }
+
+    const cart = await Cart.getOrCreateCart(userId);
     cart.items = [];
     await cart.save();
     res.status(200).json({ success: true, message: "Cart cleared", data: cart });
@@ -88,7 +121,12 @@ export const clearCart = async (req, res) => {
 // 📊 Cart Summary
 export const getCartSummary = async (req, res) => {
   try {
-    const cart = await Cart.getOrCreateCart(req.user.id);
+    const userId = req.user?.id || req.user;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "User not authenticated" });
+    }
+
+    const cart = await Cart.getOrCreateCart(userId);
     const totalItems = cart.items.reduce((sum, i) => sum + i.quantity, 0);
 
     res.status(200).json({
