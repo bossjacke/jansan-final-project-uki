@@ -37,15 +37,25 @@ const Checkout = () => {
 
   const fetchCart = async () => {
     try {
+      console.log('📦 Fetching cart...');
       const data = await getCart();
+      console.log('📥 Cart data received:', data);
+      
       if (data.success) {
         // Filter out invalid cart items
-        const validItems = data.data.items.filter(item =>
-          item.productId &&
-          item.quantity > 0 &&
-          item.price != null &&
-          item.price > 0
-        );
+        const validItems = data.data.items.filter(item => {
+          const hasProductId = item.productId && (item.productId._id || item.productId);
+          const hasQuantity = item.quantity > 0;
+          const hasPrice = item.price != null && item.price > 0;
+          
+          if (!hasProductId || !hasQuantity || !hasPrice) {
+            console.warn('⚠️ Skipping invalid cart item:', { item, hasProductId, hasQuantity, hasPrice });
+          }
+          return hasProductId && hasQuantity && hasPrice;
+        });
+
+        console.log(`✅ Cart has ${validItems.length}/${data.data.items.length} valid items`);
+
         const validCart = {
           ...data.data,
           items: validItems,
@@ -56,6 +66,7 @@ const Checkout = () => {
         setError('Failed to fetch cart');
       }
     } catch (err) {
+      console.error('❌ Error fetching cart:', err);
       setError('Network error. Please try again.');
     }
   };
@@ -200,6 +211,12 @@ const Checkout = () => {
       return;
     }
 
+    // Only allow COD submission, Stripe has its own flow
+    if (paymentMethod !== 'cod') {
+      setError('Please select Cash on Delivery or use the Stripe payment button below.');
+      return;
+    }
+
     console.log('📋 Form data:', shippingAddress);
     console.log('🛒 Cart data:', cart);
     
@@ -207,39 +224,81 @@ const Checkout = () => {
     setError('');
 
     try {
+      // Validate cart items have proper structure
+      console.log('🔍 Validating cart items...');
+      const validItems = cart.items.filter(item => {
+        // Handle both populated object and raw ID
+        const productId = item.productId?._id || item.productId;
+        const hasId = productId !== null && productId !== undefined;
+        const hasQty = item.quantity > 0;
+        const hasPrice = item.price > 0;
+        
+        if (!hasId || !hasQty || !hasPrice) {
+          console.warn('⚠️ Invalid cart item:', { 
+            productId, 
+            quantity: item.quantity, 
+            price: item.price,
+            hasId, hasQty, hasPrice 
+          });
+          return false;
+        }
+        return true;
+      });
+
+      if (validItems.length === 0) {
+        throw new Error('No valid items in cart. Please refresh and try again.');
+      }
+
+      if (validItems.length !== cart.items.length) {
+        console.warn(`⚠️ Filtered out ${cart.items.length - validItems.length} invalid items`);
+      }
+
       // Prepare order data with all required fields
       const orderData = {
-        items: cart.items.map(item => ({
-          productId: item.productId._id || item.productId,
-          quantity: item.quantity,
-          price: item.price
-        })),
+        items: validItems.map(item => {
+          // Extract product ID - handle both populated and raw formats
+          let productId = item.productId;
+          if (typeof productId === 'object' && productId !== null) {
+            productId = productId._id || productId;
+          }
+          
+          return {
+            productId: String(productId || ''), // Ensure it's a string ID
+            quantity: item.quantity,
+            price: item.price
+          };
+        }),
         shippingAddress: {
-          fullName: shippingAddress.fullName,
-          phone: shippingAddress.phone,
-          addressLine1: shippingAddress.addressLine1,
-          city: shippingAddress.city,
-          postalCode: shippingAddress.postalCode,
-          country: shippingAddress.country
+          fullName: shippingAddress.fullName.trim(),
+          phone: shippingAddress.phone.trim(),
+          addressLine1: shippingAddress.addressLine1.trim(),
+          city: shippingAddress.city.trim(),
+          postalCode: shippingAddress.postalCode.trim(),
+          country: shippingAddress.country.trim()
         },
         totalAmount: cart.totalAmount,
         paymentMethod: 'cash_on_delivery'
       };
 
       console.log('📤 Sending order data:', JSON.stringify(orderData, null, 2));
+      console.log('📤 Order items count:', orderData.items.length);
+      console.log('📤 Order total:', orderData.totalAmount);
+      
       const data = await createOrder(orderData);
       console.log('📥 Order response:', data);
 
       if (data.success) {
-        alert('Order placed successfully! Cash on delivery selected.');
-        navigate('/orders');
+        // Show success message in-page and let the effect handle redirect
+        setSuccessMessage('✅ Order placed successfully! Cash on delivery selected. Redirecting to orders...');
       } else {
         console.error('❌ Order creation failed:', data);
         setError(data.message || 'Failed to place order');
       }
     } catch (err) {
       console.error('❌ Error creating order:', err);
-      setError(err.message || 'Failed to place order. Please try again.');
+      const errorMsg = err.message || 'Failed to place order. Please try again.';
+      setError(errorMsg);
+      console.error('Error details:', err);
     } finally {
       setLoading(false);
     }

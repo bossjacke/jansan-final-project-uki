@@ -173,16 +173,19 @@ const DualPaymentSystem = ({ amount, items, shippingAddress, onPaymentSuccess, o
 
   const handlePaymentSuccess = async (paymentDetails) => {
     try {
+      console.log('💳 Payment successful, creating order...');
       // Create order after successful payment
       const orderData = {
         items: items,
         shippingAddress: shippingAddress,
         totalAmount: amount,
-        paymentMethod: 'stripe_card'
+        paymentMethod: paymentDetails.paymentMethod || 'stripe_card',
+        paymentDetails: paymentDetails
       };
 
+      console.log('📤 Creating order with payment details:', orderData);
       const orderResponse = await createOrder(orderData);
-      console.log('Order created successfully:', orderResponse);
+      console.log('✅ Order created successfully:', orderResponse);
       
       // Pass both payment and order details to parent
       onPaymentSuccess({
@@ -190,8 +193,9 @@ const DualPaymentSystem = ({ amount, items, shippingAddress, onPaymentSuccess, o
         order: orderResponse.data
       });
     } catch (error) {
-      console.error('Error creating order:', error);
-      onPaymentError(error);
+      console.error('❌ Error creating order after payment:', error);
+      const errorMsg = error.message || 'Failed to create order after payment';
+      onPaymentError(new Error(errorMsg));
     }
   };
 

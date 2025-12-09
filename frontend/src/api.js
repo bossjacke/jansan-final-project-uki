@@ -321,14 +321,20 @@ export const createOrder = async (orderData) => {
     console.log('📥 Order creation response:', res.data);
     return res.data;
   } catch (err) {
+    console.error('❌ Order API Error:', err);
+    
     // If it's a validation error, re-throw it directly
-    if (err.message.includes('is required') || 
+    if (err.message && (
+        err.message.includes('is required') || 
         err.message.includes('must be greater than 0') || 
-        err.message.includes('Order must contain')) {
+        err.message.includes('Order must contain')
+    )) {
       throw err;
     }
-    // For API errors, use the error handler
-    handleApiError(err, 'Create Order');
+    
+    // For API errors (network or server response), use the error handler
+    const error = handleApiError(err, 'Create Order');
+    throw error;
   }
 };
 

@@ -10,8 +10,18 @@ export const getCart = async (req, res) => {
     if (!userId) {
       return res.status(401).json({ success: false, message: "User not authenticated" });
     }
-    const cart = await Cart.getOrCreateCart(userId);
-    console.log('✅ Cart retrieved successfully');
+    
+    // Get cart and ensure items are populated
+    let cart = await Cart.getOrCreateCart(userId);
+    
+    // Double-check population - if items don't have productId data, re-fetch with populate
+    if (cart.items && cart.items.length > 0 && !cart.items[0].productId?.name) {
+      console.log('⚠️ Cart items not populated, re-fetching with populate...');
+      cart = await Cart.findById(cart._id)
+        .populate('items.productId', 'name type description capacity warrantyPeriod images image price');
+    }
+    
+    console.log('✅ Cart retrieved successfully with', cart.items.length, 'items');
     res.status(200).json({ success: true, message: "Cart fetched", data: cart });
   } catch (err) {
     console.error('❌ Error getting cart:', err);

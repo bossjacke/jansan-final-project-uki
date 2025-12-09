@@ -1,166 +1,3 @@
-// import logger from "../utils/logger.js";
-// import Order from "../models/order.model.js";
-// import Cart from "../models/cart.model.js";
-// import Product from "../models/product.model.js";
-// import User from "../models/user.model.js";
-
-// // ==================== ORDER CONTROLLERS ====================
-
-// // 🛍️ Create Order
-// export const createOrder = async (req, res) => {
-//   try {
-//     const { shippingAddress } = req.body;
-
-//     logger.info("🛒 Creating order for user:", req.user.id);
-
-//     const cart = await Cart.getOrCreateCart(req.user.id);
-//     logger.info("🛍️ Cart items:", cart.items.length, cart.items);
-    
-//     if (cart.items.length === 0) {
-//       return res.status(400).json({ success: false, message: "Cart is empty" });
-//     }
-
-//     // Validate cart items
-//     for (const item of cart.items) {
-//       if (!item.productId || !item.quantity || !item.price) {
-//         return res.status(400).json({ 
-//           success: false, 
-//           message: "Invalid cart item data" 
-//         });
-//       }
-//     }
-
-//     // Check product availability and stock
-//     const productIds = cart.items.map(i => i.productId);
-//     logger.info("🔍 Product IDs to check:", productIds);
-//     logger.info("🛒 Cart items structure:", JSON.stringify(cart.items, null, 2));
-    
-//     const products = await Product.find({ _id: { $in: productIds } });
-//     logger.info("📦 Found products:", products.length, products.map(p => ({ id: p._id, name: p.name, stock: p.stock })));
-
-//     if (products.length !== cart.items.length) {
-//       logger.error("❌ Product count mismatch:", { cartItems: cart.items.length, foundProducts: products.length });
-//       return res.status(400).json({ 
-//         success: false, 
-//         message: "Some products are unavailable or have been removed" 
-//       });
-//     }
-
-//     // Check stock availability
-//     for (const cartItem of cart.items) {
-//       const product = products.find(p => p._id.toString() === cartItem.productId.toString());
-//       logger.info("🔍 Checking stock for cart item:", cartItem);
-//       logger.info("📦 Found product:", product ? { id: product._id, name: product.name, stock: product.stock } : 'NOT FOUND');
-//       logger.info("🔍 Comparing:", { cartProductId: cartItem.productId.toString(), productIds: productIds.map(id => id.toString()) });
-      
-//       if (!product) {
-//         logger.error("❌ Product not found for ID:", cartItem.productId);
-//         return res.status(400).json({ 
-//           success: false, 
-//           message: `Product not found: ${cartItem.productId}` 
-//         });
-//       }
-
-//       if (product.stock < cartItem.quantity) {
-//         return res.status(400).json({ 
-//           success: false, 
-//           message: `Insufficient stock for ${product.name}. Available: ${product.stock}, Requested: ${cartItem.quantity}` 
-//         });
-//       }
-//     }
-
-//     // Get user information
-//     const user = await User.findById(req.user.id);
-//     if (!user) {
-//       return res.status(404).json({ success: false, message: "User not found" });
-//     }
-
-//     // Prepare order products
-//     const orderProducts = cart.items.map(i => ({
-//       productId: i.productId,
-//       quantity: i.quantity,
-//       price: i.price,
-//     }));
-
-//     // Prepare shipping address with proper field mapping
-//     const finalShippingAddress = shippingAddress || {
-//       fullName: user.fullName || user.name || '',
-//       phone: user.phone || '',
-//       addressLine1: user.location || '',
-//       city: user.city || '',
-//       postalCode: user.postalCode || '',
-//       country: user.country || 'India'
-//     };
-
-//     // Handle field name mapping (frontend sends 'street', backend expects 'addressLine1')
-//     if (shippingAddress && shippingAddress.street) {
-//       finalShippingAddress.addressLine1 = shippingAddress.addressLine1 || shippingAddress.street;
-//     }
-
-//     // Validate required shipping address fields
-//     const requiredFields = ['fullName', 'phone', 'addressLine1', 'city', 'postalCode'];
-//     const missingFields = requiredFields.filter(field => !finalShippingAddress[field]);
-//     if (missingFields.length > 0) {
-//       return res.status(400).json({
-//         success: false,
-//         message: `Missing required shipping address fields: ${missingFields.join(', ')}`
-//       });
-//     }
-
-//     // Create order
-//     const order = await Order.create({
-//       userId: req.user.id,
-//       products: orderProducts,
-//       totalAmount: cart.totalAmount,
-//       paymentMethod: "cash_on_delivery",
-//       deliveryLocation: user.location || finalShippingAddress.addressLine1,
-//       shippingAddress: finalShippingAddress,
-//       paymentStatus: "pending",
-//       orderStatus: "Processing"
-//     });
-
-//     // Set delivery date (3 days from now)
-//     const deliveryDate = new Date();
-//     deliveryDate.setDate(deliveryDate.getDate() + 3);
-//     order.deliveryDate = deliveryDate;
-//     await order.save();
-
-//     // Update product stock (use atomic operations to prevent race conditions)
-//     const stockUpdatePromises = cart.items.map(cartItem => 
-//       Product.findByIdAndUpdate(
-//         cartItem.productId,
-//         { $inc: { stock: -cartItem.quantity } },
-//         { new: true }
-//       )
-//     );
-
-//     await Promise.all(stockUpdatePromises);
-
-//     // Clear cart
-//     cart.items = [];
-//     cart.totalAmount = 0;
-//     await cart.save();
-
-//     // Get complete order with populated data
-//     const fullOrder = await Order.findById(order._id)
-//       .populate("products.productId", "name type description images image");
-
-//     res.status(201).json({
-//       success: true,
-//       message: "Order created successfully",
-//       data: { order: fullOrder },
-//     });
-
-//   } catch (err) {
-//     logger.error("❌ Error creating order:", err);
-//     res.status(500).json({ 
-//       success: false, 
-//       message: "Error creating order", 
-//       error: err.message 
-//     });
-//   }
-// };
-
 import logger from "../utils/logger.js";
 import Order from "../models/order.model.js";
 import Cart from "../models/cart.model.js";
@@ -169,102 +6,168 @@ import User from "../models/user.model.js";
 
 // ==================== CREATE ORDER ====================
 export const createOrder = async (req, res) => {
+  console.log('\n========================================');
+  console.log('CREATE ORDER FUNCTION CALLED');
+  console.log('========================================');
+  console.log('Request body:', JSON.stringify(req.body, null, 2));
+  console.log('User ID:', req.user?.id);
+  console.log('========================================\n');
+  
   try {
-    const { shippingAddress } = req.body;
-
-    logger.info("🛒 Creating order for user:", req.user.id);
-
-    const cart = await Cart.getOrCreateCart(req.user.id);
-
-    if (!cart || !cart.items || cart.items.length === 0) {
+    // Validate request has required fields
+    if (!req.body) {
+      console.error('No request body');
       return res.status(400).json({
         success: false,
-        message: "Cart is empty"
+        message: "Request body is empty"
       });
     }
 
-    // 🔥 FIX: Normalize productId (cart may store product as full object)
-    const productIds = cart.items
-      .map((item) => {
-        if (!item.productId) return null;
+    const { shippingAddress, items, totalAmount, paymentMethod } = req.body;
 
-        // productId may be full object → extract _id
-        if (typeof item.productId === "object" && item.productId._id) {
-          return item.productId._id.toString();
-        }
+    console.log('Extracted from req.body:');
+    console.log('  - items:', items?.length || 'MISSING');
+    console.log('  - shippingAddress:', shippingAddress ? 'PRESENT' : 'MISSING');
+    console.log('  - totalAmount:', totalAmount || 'MISSING', '(type:', typeof totalAmount, ')');
+    console.log('  - paymentMethod:', paymentMethod || 'MISSING');
 
-        // already an id
-        return item.productId.toString();
-      })
-      .filter(Boolean);
+    // Validate required fields from frontend
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      console.error('Missing or empty items array');
+      return res.status(400).json({
+        success: false,
+        message: "Order must contain at least one item"
+      });
+    }
 
-    logger.info("🔍 Normalized Product IDs:", productIds);
+    if (!shippingAddress) {
+      console.error('Missing shipping address');
+      return res.status(400).json({
+        success: false,
+        message: "Shipping address is required"
+      });
+    }
 
-    // Get products from DB
+    if (!totalAmount || totalAmount <= 0) {
+      console.error('Invalid totalAmount:', totalAmount);
+      return res.status(400).json({
+        success: false,
+        message: "Order total amount must be greater than 0"
+      });
+    }
+
+    logger.info("Creating order for user:", req.user.id);
+
+    // Use items from request body (items array sent by frontend)
+    console.log('Processing items from request body...');
+    console.log('Number of items:', items.length);
+    
+    // Extract product IDs from request items
+    const productIds = items.map(item => {
+      if (typeof item.productId === 'string') {
+        return item.productId;
+      } else if (typeof item.productId === 'object' && item.productId._id) {
+        return item.productId._id.toString();
+      } else {
+        return String(item.productId || '');
+      }
+    });
+
+    console.log('Product IDs from request:', productIds);
+    
+    // Fetch products from database to validate stock
     const products = await Product.find({ _id: { $in: productIds } });
+    console.log(`Found ${products.length}/${productIds.length} products in database`);
 
-    logger.info("📦 Products found:", products.length);
-
-    // Check mismatch
-    if (products.length !== cart.items.length) {
+    if (products.length !== productIds.length) {
+      const foundIds = products.map(p => p._id.toString());
+      const missingIds = productIds.filter(id => !foundIds.includes(id));
+      console.error('Missing product IDs:', missingIds);
       return res.status(400).json({
         success: false,
-        message: "Some products not found in database"
+        message: `Some products not found in database`
       });
     }
 
-    // Build order products with correct validation
+    // Build order products and validate stock
     const orderProducts = [];
 
-    for (let item of cart.items) {
-      // normalize cart item id again
-      let cartId =
-        typeof item.productId === "object" && item.productId._id
-          ? item.productId._id.toString()
-          : item.productId.toString();
+    for (const requestItem of items) {
+      let itemProductId = requestItem.productId;
+      if (typeof itemProductId === 'object' && itemProductId._id) {
+        itemProductId = itemProductId._id.toString();
+      } else {
+        itemProductId = String(itemProductId);
+      }
 
-      const product = products.find(
-        (p) => p._id.toString() === cartId
-      );
+      const product = products.find(p => p._id.toString() === itemProductId);
 
       if (!product) {
+        console.error('Product not found:', itemProductId);
         return res.status(400).json({
           success: false,
-          message: `Product not found: ${JSON.stringify(item.productId)}`
+          message: `Product ${itemProductId} not found`
         });
       }
 
-      if (product.stock < item.quantity) {
+      // Check stock
+      if (product.stock < requestItem.quantity) {
+        console.warn(`Stock insufficient for ${product.name}: need ${requestItem.quantity}, have ${product.stock}`);
         return res.status(400).json({
           success: false,
-          message: `${product.name} - not enough stock`
+          message: `${product.name} - insufficient stock (need ${requestItem.quantity}, available ${product.stock})`
         });
       }
 
       orderProducts.push({
         productId: product._id,
-        quantity: item.quantity,
-        price: product.price || 0
+        quantity: requestItem.quantity,
+        price: requestItem.price || product.price || 0
       });
+
+      console.log(`Added to order: ${product.name} x${requestItem.quantity} @ Rs.${requestItem.price}`);
     }
 
-    // User for auto-fill address
+    // Get user for auto-fill address
     const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
 
     const finalShippingAddress = {
       fullName: shippingAddress?.fullName || user?.name || "",
       phone: shippingAddress?.phone || user?.phone || "",
-      addressLine1: shippingAddress?.addressLine1 || user?.address || "",
+      addressLine1: shippingAddress?.addressLine1 || user?.location || "",
       city: shippingAddress?.city || user?.city || "",
       postalCode: shippingAddress?.postalCode || user?.postalCode || "",
       country: shippingAddress?.country || user?.country || "India"
     };
 
-    // Create order
+    // Validate final shipping address
+    const requiredFields = ['fullName', 'phone', 'addressLine1', 'city', 'postalCode'];
+    const missingFields = requiredFields.filter(field => !finalShippingAddress[field]);
+    
+    if (missingFields.length > 0) {
+      console.error('Missing shipping address fields:', missingFields);
+      return res.status(400).json({
+        success: false,
+        message: `Missing shipping address: ${missingFields.join(', ')}`
+      });
+    }
+
+    // Generate unique order number
+    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    console.log('Generated order number:', orderNumber);
+
+    // Create order (use totalAmount from request)
     const order = await Order.create({
       userId: req.user.id,
+      orderNumber: orderNumber,
       products: orderProducts,
-      totalAmount: cart.totalAmount,
+      totalAmount: totalAmount,
       paymentMethod: "cash_on_delivery",
       deliveryLocation: user?.location || finalShippingAddress.addressLine1,
       shippingAddress: finalShippingAddress,
@@ -272,38 +175,60 @@ export const createOrder = async (req, res) => {
       paymentStatus: "pending"
     });
 
-    // Clear cart
-    cart.items = [];
-    cart.totalAmount = 0;
-    await cart.save();
+    console.log('Order created:', order._id);
 
-    logger.info("✅ Order Created:", order._id);
+    // Clear cart for user
+    try {
+      await Cart.findOneAndUpdate(
+        { userId: req.user.id },
+        { items: [], totalAmount: 0 },
+        { new: true }
+      );
+      console.log('Cart cleared for user:', req.user.id);
+    } catch (cartError) {
+      console.error('Warning: Error clearing cart (non-critical):', cartError.message);
+      // Don't throw - order was already created successfully
+    }
+
+    // Fetch complete order with populated data
+    const populatedOrder = await Order.findById(order._id)
+      .populate('products.productId', 'name type description images image price');
 
     res.status(201).json({
       success: true,
-      message: "Order created",
-      data: order
+      message: "Order created successfully",
+      data: populatedOrder
     });
   } catch (err) {
-    logger.error("❌ CREATE ORDER ERROR:", err);
+    console.error("CREATE ORDER ERROR - Full details:");
+    console.error("Error message:", err.message);
+    console.error("Error name:", err.name);
+    console.error("Stack trace:", err.stack);
+    
+    // If Mongoose validation error, extract field errors
+    if (err.name === 'ValidationError') {
+      const fieldErrors = Object.keys(err.errors).map(field => ({
+        field,
+        message: err.errors[field].message
+      }));
+      console.error("Validation errors:", fieldErrors);
+      return res.status(400).json({
+        success: false,
+        message: "Order validation failed",
+        errors: fieldErrors
+      });
+    }
+
+    logger.error("CREATE ORDER ERROR:", err);
     res.status(500).json({
       success: false,
-      message: "Error creating order",
+      message: "Error creating order: " + err.message,
       error: err.message
     });
   }
 };
 
-
-
-
-
-
-
-
-
-
-// 📦 Get User Orders
+// Get User Orders
 export const getMyOrders = async (req, res) => {
   try {
     const { page = 1, limit = 10, status } = req.query;
@@ -339,7 +264,7 @@ export const getMyOrders = async (req, res) => {
     });
 
   } catch (err) {
-    logger.error("❌ Error fetching orders:", err);
+    logger.error("Error fetching orders:", err);
     res.status(500).json({ 
       success: false, 
       message: "Error fetching orders", 
@@ -348,7 +273,7 @@ export const getMyOrders = async (req, res) => {
   }
 };
 
-// 🔍 Get Single Order
+// Get Single Order
 export const getOrderById = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -381,172 +306,142 @@ export const getOrderById = async (req, res) => {
 
     res.status(200).json({ 
       success: true, 
-      message: "Order fetched successfully", 
+      message: "Order fetched successfully",
       data: order 
     });
 
   } catch (err) {
-    logger.error("❌ Error getting order:", err);
+    logger.error("Error fetching order:", err);
     res.status(500).json({ 
       success: false, 
-      message: "Error getting order", 
+      message: "Error fetching order", 
       error: err.message 
     });
   }
 };
 
-// 🔄 Update Order Status (Admin only)
+// Update Order Status
 export const updateOrderStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { orderStatus } = req.body;
+    const { status, adminNotes } = req.body;
 
-    if (!orderId) {
+    // Validate status
+    const validStatuses = ['Processing', 'Delivered', 'Cancelled'];
+    if (!validStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
-        message: 'Order ID is required'
+        message: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
       });
     }
 
-    if (!["Processing", "Delivered", "Cancelled"].includes(orderStatus)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid order status'
-      });
-    }
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      { 
+        orderStatus: status,
+        adminNotes: adminNotes || order.adminNotes
+      },
+      { new: true }
+    ).populate("products.productId");
 
-    const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: 'Order not found'
+        message: "Order not found"
       });
     }
 
-    // Update order status
-    order.orderStatus = orderStatus;
-    
-    // Set delivery date if order is delivered
-    if (orderStatus === "Delivered") {
-      order.deliveryDate = new Date();
-    }
-
-    await order.save();
-
     res.status(200).json({
       success: true,
-      message: 'Order status updated successfully',
+      message: "Order status updated successfully",
       data: order
     });
 
   } catch (err) {
-    logger.error("❌ Error updating order status:", err);
+    logger.error("Error updating order status:", err);
     res.status(500).json({
       success: false,
-      message: 'Error updating order status',
+      message: "Error updating order status",
       error: err.message
     });
   }
 };
 
-// ❌ Cancel Order
+// Cancel Order
 export const cancelOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
 
-    if (!orderId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Order ID is required'
-      });
-    }
-
     const order = await Order.findById(orderId);
+
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: 'Order not found'
+        message: "Order not found"
       });
     }
 
-    // Check if user owns this order
+    // Check ownership
     if (order.userId.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
-        message: 'Unauthorized to cancel this order'
+        message: "You can only cancel your own orders"
       });
     }
 
-    // Check if order can be cancelled (only if it's still processing)
-    if (order.orderStatus !== "Processing") {
+    // Only allow cancellation if order is in Processing state
+    if (order.orderStatus !== 'Processing') {
       return res.status(400).json({
         success: false,
-        message: 'Order cannot be cancelled at this stage'
+        message: "Only processing orders can be cancelled"
       });
     }
 
-    // Update order status
-    order.orderStatus = "Cancelled";
+    order.orderStatus = 'Cancelled';
     await order.save();
-
-    // Restore product stock
-    for (const orderProduct of order.products) {
-      await Product.findByIdAndUpdate(
-        orderProduct.productId,
-        { $inc: { stock: orderProduct.quantity } }
-      );
-    }
-
 
     res.status(200).json({
       success: true,
-      message: 'Order cancelled successfully',
+      message: "Order cancelled successfully",
       data: order
     });
 
   } catch (err) {
-    logger.error("❌ Error cancelling order:", err);
+    logger.error("Error cancelling order:", err);
     res.status(500).json({
       success: false,
-      message: 'Error cancelling order',
+      message: "Error cancelling order",
       error: err.message
     });
   }
 };
 
-// 📊 Get All Orders (Admin only)
+// Get All Orders (Admin)
 export const getAllOrders = async (req, res) => {
   try {
-    const { page = 1, limit = 10, status, search } = req.query;
-    
+    const { page = 1, limit = 20, status, userId } = req.query;
+
     // Build query
     const query = {};
-    if (status && status !== 'all') {
+    if (status) {
       query.orderStatus = status;
     }
-    
-    // Search functionality
-    if (search) {
-      query.$or = [
-        { orderNumber: { $regex: search, $options: 'i' } },
-        { 'userId.name': { $regex: search, $options: 'i' } },
-        { 'userId.email': { $regex: search, $options: 'i' } }
-      ];
+    if (userId) {
+      query.userId = userId;
     }
 
     const orders = await Order.find(query)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(Number(limit))
-      .populate("userId", "name email")
-      .populate("products.productId", "name type description images image");
+      .populate("userId", "name email phone")
+      .populate("products.productId", "name type description images");
 
-    // Get total count for pagination
     const total = await Order.countDocuments(query);
 
-    res.status(200).json({ 
-      success: true, 
-      message: "Orders fetched successfully",
+    res.status(200).json({
+      success: true,
+      message: "All orders fetched successfully",
       data: {
         orders,
         pagination: {
@@ -560,20 +455,11 @@ export const getAllOrders = async (req, res) => {
     });
 
   } catch (err) {
-    logger.error("❌ Error fetching all orders:", err);
-    res.status(500).json({ 
-      success: false, 
-      message: "Error fetching orders", 
-      error: err.message 
+    logger.error("Error fetching all orders:", err);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching orders",
+      error: err.message
     });
   }
-};
-
-export default {
-  createOrder,
-  getMyOrders,
-  getOrderById,
-  updateOrderStatus,
-  cancelOrder,
-  getAllOrders,
 };
