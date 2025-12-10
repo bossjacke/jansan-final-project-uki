@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAdminOrders, getOrderDetails, updateOrderStatus } from '../../api.js';
 
-const OrderManagement = () => {
+const OrderManagement = ({ onOrdersUpdate }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -63,6 +63,10 @@ const OrderManagement = () => {
         fetchAllOrders();
         if (showOrderDetails) {
           fetchOrderDetails(orderId);
+        }
+        // Notify parent component to refresh its count
+        if (onOrdersUpdate) {
+          onOrdersUpdate();
         }
       } else {
         alert(response.message || 'Failed to update order status');

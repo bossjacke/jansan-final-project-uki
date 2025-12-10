@@ -3,7 +3,7 @@ import { getAllProducts, deleteProduct } from '../../api.js';
 import ProductForm from './ProductForm.jsx';
 import ProductCard from './ProductCard.jsx';
 
-function ProductTab() {
+function ProductTab({ onProductsUpdate }) {
 	const [products, setProducts] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -31,6 +31,10 @@ function ProductTab() {
 		setShowAddForm(false);
 		setEditingProduct(null);
 		fetchProducts();
+		// Notify parent component to refresh its count
+		if (onProductsUpdate) {
+			onProductsUpdate();
+		}
 	};
 
 	const handleEdit = (product) => {
@@ -43,6 +47,10 @@ function ProductTab() {
 			try {
 				await deleteProduct(productId);
 				fetchProducts();
+				// Notify parent component to refresh its count
+				if (onProductsUpdate) {
+					onProductsUpdate();
+				}
 			} catch (err) {
 				alert('Failed to delete product');
 			}

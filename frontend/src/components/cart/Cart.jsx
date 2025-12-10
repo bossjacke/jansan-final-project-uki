@@ -8,6 +8,7 @@ import CartSummary from './CartSummary.jsx';
 import EmptyCart from './EmptyCart.jsx';
 import LoadingCart from './LoadingCart.jsx';
 import CartError from './CartError.jsx';
+import OrderSummarySection from './OrderSummarySection.jsx';
 
 function Cart() {
     const { user, token } = useAuth();
@@ -116,8 +117,11 @@ function Cart() {
                         onContinueShopping={() => navigate('/products')}
                         onCheckout={handleCheckout}
                     />
+                    
+                    
                 </>
             )}
+            <OrderSummarySection />
         </CartLayout>
     );
 }
