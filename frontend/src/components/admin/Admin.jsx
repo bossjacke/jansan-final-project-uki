@@ -35,7 +35,7 @@ function Admin() {
 		try {
 			// Fetch users
 			const usersResponse = await getAllUsers();
-			setUsers(usersResponse.data || []);
+			setUsers(usersResponse.users || []);
 			
 			// Fetch products
 			const productsResponse = await getAllProducts();
@@ -56,7 +56,7 @@ function Admin() {
 		try {
 			setLoading(true);
 			const response = await getAllUsers();
-			setUsers(response.data || []);
+			setUsers(response.users || []);
 			setError(null);
 		} catch (err) {
 			setError('Failed to load users');
