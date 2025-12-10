@@ -51,7 +51,7 @@ const OrderManagement = () => {
   const handleUpdateOrderStatus = async (orderId, status, notes) => {
     try {
       const response = await updateOrderStatus(orderId, {
-        orderStatus: status,
+        status: status,
         adminNotes: notes
       });
 

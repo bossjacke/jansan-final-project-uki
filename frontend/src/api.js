@@ -514,7 +514,7 @@ export const updateOrderStatus = async (orderId, statusData) => {
     validateRequired(statusData, 'Status data');
     validateRequired(statusData.status, 'Status');
     
-    const validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
+    const validStatuses = ['Processing', 'Delivered', 'Cancelled'];
     if (!validStatuses.includes(statusData.status)) {
       throw new Error(`Status must be one of: ${validStatuses.join(', ')}`);
     }
