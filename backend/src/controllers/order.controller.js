@@ -335,14 +335,8 @@ export const updateOrderStatus = async (req, res) => {
       });
     }
 
-    const order = await Order.findByIdAndUpdate(
-      orderId,
-      { 
-        orderStatus: status,
-        adminNotes: adminNotes || order.adminNotes
-      },
-      { new: true }
-    ).populate("products.productId");
+    // Fetch order first to allow conditional updates (deliveryDate, paymentStatus)
+    const order = await Order.findById(orderId).populate('products.productId');
 
     if (!order) {
       return res.status(404).json({
@@ -350,6 +344,24 @@ export const updateOrderStatus = async (req, res) => {
         message: "Order not found"
       });
     }
+
+    // Update fields
+    order.orderStatus = status;
+    order.adminNotes = adminNotes || order.adminNotes;
+
+    // If marked Delivered, set deliveryDate and (optionally) update payment status for non-COD payments
+    if (status === 'Delivered') {
+      order.deliveryDate = new Date();
+      try {
+        if (order.paymentMethod && order.paymentMethod !== 'cash_on_delivery') {
+          order.paymentStatus = 'paid';
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    await order.save();
 
     res.status(200).json({
       success: true,
