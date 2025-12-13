@@ -34,7 +34,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import img from '../../assets/ChatGPT Image Nov 27, 2025, 02_10_31 PM.png';
+import img from '../../assets/logo.png';
 
 function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -77,7 +77,7 @@ function Navbar() {
           {/* Logo Section */}
           <div className="flex items-center gap-3">
             <Link to="/" className="flex items-center">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-indigo-600 text-white font-bold rounded-full flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 text-white font-bold rounded-full flex items-center justify-center shadow-lg">
              <img src={img} alt="" />
             </div>
               <span className="text-sm bg-slate-900 text-white p-6 rounded-lg ml-2">Adams Fire</span>

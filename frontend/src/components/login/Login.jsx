@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import img from '../../assets/logo.png';
 
 function Login({ onLogin, onClose }) {
   const { login, googleLogin } = useAuth();
@@ -97,8 +98,8 @@ function Login({ onLogin, onClose }) {
         <div className="max-w-md w-full">
           {/* Logo/Branding */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <span className="text-white text-2xl font-bold">X</span>
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+               <img src={img} alt="" /> 
             </div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Welcome Back</h1>
             <p className="text-gray-600 dark:text-gray-400">Sign in to your account to continue</p>

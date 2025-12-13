@@ -1,4 +1,5 @@
 import React from 'react';
+import img from '../../assets/logo.png';
 
 const Footer = () => {
   return (
@@ -10,12 +11,10 @@ const Footer = () => {
           {/* Left Section - Logo and Brand */}
           <div>
             <div className="flex items-center mb-3">
-              <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center mr-3">
-                <svg className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-                </svg>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center mr-3">
+                <img src={img} alt="" />
               </div>
-              <h3 className="text-lg font-semibold text-white">YourBrand</h3>
+              <h3 className="text-lg font-semibold text-white">Adams Fire</h3>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Quality products, exceptional service.
