@@ -3,6 +3,9 @@ import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import img from '../../assets/logo.png';
+import { toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+
 
 function Login({ onLogin, onClose }) {
   const { login, googleLogin } = useAuth();
@@ -11,6 +14,10 @@ function Login({ onLogin, onClose }) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [oneTapSkipped, setOneTapSkipped] = useState(false);
+
+
+  const notify = () => toast.success("Login successful!");
+
 
   const validateForm = () => {
     const newErrors = {};
@@ -40,9 +47,11 @@ function Login({ onLogin, onClose }) {
       const result = await login(form);
       console.log('✅ Login result:', result);
       if (result.success) {
+        notify();
         console.log('✅ Login successful, redirecting...');
         if (onLogin) onLogin();
         if (onClose) onClose();
+        
         navigate('/');
       } else {
         console.error('❌ Login failed:', result.error);
@@ -231,6 +240,7 @@ function Login({ onLogin, onClose }) {
               </Link>
             </p>
           </div>
+              
         </div>
       </div>
 

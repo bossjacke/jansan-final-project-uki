@@ -21,38 +21,41 @@ import ChatButton from './components/chat/ChatButton.jsx';
 import PaymentSuccess from './pages/PaymentSuccess.jsx';
 import Success from './pages/Success.jsx';
 import Cancel from './pages/Cancel.jsx';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
     <AuthProvider>
 
 
-          <div>
-            <Navbar />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/products" element={<ProductsPage />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/orders" element={<Orders />} />
-              <Route path="/order/:orderId" element={<OrderDetail />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/payment-success" element={<PaymentSuccess />} />
-              <Route path="/success" element={<Success />} />
-              <Route path="/cancel" element={<Cancel />} />
-            </Routes>
-             {/* Chat Button - Global Component */}
-          <ChatButton />
-            <Footer />
-          </div>
-          
-         
+      <div>
+        <ToastContainer />
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/order/:orderId" element={<OrderDetail />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/success" element={<Success />} />
+          <Route path="/cancel" element={<Cancel />} />
+        </Routes>
+        {/* Chat Button - Global Component */}
+        <ChatButton />
+        <Footer />
+      </div>
+
+
 
 
     </AuthProvider>

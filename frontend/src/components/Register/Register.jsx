@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { RegisterUser } from "../../api.js";
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 function Register({ onRegister, onClose }) {
   const navigate = useNavigate();
@@ -16,6 +19,8 @@ function Register({ onRegister, onClose }) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
+
+  const notify = () => toast.success("Registration successful!");
 
   const validateForm = () => {
     const newErrors = {};
@@ -136,7 +141,7 @@ function Register({ onRegister, onClose }) {
 
             {successMessage && (
               <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded-lg text-sm">
-                {successMessage}
+                {successMessage} {notify()}
               </div>
             )}
 
@@ -313,7 +318,9 @@ function Register({ onRegister, onClose }) {
               className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
             >
               {loading ? 'Creating Account...' : 'Create Account'}
+              
             </button>
+
 
             {/* Sign In Link */}
             <div className="text-center">
