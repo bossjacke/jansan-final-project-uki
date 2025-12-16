@@ -248,12 +248,12 @@ function Login({ onLogin, onClose }) {
       </div>
 
       {/* Right side - Image */}
-      <div className="hidden lg:block flex-1 relative">
+      <div className="hidden lg:block flex-1 relative  mx-auto mb-4 m-4">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-700">
           <img
             src={imglogin}
             alt="Modern workspace"
-            className="w-2/4 h-3/4 object-cover opacity-80 "
+            className="w-2/4 h-3/4 object-cover opacity-80 mx-auto mb-4 m-4"
           />
           <div className="absolute inset-0 bg-slate-900/70 dark:bg-slate-900/50"></div>
         </div>
