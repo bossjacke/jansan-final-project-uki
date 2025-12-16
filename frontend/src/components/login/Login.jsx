@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext.jsx';
 import img from '../../assets/logo.png';
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import imglogin from '../../assets/login.jpg';
+
 
 
 function Login({ onLogin, onClose }) {
@@ -14,9 +16,10 @@ function Login({ onLogin, onClose }) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [oneTapSkipped, setOneTapSkipped] = useState(false);
-
-
   const notify = () => toast.success("Login successful!");
+  
+
+
 
 
   const validateForm = () => {
@@ -248,9 +251,9 @@ function Login({ onLogin, onClose }) {
       <div className="hidden lg:block flex-1 relative">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-700">
           <img
-            src="https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"
+            src={imglogin}
             alt="Modern workspace"
-            className="w-full h-full object-cover opacity-80"
+            className="w-2/4 h-3/4 object-cover opacity-80 "
           />
           <div className="absolute inset-0 bg-slate-900/70 dark:bg-slate-900/50"></div>
         </div>
