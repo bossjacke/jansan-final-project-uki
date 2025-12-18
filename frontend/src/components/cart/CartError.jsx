@@ -1,9 +1,16 @@
 import React from 'react';
 
 const CartError = ({ error }) => (
-	<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
-		{error}
-	</div>
+    <div style={{
+        backgroundColor: '#ffebee',
+        border: '1px solid #ffcdd2',
+        color: '#c62828',
+        padding: '10px 15px',
+        borderRadius: '5px',
+        marginBottom: '15px'
+    }}>
+        {error}
+    </div>
 );
 
 export default CartError;

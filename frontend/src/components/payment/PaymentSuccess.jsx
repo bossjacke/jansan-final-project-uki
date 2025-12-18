@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getPaymentStatus } from '../../api.js';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
@@ -11,8 +13,16 @@ const PaymentSuccess = () => {
 
   const sessionId = searchParams.get('session_id');
 
+  const notifySuccess = (A,B,C) => toast.success(A+""+B+""+C+" Payment completed successfully");
+  const notifyError = (error) => toast.error(errorMsg+" Add to cart failed!");
+  const notifyInfo = () => toast.info("Please login befor add items to cart! ");
+  const notifyWarning = () => toast.warning("No session ID found!");
+
+  alert
+
   useEffect(() => {
     if (!sessionId) {
+      notifyWarning();
       setError('No session ID found');
       setLoading(false);
       return;
@@ -34,6 +44,7 @@ const PaymentSuccess = () => {
 
       if (response.ok) {
         const data = await response.json();
+        notifySuccess( data.data.status, data.data.amount, data.data.currency);
         setPaymentDetails({
           sessionId,
           status: data.data.status,
@@ -42,6 +53,7 @@ const PaymentSuccess = () => {
           message: 'Payment completed successfully!'
         });
       } else {
+        notifySuccess( data.data.status);
         // If verification fails, still show success (webhook might have created order)
         setPaymentDetails({
           sessionId,
@@ -49,8 +61,9 @@ const PaymentSuccess = () => {
           message: 'Payment completed successfully!'
         });
       }
-      setLoading(false);
+      setLoading(false,);
     } catch (err) {
+      notifySuccess( err.message);
       // If verification fails, still show success (webhook might have created order)
       setPaymentDetails({
         sessionId,
@@ -118,7 +131,7 @@ const PaymentSuccess = () => {
             </p>
             <p className="text-sm text-gray-600 mb-1">
               <span className="font-medium">Status:</span> 
-              <span className="text-green-600 font-medium"> {paymentDetails.status}</span>
+              <span className="text-green-600 font-medium" o > {paymentDetails.status}</span>
             </p>
             <p className="text-sm text-gray-600">
               <span className="font-medium">Message:</span> {paymentDetails.message}

@@ -8,7 +8,7 @@ import CartSummary from './CartSummary.jsx';
 import EmptyCart from './EmptyCart.jsx';
 import LoadingCart from './LoadingCart.jsx';
 import CartError from './CartError.jsx';
-import OrderSummarySection from './OrderSummarySection.jsx';
+import OrderSummarySection from '../orders/OrderSummarySection.jsx';
 
 function Cart() {
     const { user, token } = useAuth();
@@ -25,7 +25,6 @@ function Cart() {
     const fetchCart = async () => {
         try {
             const data = await getCart();
-            // Filter out invalid cart items
             const validItems = data.data.items.filter(item =>
                 item.productId &&
                 item.quantity > 0 &&
@@ -39,7 +38,7 @@ function Cart() {
             };
             setCart(validCart);
         } catch (err) {
-            console.error('❌ Error fetching cart:', err);
+            console.error('Error fetching cart:', err);
             const errorMsg = err?.message || err?.response?.data?.message || 'Failed to fetch cart';
             setError(errorMsg);
         } finally {
@@ -55,13 +54,10 @@ function Cart() {
         if (qty < 1) return removeItem(id);
 
         try {
-            console.log('🔄 Updating quantity for item:', id);
             const data = await updateCartItem(id, qty);
-            console.log('✅ Updated cart:', data);
             setCart({ ...data.data });
             setError(null);
         } catch (err) {
-            console.error('❌ Error updating cart:', err);
             const errorMsg = err?.message || err?.response?.data?.message || 'Failed to update cart';
             setError(errorMsg);
         }
@@ -73,13 +69,10 @@ function Cart() {
             return;
         }
         try {
-            console.log('🗑️ Removing item from cart:', id);
             const data = await removeFromCart(id);
-            console.log('✅ Item removed, updated cart:', data);
             setCart({ ...data.data });
             setError(null);
         } catch (err) {
-            console.error('❌ Error removing item:', err);
             const errorMsg = err?.message || err?.response?.data?.message || 'Failed to remove item';
             setError(errorMsg);
         }
@@ -101,7 +94,7 @@ function Cart() {
                 <EmptyCart onStartShopping={() => navigate('/products')} />
             ) : (
                 <>
-                    <div className="space-y-4 mb-6">
+                    <div className="cart-items">
                         {cart.items.map(item => (
                             <CartItem
                                 key={item.productId?._id || item.productId}
@@ -117,8 +110,6 @@ function Cart() {
                         onContinueShopping={() => navigate('/products')}
                         onCheckout={handleCheckout}
                     />
-                    
-                    
                 </>
             )}
             <OrderSummarySection />

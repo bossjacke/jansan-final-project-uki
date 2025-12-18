@@ -4,7 +4,6 @@ import "./Smoke.css";
 export default function SmokeDemo() {
   const [puffs, setPuffs] = useState([]);
 
-  // Mouse move → small smoke puff
   const handleMouseMove = (e) => {
     const newPuff = {
       id: Date.now(),
@@ -15,25 +14,24 @@ export default function SmokeDemo() {
 
     setTimeout(() => {
       setPuffs((prev) => prev.filter((p) => p.id !== newPuff.id));
-    }, 1000);
+    }, 1500); // Increased duration for longer smoke effect
   };
 
-  // Add global mouse move listener
   useEffect(() => {
     document.addEventListener('mousemove', handleMouseMove);
-    
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-    };
+    return () => document.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   return (
-    <div className="smoke-area">
+    <div className="smoke-container">
       {puffs.map((puff) => (
         <div
           key={puff.id}
-          className="smoke puff"
-          style={{ left: puff.x, top: puff.y }}
+          className="smoke-puff"
+          style={{
+            left: `${puff.x}px`,
+            top: `${puff.y}px`,
+          }}
         />
       ))}
     </div>

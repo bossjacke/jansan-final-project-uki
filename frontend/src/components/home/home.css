@@ -32,7 +32,6 @@
 }
 
 .btn {
-  padding: 12px 24px;
   border-radius: 4px;
   text-decoration: none;
   font-weight: bold;
@@ -41,8 +40,13 @@
 }
 
 .btn-primary {
-  background-color: #3498db;
-  color: white;
+   background-color: #4CAF50; /* Primary green */
+    color: white;
+    font-weight: 500; /* medium */
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 .btn-primary:hover {

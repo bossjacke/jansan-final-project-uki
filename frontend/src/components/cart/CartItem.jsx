@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
 
 const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
-  // Handle null or undefined item
   if (!item) {
     return (
-      <div className="flex items-center bg-white rounded-lg shadow-md p-4 mb-4 border">
-        <div className="text-red-500">Error: Item data is missing</div>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        borderRadius: '8px',
+        padding: '15px',
+        marginBottom: '15px',
+        border: '1px solid #eee'
+      }}>
+        <div style={{ color: '#f44336' }}>Error: Item data is missing</div>
       </div>
     );
   }
@@ -15,64 +22,124 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
   const handleIncrease = () => {
     const newQuantity = quantity + 1;
     setQuantity(newQuantity);
-    if (item._id) {
-      onUpdateQuantity(item._id, newQuantity);
-    }
+    if (item._id) onUpdateQuantity(item._id, newQuantity);
   };
 
   const handleDecrease = () => {
     if (quantity > 1) {
       const newQuantity = quantity - 1;
       setQuantity(newQuantity);
-      if (item._id) {
-        onUpdateQuantity(item._id, newQuantity);
-      }
+      if (item._id) onUpdateQuantity(item._id, newQuantity);
     }
   };
 
   const handleRemove = () => {
-    if (item._id) {
-      onRemove(item._id);
-    }
+    if (item._id) onRemove(item._id);
   };
 
   return (
-    <div className="flex items-center bg-white rounded-lg shadow-md p-4 mb-4 border">
-      <div className="w-20 h-20 mr-4 flex-shrink-0">
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      backgroundColor: '#fff',
+      borderRadius: '8px',
+      padding: '15px',
+      marginBottom: '15px',
+      border: '1px solid #eee'
+    }}>
+      <div style={{ width: '80px', height: '80px', marginRight: '15px', flexShrink: 0 }}>
         {item.productId?.image ? (
-          <img src={item.productId.image} alt={item.productId?.name || 'Product'} className="w-full h-full object-cover rounded" />
+          <img 
+            src={item.productId.image} 
+            alt={item.productId?.name || 'Product'} 
+            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} 
+          />
         ) : (
-          <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center text-gray-500 text-sm">No Image</div>
+          <div style={{
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#f5f5f5',
+            borderRadius: '4px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#9e9e9e',
+            fontSize: '14px'
+          }}>
+            No Image
+          </div>
         )}
       </div>
 
-      <div className="flex-1">
-        <h4 className="text-lg font-semibold text-gray-800">{item.productId?.name || 'Unknown Product'}</h4>
-        <p className="text-sm text-gray-600">{item.productId?.type || 'Unknown Type'}</p>
-        <p className="text-sm font-medium text-gray-800">₹{(item.price || 0).toLocaleString()}</p>
+      <div style={{ flex: 1 }}>
+        <h4 style={{ fontSize: '18px', fontWeight: '600', color: '#333', marginBottom: '5px' }}>
+          {item.productId?.name || 'Unknown Product'}
+        </h4>
+        <p style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>
+          {item.productId?.type || 'Unknown Type'}
+        </p>
+        <p style={{ fontSize: '16px', fontWeight: '500', color: '#333', marginBottom: '10px' }}>
+          ₹{(item.price || 0).toLocaleString()}
+        </p>
 
-        <div className="flex items-center mt-2">
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
           <button
-            className="bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded-l disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              backgroundColor: '#f0f0f0',
+              padding: '5px 10px',
+              borderRadius: '4px 0 0 4px',
+              border: '1px solid #ddd',
+              cursor: 'pointer',
+              fontSize: '16px'
+            }}
             onClick={handleDecrease}
             disabled={quantity <= 1}
           >
             -
           </button>
 
-          <span className="px-3 py-1 bg-gray-100">{quantity}</span>
+          <span style={{
+            padding: '0 15px',
+            backgroundColor: '#f9f9f9',
+            borderTop: '1px solid #ddd',
+            borderBottom: '1px solid #ddd'
+          }}>
+            {quantity}
+          </span>
 
           <button
-            className="bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded-r"
+            style={{
+              backgroundColor: '#f0f0f0',
+              padding: '5px 10px',
+              borderRadius: '0 4px 4px 0',
+              border: '1px solid #ddd',
+              cursor: 'pointer',
+              fontSize: '16px'
+            }}
             onClick={handleIncrease}
           >
             +
           </button>
         </div>
 
-        <p className="text-sm font-medium mt-2 text-gray-800">Total: ₹{((item.price || 0) * quantity).toLocaleString()}</p>
+        <p style={{ fontSize: '14px', fontWeight: '500', marginBottom: '10px', color: '#333' }}>
+          Total: ₹{((item.price || 0) * quantity).toLocaleString()}
+        </p>
 
-        <button type="button" className="mt-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700 text-sm font-medium" onClick={handleRemove}>
+        <button 
+          type="button" 
+          style={{
+            padding: '8px 15px',
+            backgroundColor: '#f44336',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: 'pointer'
+          }}
+          onClick={handleRemove}
+        >
           Remove
         </button>
       </div>

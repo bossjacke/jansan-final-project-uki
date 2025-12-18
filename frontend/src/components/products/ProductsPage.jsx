@@ -7,6 +7,11 @@ import LoadingState from './LoadingState.jsx';
 import ErrorState from './ErrorState.jsx';
 import EmptyState from './EmptyState.jsx';
 import ProductSummary from './ProductSummary.jsx';
+import './Product.css';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
 
 function ProductsPage() {
   const { user, token } = useAuth();
@@ -15,6 +20,12 @@ function ProductsPage() {
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
 
+  const notifySuccess = (product) => toast.success(product + " added to cart");
+  const notifyError = (error) => toast.error(errorMsg+" Add to cart failed!");
+  const notifyInfo = () => toast.info("Please login befor add items to cart! ");
+  const notifyWarning = () => toast.warning("Please wait!");
+
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -22,21 +33,12 @@ function ProductsPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      console.log('🛍️ ProductsPage: Starting to fetch products...');
       const response = await getAllProducts();
-      console.log('🛍️ ProductsPage: API response:', response);
-      console.log('🛍️ ProductsPage: Response data:', response.data);
-      
-      // Backend returns { success: true, data: products }
       const products = response.data || [];
-      console.log('🛍️ ProductsPage: Products to display:', products);
-      console.log('🛍️ ProductsPage: Number of products:', products.length);
-      
       setProducts(products);
       setError(null);
     } catch (err) {
-      console.error('🛍️ ProductsPage: Error fetching products:', err);
-      console.error('🛍️ ProductsPage: Error details:', err.response?.data || err.message);
+      console.error('ProductsPage: Error fetching products:', err);
       setError('Failed to load products from backend. Please make sure the backend server is running.');
     } finally {
       setLoading(false);
@@ -45,19 +47,22 @@ function ProductsPage() {
 
   const addToCart = async (product) => {
     if (!user || !token) {
-      alert('Please login to add items to cart');
+      notifyInfo();
+      // alert('Please login to add items to cart');
+
       return;
     }
 
     try {
-      console.log('🛒 Adding to cart:', product._id);
-      const result = await addToCartApi(product._id, 1);
-      console.log('✅ Add to cart result:', result);
-      alert(`${product.name} added to cart`);
+      await addToCartApi(product._id, 1);
+      notifySuccess(product.name);
+      // alert(`${product.name} added to cart`);
     } catch (err) {
-      console.error('❌ Add to cart error:', err);
+      console.error('Add to cart error:', err);
       const errorMsg = err?.message || err?.response?.data?.message || 'Could not add to cart';
-      alert(errorMsg);
+      notifyError(errorMsg);
+      notifyWarning();
+      // alert(errorMsg);
     }
   };
 
@@ -70,12 +75,11 @@ function ProductsPage() {
   if (error) return <ErrorState error={error} onRetry={fetchProducts} />;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Our Products</h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+    <div className="products-page">
+      <div className="products-container">
+        <div className="products-header">
+          <h1 className="products-title">Our Products</h1>
+          <p className="products-subtitle">
             High-quality biogas systems and organic fertilizers for sustainable agriculture
           </p>
         </div>
@@ -92,7 +96,7 @@ function ProductsPage() {
             onViewAll={() => setSelectedCategory('all')}
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="products-grid">
             {filteredProducts.map((product) => (
               <ProductCard key={product._id} product={product} addToCart={addToCart} />
             ))}

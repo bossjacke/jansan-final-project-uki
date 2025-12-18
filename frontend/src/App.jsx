@@ -21,10 +21,22 @@ import ChatButton from './components/chat/ChatButton.jsx';
 import PaymentSuccess from './pages/PaymentSuccess.jsx';
 import Success from './pages/Success.jsx';
 import Cancel from './pages/Cancel.jsx';
+
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import { AnimatePresence } from "framer-motion";
+import { useLocation } from "react-router-dom";
+import PageFlip from "./pagefilp/pagefilip.jsx";
+
+
+
+
+
+
 function App() {
+  const location = useLocation();
+
   return (
     <AuthProvider>
 
@@ -32,24 +44,27 @@ function App() {
       <div>
         <ToastContainer />
         <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/products" element={<ProductsPage />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/order/:orderId" element={<OrderDetail />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/payment-success" element={<PaymentSuccess />} />
-          <Route path="/success" element={<Success />} />
-          <Route path="/cancel" element={<Cancel />} />
-        </Routes>
+        <AnimatePresence mode="wait" >
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<PageFlip><Home /></PageFlip>} />
+            <Route path="/about" element={<PageFlip><About /></PageFlip>} />
+            <Route path="/products" element={<PageFlip><ProductsPage /></PageFlip>} />
+            <Route path="/cart" element={<PageFlip><Cart /></PageFlip>} />
+            <Route path="/login" element={<PageFlip><Login /></PageFlip>} />
+            <Route path="/register" element={<pageFlip><Register /></pageFlip>} />
+            <Route path="/forgot-password" element={<pageFlip><ForgotPassword /></pageFlip>} />
+            <Route path="/reset-password" element={<pageFlip><ResetPassword /></pageFlip>} />
+            <Route path="/admin" element={<pageFlip><Admin /></pageFlip>} />
+            <Route path="/orders" element={<pageFlip> <Orders /> </pageFlip>} />
+            <Route path="/order/:orderId" element={<pageFlip> <OrderDetail /> </pageFlip>} />
+            <Route path="/checkout" element={<pageFlip> <Checkout /> </pageFlip>} />
+            <Route path="/contact" element={<pageFlip> <Contact /> </pageFlip>} />
+            <Route path="/payment-success" element={<pageFlip> <PaymentSuccess /> </pageFlip>} />
+            <Route path="/success" element={<pageFlip> <Success /> </pageFlip>} />
+            <Route path="/cancel" element={<pageFlip> <Cancel /> </pageFlip>} />
+            <Route path="/orders" element={<pageFlip> <Orders /> </pageFlip>} />
+          </Routes>
+        </AnimatePresence>
         {/* Chat Button - Global Component */}
         <ChatButton />
         <Footer />
