@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getMyOrders, cancelOrder } from '../../api.js';
+import './Checkout.css'; // Import custom CSS
 
 const OrderSummarySection = () => {
   const { user } = useAuth();
@@ -24,7 +25,6 @@ const OrderSummarySection = () => {
       setOrders(data.data.orders || []);
       setError(null);
     } catch (err) {
-      console.error('❌ Error fetching orders:', err);
       setError(err.response?.data?.message || 'Failed to fetch orders');
     } finally {
       setLoading(false);
@@ -34,9 +34,8 @@ const OrderSummarySection = () => {
   const handleCancelOrder = async (orderId) => {
     try {
       setCancellingOrderId(orderId);
-      const response = await cancelOrder(orderId);
+      await cancelOrder(orderId);
       
-      // Update the order in the local state
       setOrders(prevOrders => 
         prevOrders.map(order => 
           order._id === orderId 
@@ -48,7 +47,6 @@ const OrderSummarySection = () => {
       setShowCancelConfirm(null);
       alert('Order cancelled successfully!');
     } catch (err) {
-      console.error('❌ Error cancelling order:', err);
       alert(err.message || 'Failed to cancel order');
     } finally {
       setCancellingOrderId(null);
@@ -68,69 +66,63 @@ const OrderSummarySection = () => {
       year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
 
-  const getStatusColor = (status) => {
+  const getStatusColorClass = (status) => {
     switch (status) {
-      case 'Processing':
-        return 'bg-orange-500';
-      case 'Delivered':
-        return 'bg-blue-500';
-      case 'Cancelled':
-        return 'bg-red-500';
-      default:
-        return 'bg-gray-500';
+      case 'Processing': return 'orderSummarySectionStatusBadge--processing';
+      case 'Delivered': return 'orderSummarySectionStatusBadge--delivered';
+      case 'Cancelled': return 'orderSummarySectionStatusBadge--cancelled';
+      default: return 'orderSummarySectionStatusBadge--default';
     }
   };
 
   if (!user) return null;
 
   return (
-    <div className="mt-8 bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="orderSummarySection">
       <div 
-        className="p-6 bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-gray-200 cursor-pointer hover:from-purple-100 hover:to-indigo-100 transition-colors"
+        className="orderSummarySectionHeader"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              My Orders Summary
-            </h2>
-            <p className="text-gray-600 mt-1">View your recent orders and track their status</p>
-          </div>
-          <div className="flex items-center gap-3">
-            {orders.length > 0 && (
-              <span className="bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                {orders.length} Orders
-              </span>
-            )}
-            <svg 
-              className={`w-6 h-6 text-gray-600 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        <div className="orderSummarySectionTitleGroup">
+          <h2 className="orderSummarySectionTitle">
+            <svg className="orderSummarySectionTitleIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-          </div>
+            My Orders Summary
+          </h2>
+          <p className="orderSummarySectionSubtitle">View your recent orders and track their status</p>
+        </div>
+        <div className="orderSummarySectionMeta">
+          {orders.length > 0 && (
+            <span className="orderSummarySectionCount">
+              {orders.length} Orders
+            </span>
+          )}
+          <svg 
+            className={`orderSummarySectionToggleIcon ${isExpanded ? 'orderSummarySectionToggleIcon--expanded' : ''}`} 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
         </div>
       </div>
 
       {isExpanded && (
-        <div className="p-6">
+        <div className="orderSummarySectionContent">
           {loading && (
-            <div className="text-center py-10">
-              <div className="text-lg text-gray-600">Loading orders...</div>
+            <div className="orderSummarySectionLoading">
+              <div className="orderSummarySectionLoadingText">Loading orders...</div>
             </div>
           )}
 
           {error && (
-            <div className="text-center py-10">
-              <div className="text-red-500 mb-4">{error}</div>
+            <div className="orderSummarySectionError">
+              <div className="orderSummarySectionErrorMessage">{error}</div>
               <button
                 onClick={fetchOrders}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+                className="orderSummarySectionBtnPrimary"
               >
                 Retry
               </button>
@@ -138,49 +130,49 @@ const OrderSummarySection = () => {
           )}
 
           {!loading && !error && orders.length === 0 && (
-            <div className="text-center py-16">
-              <div className="text-5xl mb-5">📦</div>
-              <h3 className="text-gray-600 mb-3">No orders yet</h3>
-              <p className="text-gray-400">Start shopping to see your orders here!</p>
+            <div className="orderSummarySectionEmptyState">
+              <div className="orderSummarySectionEmptyStateIcon">📦</div>
+              <h3 className="orderSummarySectionEmptyStateTitle">No orders yet</h3>
+              <p className="orderSummarySectionEmptyStateText">Start shopping to see your orders here!</p>
             </div>
           )}
 
           {!loading && !error && orders.length > 0 && (
             <>
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                <h3 className="font-bold mb-3">Order Statistics</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="orderSummarySectionStats">
+                <h3 className="orderSummarySectionStatsTitle">Order Statistics</h3>
+                <div className="orderSummarySectionStatsGrid">
                   {[
-                    { label: 'Total Orders', value: orders.length, color: 'text-gray-800' },
-                    { label: 'Processing', value: orders.filter(o => o.orderStatus === 'Processing').length, color: 'text-orange-500' },
-                    { label: 'Delivered', value: orders.filter(o => o.orderStatus === 'Delivered').length, color: 'text-blue-500' },
-                    { label: 'Cancelled', value: orders.filter(o => o.orderStatus === 'Cancelled').length, color: 'text-red-500' }
-                  ].map(({ label, value, color }) => (
-                    <div key={label} className="text-center p-3 bg-white rounded-lg">
-                      <div className={`text-lg font-bold ${color}`}>{value}</div>
-                      <div className="text-gray-600 text-xs">{label}</div>
+                    { label: 'Total Orders', value: orders.length, colorClass: 'orderSummarySectionStatValue--default' },
+                    { label: 'Processing', value: orders.filter(o => o.orderStatus === 'Processing').length, colorClass: 'orderSummarySectionStatValue--processing' },
+                    { label: 'Delivered', value: orders.filter(o => o.orderStatus === 'Delivered').length, colorClass: 'orderSummarySectionStatValue--delivered' },
+                    { label: 'Cancelled', value: orders.filter(o => o.orderStatus === 'Cancelled').length, colorClass: 'orderSummarySectionStatValue--cancelled' }
+                  ].map(({ label, value, colorClass }) => (
+                    <div key={label} className="orderSummarySectionStatCard">
+                      <div className={`orderSummarySectionStatValue ${colorClass}`}>{value}</div>
+                      <div className="orderSummarySectionStatLabel">{label}</div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="orderSummarySectionOrderList">
                 {orders.map((order) => (
-                  <div key={order._id} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                    <div className="flex justify-between items-start mb-3">
+                  <div key={order._id} className="orderSummarySectionOrderItem">
+                    <div className="orderSummarySectionOrderItemHeader">
                       <div>
-                        <div className="text-sm text-gray-600">Order #{order.orderNumber || order._id?.slice(-8)}</div>
-                        <div className="text-xs text-gray-500">{formatDate(order.createdAt)}</div>
+                        <div className="orderSummarySectionOrderNumber">Order #{order.orderNumber || order._id?.slice(-8)}</div>
+                        <div className="orderSummarySectionOrderDate">{formatDate(order.createdAt)}</div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className={`px-2 py-1 rounded-full text-xs font-bold text-white ${getStatusColor(order.orderStatus)}`}>
+                      <div className="orderSummarySectionOrderMetaActions">
+                        <div className={`orderSummarySectionStatusBadge ${getStatusColorClass(order.orderStatus)}`}>
                           {order.orderStatus}
                         </div>
                         {order.orderStatus === 'Processing' && (
                           <button
                             onClick={() => confirmCancelOrder(order._id)}
                             disabled={cancellingOrderId === order._id}
-                            className="px-2 py-1 rounded text-xs font-medium bg-red-500 hover:bg-red-600 text-white disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                            className="orderSummarySectionBtnCancel"
                           >
                             {cancellingOrderId === order._id ? 'Cancelling...' : 'Cancel'}
                           </button>
@@ -188,47 +180,47 @@ const OrderSummarySection = () => {
                       </div>
                     </div>
 
-                    <div className="space-y-2 mb-3">
+                    <div className="orderSummarySectionOrderProducts">
                       {order.products && order.products.slice(0, 3).map((product, index) => (
-                        <div key={index} className="flex justify-between text-sm">
-                          <div>
-                            <span className="font-medium">{product.productId?.name || 'Product'}</span>
-                            <span className="text-gray-500 ml-2">×{product.quantity}</span>
+                        <div key={index} className="orderSummarySectionOrderProductItem">
+                          <div className="orderSummarySectionOrderProductName">
+                            <span>{product.productId?.name || 'Product'}</span>
+                            <span className="orderSummarySectionOrderProductQuantity">×{product.quantity}</span>
                           </div>
-                          <span className="font-medium">₹{(product.price * product.quantity).toLocaleString('en-IN')}</span>
+                          <span className="orderSummarySectionOrderProductTotal">₹{(product.price * product.quantity).toLocaleString('en-IN')}</span>
                         </div>
                       ))}
                       {order.products && order.products.length > 3 && (
-                        <div className="text-xs text-gray-500">+{order.products.length - 3} more items</div>
+                        <div className="orderSummarySectionMoreItems">+{order.products.length - 3} more items</div>
                       )}
                     </div>
 
-                    <div className="flex justify-between pt-3 border-t border-gray-200">
-                      <div className="font-bold">Total:</div>
-                      <div className="font-bold text-lg">₹{(order.totalAmount || 0).toLocaleString('en-IN')}</div>
+                    <div className="orderSummarySectionOrderTotal">
+                      <div className="orderSummarySectionOrderTotalLabel">Total:</div>
+                      <div className="orderSummarySectionOrderTotalValue">₹{(order.totalAmount || 0).toLocaleString('en-IN')}</div>
                     </div>
                   </div>
                 ))}
 
                 {/* Cancel Confirmation Modal */}
                 {showCancelConfirm && (
-                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg max-w-md w-full p-6">
-                      <h3 className="text-lg font-bold text-gray-800 mb-4">Confirm Order Cancellation</h3>
-                      <p className="text-gray-600 mb-6">
+                  <div className="orderSummarySectionModalOverlay">
+                    <div className="orderSummarySectionModal">
+                      <h3 className="orderSummarySectionModalTitle">Confirm Order Cancellation</h3>
+                      <p className="orderSummarySectionModalText">
                         Are you sure you want to cancel this order? This action cannot be undone.
                       </p>
-                      <div className="flex gap-3 justify-end">
+                      <div className="orderSummarySectionModalActions">
                         <button
                           onClick={cancelConfirmation}
-                          className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors"
+                          className="orderSummarySectionBtnSecondary"
                         >
                           No, Keep Order
                         </button>
                         <button
                           onClick={() => handleCancelOrder(showCancelConfirm)}
                           disabled={cancellingOrderId === showCancelConfirm}
-                          className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                          className="orderSummarySectionBtnDanger"
                         >
                           {cancellingOrderId === showCancelConfirm ? 'Cancelling...' : 'Yes, Cancel Order'}
                         </button>
@@ -238,10 +230,10 @@ const OrderSummarySection = () => {
                 )}
               </div>
 
-              <div className="mt-6 text-center">
+              <div className="orderSummarySectionViewAllContainer">
                 <button
                   onClick={() => window.location.href = '/orders'}
-                  className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200"
+                  className="orderSummarySectionBtnViewAll"
                 >
                   View All Orders
                 </button>

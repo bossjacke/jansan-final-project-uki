@@ -41,7 +41,7 @@ function App() {
     <AuthProvider>
 
 
-      <div>
+      <div className="jansanApp">
         <ToastContainer />
         <Navbar />
         <AnimatePresence mode="wait" >
@@ -62,7 +62,7 @@ function App() {
             <Route path="/payment-success" element={<pageFlip> <PaymentSuccess /> </pageFlip>} />
             <Route path="/success" element={<pageFlip> <Success /> </pageFlip>} />
             <Route path="/cancel" element={<pageFlip> <Cancel /> </pageFlip>} />
-            <Route path="/orders" element={<pageFlip> <Orders /> </pageFlip>} />
+            {/* <Route path="/orders" element={<pageFlip> <Orders /> </pageFlip>} /> */}
           </Routes>
         </AnimatePresence>
         {/* Chat Button - Global Component */}
