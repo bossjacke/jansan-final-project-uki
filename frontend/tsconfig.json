@@ -29,7 +29,7 @@
     "paths": {
       "@/*": ["src/*"],
       "@/components/*": ["src/components/*"],
-      "@/pages/*": ["src/components/pages/*"],
+      "@/pages/*": ["src/components/payment/*"],
       "@/utils/*": ["src/utils/*"],
       "@/api/*": ["src/api/*"]
     }

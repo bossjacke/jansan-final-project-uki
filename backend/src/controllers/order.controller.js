@@ -23,13 +23,31 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    const { shippingAddress, items, totalAmount, paymentMethod } = req.body;
+    const { shippingAddress, items, totalAmount, paymentMethod, paymentIntentId } = req.body;
 
     console.log('Extracted from req.body:');
     console.log('  - items:', items?.length || 'MISSING');
     console.log('  - shippingAddress:', shippingAddress ? 'PRESENT' : 'MISSING');
     console.log('  - totalAmount:', totalAmount || 'MISSING', '(type:', typeof totalAmount, ')');
     console.log('  - paymentMethod:', paymentMethod || 'MISSING');
+    console.log('  - paymentIntentId:', paymentIntentId || 'MISSING');
+
+    // Validate payment method
+    const validPaymentMethods = ["cash_on_delivery", "stripe"];
+    if (paymentMethod && !validPaymentMethods.includes(paymentMethod)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid payment method. Must be one of: ${validPaymentMethods.join(', ')}`
+      });
+    }
+
+    // If payment method is stripe, payment intent ID is required
+    if (paymentMethod === "stripe" && !paymentIntentId) {
+      return res.status(400).json({
+        success: false,
+        message: "Payment intent ID is required for Stripe payments"
+      });
+    }
 
     // Validate required fields from frontend
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -168,11 +186,12 @@ export const createOrder = async (req, res) => {
       orderNumber: orderNumber,
       products: orderProducts,
       totalAmount: totalAmount,
-      paymentMethod: "cash_on_delivery",
+      paymentMethod: paymentMethod || "cash_on_delivery",
+      stripePaymentId: paymentIntentId || null,
       deliveryLocation: user?.location || finalShippingAddress.addressLine1,
       shippingAddress: finalShippingAddress,
       orderStatus: "Processing",
-      paymentStatus: "pending"
+      paymentStatus: paymentMethod === "stripe" ? "pending" : "pending"
     });
 
     console.log('Order created:', order._id);
