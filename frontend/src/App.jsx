@@ -18,9 +18,6 @@ import OrderDetail from './components/orders/OrderDetail.jsx';
 import Checkout from './components/orders/Checkout.jsx';
 import Contact from './components/Contact/Contact.jsx';
 import ChatButton from './components/chat/ChatButton.jsx';
-import PaymentSuccess from './pages/PaymentSuccess.jsx';
-import Success from './pages/Success.jsx';
-import Cancel from './pages/Cancel.jsx';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -59,9 +56,6 @@ function App() {
             <Route path="/order/:orderId" element={<pageFlip> <OrderDetail /> </pageFlip>} />
             <Route path="/checkout" element={<pageFlip> <Checkout /> </pageFlip>} />
             <Route path="/contact" element={<pageFlip> <Contact /> </pageFlip>} />
-            <Route path="/payment-success" element={<pageFlip> <PaymentSuccess /> </pageFlip>} />
-            <Route path="/success" element={<pageFlip> <Success /> </pageFlip>} />
-            <Route path="/cancel" element={<pageFlip> <Cancel /> </pageFlip>} />
             {/* <Route path="/orders" element={<pageFlip> <Orders /> </pageFlip>} /> */}
           </Routes>
         </AnimatePresence>

@@ -349,16 +349,9 @@ export const updateOrderStatus = async (req, res) => {
     order.orderStatus = status;
     order.adminNotes = adminNotes || order.adminNotes;
 
-    // If marked Delivered, set deliveryDate and (optionally) update payment status for non-COD payments
+    // If marked Delivered, set deliveryDate
     if (status === 'Delivered') {
       order.deliveryDate = new Date();
-      try {
-        if (order.paymentMethod && order.paymentMethod !== 'cash_on_delivery') {
-          order.paymentStatus = 'paid';
-        }
-      } catch (e) {
-        // ignore
-      }
     }
 
     await order.save();

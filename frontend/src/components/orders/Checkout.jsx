@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCart, createOrder, confirmPayment } from '../../api.js';
-import DualPaymentSystem from '../payment/DualPaymentSystem.jsx'; // Assuming this component exists
+import { getCart, createOrder } from '../../api.js';
 import './Checkout.css'; // Import the custom CSS
 
 const Checkout = () => {
@@ -19,8 +18,6 @@ const Checkout = () => {
   });
   const [user, setUser] = useState(null); // Assuming user state is fetched elsewhere or from AuthContext
   const [successMessage, setSuccessMessage] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('cod');
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
 
   useEffect(() => {
     fetchCart();
@@ -133,53 +130,6 @@ const Checkout = () => {
     return true;
   };
 
-  const handlePaymentSuccess = async (paymentDetails) => {
-    setLoading(true);
-    setError('');
-
-    try {
-      const orderData = {
-        items: cart.items.map(item => ({
-          productId: item.productId._id || item.productId,
-          quantity: item.quantity,
-          price: item.price
-        })),
-        shippingAddress: {
-          fullName: shippingAddress.fullName,
-          phone: shippingAddress.phone,
-          addressLine1: shippingAddress.addressLine1,
-          city: shippingAddress.city,
-          postalCode: shippingAddress.postalCode,
-          country: shippingAddress.country
-        },
-        totalAmount: cart.totalAmount,
-        paymentMethod: paymentDetails.paymentMethod,
-        paymentDetails: paymentDetails
-      };
-
-      const data = await confirmPayment({
-        paymentIntentId: paymentDetails.paymentIntentId,
-        orderData: orderData
-      });
-
-      if (data.success) {
-        setSuccessMessage('Payment successful! Order placed successfully.');
-        // Clear cart after successful order
-        // This should be done via API call or AuthContext after order is confirmed
-        // For now, redirect will cause re-fetch
-      } else {
-        setError(data.message || 'Failed to confirm payment');
-      }
-    } catch (err) {
-      setError(err.message || 'Failed to confirm payment');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePaymentError = (error) => {
-    setError(error.message || 'Payment failed. Please try again.');
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -193,10 +143,6 @@ const Checkout = () => {
       return;
     }
 
-    if (paymentMethod !== 'cod') {
-      setError('Please select Cash on Delivery or use the Stripe payment button below.');
-      return;
-    }
 
     setLoading(true);
     setError('');
@@ -313,61 +259,15 @@ const Checkout = () => {
         <div className="checkoutPaymentMethodCard">
           <h3 className="checkoutCardTitle">Payment Method</h3>
           
-          <div className="checkoutPaymentOptions">
-            <button
-              onClick={() => {
-                setPaymentMethod('cod');
-                setShowPaymentForm(false);
-              }}
-              className={`checkoutPaymentOptionBtn ${paymentMethod === 'cod' ? 'checkoutPaymentOptionBtn--selected' : ''}`}
-            >
-              <div className="checkoutPaymentOptionContent">
-                <span className="checkoutPaymentOptionIcon">💵</span>
-                <div className="checkoutPaymentOptionText">
-                  <div className="checkoutPaymentOptionName">Cash on Delivery</div>
-                  <div className="checkoutPaymentOptionDescription">Pay when you receive your order</div>
-                </div>
-              </div>
-            </button>
-
-            <button
-              onClick={() => {
-                setPaymentMethod('stripe');
-                setShowPaymentForm(true);
-              }}
-              className={`checkoutPaymentOptionBtn ${paymentMethod === 'stripe' ? 'checkoutPaymentOptionBtn--selected' : ''}`}
-            >
-              <div className="checkoutPaymentOptionContent">
-                <span className="checkoutPaymentOptionIcon">💳</span>
-                <div className="checkoutPaymentOptionText">
-                  <div className="checkoutPaymentOptionName">Credit/Debit Card & UPI</div>
-                  <div className="checkoutPaymentOptionDescription">Instant payment with Stripe</div>
-                </div>
-              </div>
-            </button>
-          </div>
-
-          {paymentMethod === 'cod' && (
-            <div className="checkoutCodMessage">
-              <div className="checkoutCodMessageHeader">
-                <span className="checkoutCodMessageIcon">✓</span>
-                <span className="checkoutCodMessageText">Cash on Delivery Selected</span>
-              </div>
-              <p className="checkoutCodMessageDescription">
-                Pay when you receive your order. Delivery typically takes 3-5 days.
-              </p>
+          <div className="checkoutCodMessage">
+            <div className="checkoutCodMessageHeader">
+              <span className="checkoutCodMessageIcon">💵</span>
+              <span className="checkoutCodMessageText">Cash on Delivery</span>
             </div>
-          )}
-
-          {paymentMethod === 'stripe' && showPaymentForm && (
-            <DualPaymentSystem
-              amount={cart.totalAmount}
-              items={cart.items}
-              shippingAddress={shippingAddress}
-              onPaymentSuccess={handlePaymentSuccess}
-              onPaymentError={handlePaymentError}
-            />
-          )}
+            <p className="checkoutCodMessageDescription">
+              Pay when you receive your order. Delivery typically takes 3-5 days.
+            </p>
+          </div>
         </div>
 
         <div className="checkoutShippingAddressFormCard">
@@ -469,7 +369,7 @@ const Checkout = () => {
               </button>
               <button 
                 type="submit" 
-                disabled={loading || paymentMethod === 'stripe'}
+                disabled={loading}
                 className="checkoutBtnPrimary"
               >
                 {loading ? (

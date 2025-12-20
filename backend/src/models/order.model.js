@@ -41,27 +41,15 @@ const orderSchema = new mongoose.Schema(
 
     paymentMethod: {
       type: String,
-      enum: ["cash_on_delivery", "stripe_card", "stripe_checkout"],
+      enum: ["cash_on_delivery"],
       required: true,
       default: "cash_on_delivery"
     },
 
     paymentStatus: {
       type: String,
-      enum: ["pending", "paid", "failed", "cancelled", "refunded"],
+      enum: ["pending"],
       default: "pending"
-    },
-
-    paymentDetails: {
-      paymentIntentId: String,
-      checkoutSessionId: String,
-      stripeChargeId: String,
-      status: String,
-      amount: Number,
-      currency: String,
-      customerEmail: String,
-      refundId: String,
-      metadata: mongoose.Schema.Types.Mixed
     },
 
     deliveryLocation: {

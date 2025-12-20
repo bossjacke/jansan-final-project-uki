@@ -377,63 +377,6 @@ export const cancelOrder = async (orderId) => {
   }
 };
 
-// Payment API functions
-export const createPayment = async (paymentData) => {
-  try {
-    validateRequired(paymentData, 'Payment data');
-    validateRequired(paymentData.amount, 'Payment amount');
-    
-    const res = await axios.post(`${API_URL}/payments`, paymentData, {
-      headers: getAuthHeaders()
-    });
-    return res.data;
-  } catch (err) {
-    handleApiError(err, 'Create Payment');
-  }
-};
-
-export const confirmPayment = async (paymentData) => {
-  try {
-    validateRequired(paymentData, 'Payment confirmation data');
-    validateRequired(paymentData.sessionId, 'Session ID');
-    
-    const res = await axios.post(`${API_URL}/payments/confirm`, paymentData);
-    return res.data;
-  } catch (err) {
-    handleApiError(err, 'Confirm Payment');
-  }
-};
-
-// Legacy function names for backward compatibility
-export const createPaymentIntent = createPayment;
-export const createCheckoutSession = createPayment;
-
-export const getPaymentStatus = async (paymentIntentId) => {
-  try {
-    validateRequired(paymentIntentId, 'Payment Intent ID');
-    
-    const res = await axios.get(`${API_URL}/payments/status/${paymentIntentId}`, {
-      headers: getAuthHeaders()
-    });
-    return res.data;
-  } catch (err) {
-    handleApiError(err, 'Get Payment Status');
-  }
-};
-
-export const processRefund = async (orderId, refundData) => {
-  try {
-    validateRequired(orderId, 'Order ID');
-    validateRequired(refundData, 'Refund data');
-    
-    const res = await axios.post(`${API_URL}/payments/refund/${orderId}`, refundData, {
-      headers: getAuthHeaders()
-    });
-    return res.data;
-  } catch (err) {
-    handleApiError(err, 'Process Refund');
-  }
-};
 
 // Admin API functions
 export const getAllUsers = async () => {
