@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { getAllProducts, deleteProduct } from '../../api.js';
 import ProductForm from './ProductForm.jsx';
 import ProductCard from './ProductCard.jsx';
@@ -52,7 +53,7 @@ function ProductTab({ onProductsUpdate }) {
 					onProductsUpdate();
 				}
 			} catch (err) {
-				alert('Failed to delete product');
+				toast.error('Failed to delete product');
 			}
 		}
 	};

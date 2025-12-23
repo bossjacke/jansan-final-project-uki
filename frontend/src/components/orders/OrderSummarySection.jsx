@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { toast } from 'react-toastify';
 import { getMyOrders, cancelOrder } from '../../api.js';
 import './Checkout.css'; // Import custom CSS
 
@@ -45,9 +46,9 @@ const OrderSummarySection = () => {
       );
       
       setShowCancelConfirm(null);
-      alert('Order cancelled successfully!');
+      toast.success('Order cancelled successfully!');
     } catch (err) {
-      alert(err.message || 'Failed to cancel order');
+      toast.error(err.message || 'Failed to cancel order');
     } finally {
       setCancellingOrderId(null);
     }
@@ -187,7 +188,7 @@ const OrderSummarySection = () => {
                             <span>{product.productId?.name || 'Product'}</span>
                             <span className="orderSummarySectionOrderProductQuantity">×{product.quantity}</span>
                           </div>
-                          <span className="orderSummarySectionOrderProductTotal">₹{(product.price * product.quantity).toLocaleString('en-IN')}</span>
+                          <span className="orderSummarySectionOrderProductTotal">Rs.{(product.price * product.quantity).toLocaleString()}</span>
                         </div>
                       ))}
                       {order.products && order.products.length > 3 && (
@@ -197,7 +198,7 @@ const OrderSummarySection = () => {
 
                     <div className="orderSummarySectionOrderTotal">
                       <div className="orderSummarySectionOrderTotalLabel">Total:</div>
-                      <div className="orderSummarySectionOrderTotalValue">₹{(order.totalAmount || 0).toLocaleString('en-IN')}</div>
+                      <div className="orderSummarySectionOrderTotalValue">Rs.{(order.totalAmount || 0).toLocaleString()}</div>
                     </div>
                   </div>
                 ))}

@@ -74,7 +74,7 @@ const ProductCard = ({ product, addToCart }) => {
 
           <div className="product-card-footer">
             <div className="product-card-price">
-              Rs{product.price.toLocaleString('en-RS')}
+              Rs.{product.price.toLocaleString()}
             </div>
             <button
               type="button"

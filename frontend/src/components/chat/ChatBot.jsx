@@ -86,7 +86,7 @@ const ChatBot = ({ onClose }) => {
     }
     
     if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerMessage.includes('how much')) {
-      return "Our products range from ₹100 to ₹1000 depending on the type and size. We have affordable options for every budget!";
+      return "Our products range from Rs.100 to Rs.1000 depending on the type and size. We have affordable options for every budget!";
     }
     
     if (lowerMessage.includes('order') || lowerMessage.includes('buy') || lowerMessage.includes('purchase')) {

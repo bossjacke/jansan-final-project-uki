@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { getCart, getMyOrders, createOrder, cancelOrder } from '../../api.js';
 import './Checkout.css'; // Import custom CSS
+
 
 function Orders() {
   const { user, token } = useAuth();
@@ -80,7 +82,7 @@ function Orders() {
 
   const createOrderHandler = async () => {
     if (!shippingAddress.street || !shippingAddress.city || !shippingAddress.postalCode) {
-      alert('Please fill in all shipping address fields');
+      toast.warning('Please fill in all shipping address fields');
       return;
     }
 
@@ -113,7 +115,7 @@ function Orders() {
       fetchOrders();
 
     } catch (err) {
-      alert(err.response?.data?.message || err.message || 'Failed to create order');
+      toast.error(err.response?.data?.message || err.message || 'Failed to create order');
     } finally {
       setOrderProcessing(false);
     }
@@ -159,14 +161,14 @@ function Orders() {
               <div className="ordersCheckoutSummaryProductType">
                 {item.productId?.type === 'biogas' ? '🔥 Biogas Unit' : '🌱 Fertilizer'}
               </div>
-              <div className="ordersCheckoutSummaryProductQtyPrice">Qty: {item.quantity} × ₹{item.price}</div>
+              <div className="ordersCheckoutSummaryProductQtyPrice">Qty: {item.quantity} × Rs.{item.price}</div>
             </div>
-            <div className="ordersCheckoutSummaryProductTotal">₹{(item.price * item.quantity).toLocaleString('en-IN')}</div>
+            <div className="ordersCheckoutSummaryProductTotal">Rs.{(item.price * item.quantity).toLocaleString()}</div>
           </div>
         ))}
         <div className="ordersCheckoutSummaryTotal">
           <div className="ordersCheckoutSummaryTotalLabel">Total</div>
-          <div className="ordersCheckoutSummaryTotalValue">₹{cart.totalAmount.toLocaleString('en-IN')}</div>
+          <div className="ordersCheckoutSummaryTotalValue">Rs.{cart.totalAmount.toLocaleString()}</div>
         </div>
       </div>
 
@@ -198,7 +200,7 @@ function Orders() {
       <div className="ordersCheckoutActions">
         <button className="ordersBtnSecondary" onClick={cancelCheckout} disabled={orderProcessing}>Cancel</button>
         <button className="ordersBtnPrimary" onClick={createOrderHandler} disabled={orderProcessing}>
-          {orderProcessing ? 'Processing...' : `Place Order • ₹${cart.totalAmount.toLocaleString('en-IN')}`}
+          {orderProcessing ? 'Processing...' : `Place Order • Rs.${cart.totalAmount.toLocaleString()}`}
         </button>
       </div>
     </div>
@@ -236,9 +238,9 @@ function Orders() {
                   <div className="ordersOrderCardProductType">
                     {product.productId?.type === 'biogas' ? '🔥 Biogas Unit' : '🌱 Fertilizer'}
                   </div>
-                  <div className="ordersOrderCardProductQtyPrice">Qty: {product.quantity} × ₹{product.price}</div>
+                  <div className="ordersOrderCardProductQtyPrice">Qty: {product.quantity} × Rs.{product.price}</div>
                 </div>
-                <div className="ordersOrderCardProductTotal">₹{(product.price * product.quantity).toLocaleString('en-IN')}</div>
+                <div className="ordersOrderCardProductTotal">Rs.{(product.price * product.quantity).toLocaleString()}</div>
               </div>
             ))
           ) : (
@@ -248,7 +250,7 @@ function Orders() {
 
         <div className="ordersOrderCardSummaryTotal">
           <div><strong>Total Amount:</strong></div>
-          <div className="ordersOrderCardTotalValue">₹{(order.totalAmount || 0).toLocaleString('en-IN')}</div>
+          <div className="ordersOrderCardTotalValue">Rs.{(order.totalAmount || 0).toLocaleString()}</div>
         </div>
 
         {order.deliveryDate && (
@@ -268,7 +270,7 @@ function Orders() {
           {order.orderStatus === 'Delivered' && (
             <button 
               className="ordersBtnPrimary" 
-              onClick={() => alert('Review feature coming soon!')}
+              onClick={() => toast.info('Review feature coming soon!')}
             >
               Write Review
             </button>
@@ -279,10 +281,10 @@ function Orders() {
               onClick={() => {
                 if (window.confirm('Are you sure you want to cancel this order?')) {
                   cancelOrder(order._id).then(() => {
-                    alert('Order cancelled successfully');
+                    toast.success('Order cancelled successfully');
                     fetchOrders();
                   }).catch(err => {
-                    alert(err.message || 'Failed to cancel order');
+                    toast.error(err.message || 'Failed to cancel order');
                   });
                 }
               }}

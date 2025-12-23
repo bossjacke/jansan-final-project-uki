@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 import { updateUserRole, deleteUser } from '../../api.js';
 
 const UserCard = ({ user, onUserUpdate }) => {
@@ -14,7 +15,7 @@ const UserCard = ({ user, onUserUpdate }) => {
 			}
 		} catch (error) {
 			console.error('Failed to update user role:', error);
-			alert('Failed to update user role');
+			toast.error('Failed to update user role');
 		} finally {
 			setIsLoading(false);
 		}
@@ -30,7 +31,7 @@ const UserCard = ({ user, onUserUpdate }) => {
 				}
 			} catch (error) {
 				console.error('Failed to delete user:', error);
-				alert('Failed to delete user');
+				toast.error('Failed to delete user');
 			} finally {
 				setIsLoading(false);
 			}

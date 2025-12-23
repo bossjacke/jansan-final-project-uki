@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { createProduct, updateProduct } from '../../api.js';
 
 function ProductForm({ editingProduct, onProductSaved, onCancel }) {
@@ -43,7 +44,7 @@ function ProductForm({ editingProduct, onProductSaved, onCancel }) {
 			onProductSaved();
 		} catch (error) {
 			console.error('Error saving product:', error);
-			alert('Failed to save product');
+			toast.error('Failed to save product');
 		}
 	};
 
@@ -90,7 +91,7 @@ function ProductForm({ editingProduct, onProductSaved, onCancel }) {
 				</div>
 
 				<div>
-					<label className="block text-sm leading-5 font-medium text-gray-700 mb-2">Price (₹)</label>
+					<label className="block text-sm leading-5 font-medium text-gray-700 mb-2">Price (Rs.)</label>
 					<input
 						type="number"
 						name="price"

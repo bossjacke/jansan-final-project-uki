@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { getAdminOrders, getOrderDetails, updateOrderStatus } from '../../api.js';
 
 const OrderManagement = ({ onOrdersUpdate }) => {
@@ -56,7 +57,7 @@ const OrderManagement = ({ onOrdersUpdate }) => {
       });
 
       if (response.success) {
-        alert('Order status updated successfully');
+        toast.success('Order status updated successfully');
         setStatusUpdateModal(false);
         setAdminNotes('');
         setSelectedStatus('');
@@ -69,11 +70,11 @@ const OrderManagement = ({ onOrdersUpdate }) => {
           onOrdersUpdate();
         }
       } else {
-        alert(response.message || 'Failed to update order status');
+        toast.error(response.message || 'Failed to update order status');
       }
     } catch (err) {
       console.error('Error updating order status:', err);
-      alert('Network error. Please try again.');
+      toast.error('Network error. Please try again.');
     }
   };
 
@@ -85,11 +86,11 @@ const OrderManagement = ({ onOrdersUpdate }) => {
         setSelectedOrder(response.data);
         setShowOrderDetails(true);
       } else {
-        alert(response.message || 'Failed to fetch order details');
+        toast.error(response.message || 'Failed to fetch order details');
       }
     } catch (err) {
       console.error('Error fetching order details:', err);
-      alert('Network error. Please try again.');
+      toast.error('Network error. Please try again.');
     }
   };
 
@@ -211,7 +212,7 @@ const OrderManagement = ({ onOrdersUpdate }) => {
                   <strong>Customer:</strong> {order.userId?.name || 'N/A'}
                 </div>
                 <div className="order-total">
-                  <strong>Total:</strong> ₹{order.totalAmount}
+                  <strong>Total:</strong> Rs.{order.totalAmount}
                 </div>
                 <div className="order-items">
                   <strong>Items:</strong> {order.products?.length || 0}
@@ -281,7 +282,7 @@ const OrderManagement = ({ onOrdersUpdate }) => {
                 <p><strong>Order ID:</strong> {selectedOrder._id}</p>
                 <p><strong>Date:</strong> {formatDate(selectedOrder.createdAt)}</p>
                 <p><strong>Status:</strong> {getStatusText(selectedOrder.orderStatus)}</p>
-                <p><strong>Total:</strong> ₹{selectedOrder.totalAmount}</p>
+                <p><strong>Total:</strong> Rs.{selectedOrder.totalAmount}</p>
                 <p><strong>Payment Method:</strong> {selectedOrder.paymentMethod}</p>
                 <p><strong>Payment Status:</strong> {selectedOrder.paymentStatus}</p>
               </div>
@@ -300,7 +301,7 @@ const OrderManagement = ({ onOrdersUpdate }) => {
                   <div key={index} className="product-item">
                     <p><strong>Product:</strong> {product.productId?.name || 'N/A'}</p>
                     <p><strong>Quantity:</strong> {product.quantity}</p>
-                    <p><strong>Price:</strong> ₹{product.price}</p>
+                    <p><strong>Price:</strong> Rs.{product.price}</p>
                   </div>
                 ))}
               </div>

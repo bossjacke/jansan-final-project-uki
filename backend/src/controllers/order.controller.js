@@ -33,7 +33,7 @@ export const createOrder = async (req, res) => {
     console.log('  - paymentIntentId:', paymentIntentId || 'MISSING');
 
     // Validate payment method
-    const validPaymentMethods = ["cash_on_delivery", "stripe"];
+    const validPaymentMethods = ["cash_on_delivery", "stripe", "online_payment"];
     if (paymentMethod && !validPaymentMethods.includes(paymentMethod)) {
       return res.status(400).json({
         success: false,
@@ -41,13 +41,8 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // If payment method is stripe, payment intent ID is required
-    if (paymentMethod === "stripe" && !paymentIntentId) {
-      return res.status(400).json({
-        success: false,
-        message: "Payment intent ID is required for Stripe payments"
-      });
-    }
+    // Payment intent ID is not required for initial order creation
+    // It will be set after successful payment confirmation
 
     // Validate required fields from frontend
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -191,7 +186,7 @@ export const createOrder = async (req, res) => {
       deliveryLocation: user?.location || finalShippingAddress.addressLine1,
       shippingAddress: finalShippingAddress,
       orderStatus: "Processing",
-      paymentStatus: paymentMethod === "stripe" ? "pending" : "pending"
+      paymentStatus: (paymentMethod === "stripe" || paymentMethod === "online_payment") ? "pending" : "pending"
     });
 
     console.log('Order created:', order._id);

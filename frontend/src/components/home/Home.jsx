@@ -122,7 +122,7 @@ function Home() {
 										</div>
 
 										<div>
-											<div className="product-price">₹{product.price.toLocaleString('en-IN')}</div>
+											<div className="product-price">Rs.{product.price.toLocaleString()}</div>
 											<Link to="/products" className="btn btn-primary">
 												View Details
 											</Link>

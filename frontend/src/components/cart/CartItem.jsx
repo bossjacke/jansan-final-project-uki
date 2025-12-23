@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import gascylinder from '../../assets/gascylinder.avif';
+import organicfertilizer from '../../assets/organicfertilizer.webp';
 
 const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
   if (!item) {
@@ -55,19 +57,41 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
             style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} 
           />
         ) : (
-          <div style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#f5f5f5',
-            borderRadius: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#9e9e9e',
-            fontSize: '14px'
-          }}>
-            No Image
-          </div>
+          <>
+            {item.productId?.type?.toLowerCase().includes('biogas') || 
+             item.productId?.name?.toLowerCase().includes('biogas') ||
+             item.productId?.type?.toLowerCase().includes('gas') ||
+             item.productId?.name?.toLowerCase().includes('gas') ? (
+              <img 
+                src={gascylinder} 
+                alt="Biogas Product" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} 
+              />
+            ) : item.productId?.type?.toLowerCase().includes('fertilizer') || 
+                    item.productId?.name?.toLowerCase().includes('fertilizer') ||
+                    item.productId?.type?.toLowerCase().includes('organic') ||
+                    item.productId?.name?.toLowerCase().includes('organic') ? (
+              <img 
+                src={organicfertilizer} 
+                alt="Fertilizer Product" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} 
+              />
+            ) : (
+              <div style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#f5f5f5',
+                borderRadius: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#9e9e9e',
+                fontSize: '14px'
+              }}>
+                No Image
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -79,7 +103,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
           {item.productId?.type || 'Unknown Type'}
         </p>
         <p style={{ fontSize: '16px', fontWeight: '500', color: '#333', marginBottom: '10px' }}>
-          ₹{(item.price || 0).toLocaleString()}
+          Rs.{(item.price || 0).toLocaleString()}
         </p>
 
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
@@ -123,7 +147,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
         </div>
 
         <p style={{ fontSize: '14px', fontWeight: '500', marginBottom: '10px', color: '#333' }}>
-          Total: ₹{((item.price || 0) * quantity).toLocaleString()}
+          Total: Rs.{((item.price || 0) * quantity).toLocaleString()}
         </p>
 
         <button 

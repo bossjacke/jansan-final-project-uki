@@ -2,32 +2,39 @@ import express from "express";
 import { authMiddleware } from '../middleware/auth.js';
 import { roleCheck } from '../middleware/roleCheck.js';
 import {
-    createPaymentIntent,
-    confirmPayment,
-    getPaymentById,
-    getUserPayments,
-    processRefund,
-    getAllPayments
+  createPaymentIntent,
+  confirmPayment,
+  getPaymentById,
+  getPaymentByIntentId,
+  getUserPayments,
+  processRefund,
+  getAllPayments,
+  getUserPaymentsForAdmin
 } from '../controllers/payment.controller.js';
 
 const router = express.Router();
 
-// POST /api/payment/create-payment-intent - Create payment intent
+// User Routes
 router.post("/create-payment-intent", authMiddleware, createPaymentIntent);
-
-// POST /api/payment/confirm - Confirm payment after successful stripe payment
 router.post("/confirm", authMiddleware, confirmPayment);
-
-// GET /api/payment/my - Get logged-in user's payments
 router.get("/my", authMiddleware, getUserPayments);
 
-// GET /api/payment/:paymentId - Get specific payment
-router.get("/:paymentId", authMiddleware, getPaymentById);
-
-// POST /api/payment/refund - Process refund (Admin only)
+// Admin Routes (must come before /:paymentId to avoid conflicts)
 router.post("/refund", authMiddleware, roleCheck(['admin']), processRefund);
-
-// GET /api/payment/admin/all - Get all payments (Admin only)
 router.get("/admin/all", authMiddleware, roleCheck(['admin']), getAllPayments);
+router.get("/admin/user/:userId", authMiddleware, roleCheck(['admin']), getUserPaymentsForAdmin);
+
+// Stripe Config (for frontend)
+router.get("/stripe-config", (req, res) => {
+  res.json({
+    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
+  });
+});
+
+// Payment by Intent ID (for success page)
+router.get("/by-intent/:paymentIntentId", authMiddleware, getPaymentByIntentId);
+
+// Dynamic Routes (must come after specific routes)
+router.get("/:paymentId", authMiddleware, getPaymentById);
 
 export default router;

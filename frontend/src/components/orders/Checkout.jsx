@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCart, createOrder } from '../../api.js';
-import './Checkout.css'; // Import the custom CSS
+import StripePayment from '../payment/StripePayment.jsx';
+import gascylinder from '../../assets/gascylinder.avif';
+import organicfertilizer from '../../assets/organicfertilizer.webp';
+import './Checkout.css';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -16,8 +19,11 @@ const Checkout = () => {
     postalCode: '',
     country: 'India'
   });
-  const [user, setUser] = useState(null); // Assuming user state is fetched elsewhere or from AuthContext
+  const [user, setUser] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [orderId, setOrderId] = useState(null);
+  const [showPayment, setShowPayment] = useState(false);
 
   useEffect(() => {
     fetchCart();
@@ -60,7 +66,6 @@ const Checkout = () => {
   };
 
   const fetchUserData = async () => {
-    // This part should ideally come from AuthContext or a dedicated profile API
     try {
       const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:3003/api/users/profile', {
@@ -130,22 +135,15 @@ const Checkout = () => {
     return true;
   };
 
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
+  const createOrderForPayment = async () => {
     if (!validateForm()) {
-      return;
+      return null;
     }
 
     if (!cart || !cart.items || cart.items.length === 0) {
       setError('Your cart is empty. Please add items before checkout.');
-      return;
+      return null;
     }
-
-
-    setLoading(true);
-    setError('');
 
     try {
       const validItems = cart.items.filter(item => {
@@ -181,22 +179,47 @@ const Checkout = () => {
           country: shippingAddress.country.trim()
         },
         totalAmount: cart.totalAmount,
-        paymentMethod: 'cash_on_delivery'
+        paymentMethod: paymentMethod === 'stripe' ? 'online_payment' : 'cash_on_delivery',
+        paymentIntentId: paymentMethod === 'stripe' ? 'pending' : null
       };
       
       const data = await createOrder(orderData);
 
       if (data.success) {
-        setSuccessMessage('✅ Order placed successfully! Cash on delivery selected. Redirecting to orders...');
+        setOrderId(data.data._id);
+        return data.data;
       } else {
-        setError(data.message || 'Failed to place order');
+        throw new Error(data.message || 'Failed to create order');
       }
     } catch (err) {
-      const errorMsg = err.message || 'Failed to place order. Please try again.';
-      setError(errorMsg);
-    } finally {
-      setLoading(false);
+      setError(err.message || 'Failed to create order');
+      return null;
     }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (paymentMethod === 'stripe') {
+      const order = await createOrderForPayment();
+      if (order) {
+        setShowPayment(true);
+      }
+    } else {
+      const order = await createOrderForPayment();
+      if (order) {
+        setSuccessMessage('✅ Order placed successfully! Cash on delivery selected. Redirecting to orders...');
+      }
+    }
+  };
+
+  const handlePaymentSuccess = (paymentIntent) => {
+    setSuccessMessage('✅ Payment successful! Order confirmed. Redirecting to orders...');
+  };
+
+  const handlePaymentError = (error) => {
+    setError(`Payment failed: ${error.message}`);
+    setShowPayment(false);
   };
 
   if (!cart || cart.items.length === 0) {
@@ -238,17 +261,52 @@ const Checkout = () => {
           <div className="checkoutOrderItems">
             {cart.items.map((item, index) => (
               <div key={index} className="checkoutOrderItem">
+                <div className="checkoutOrderItemImage">
+                  {item.productId?.image ? (
+                    <img 
+                      src={item.productId.image} 
+                      alt={item.productId?.name || 'Product'} 
+                      className="checkoutOrderItemImg"
+                    />
+                  ) : (
+                    <>
+                      {item.productId?.type?.toLowerCase().includes('biogas') || 
+                       item.productId?.name?.toLowerCase().includes('biogas') ||
+                       item.productId?.type?.toLowerCase().includes('gas') ||
+                       item.productId?.name?.toLowerCase().includes('gas') ? (
+                        <img 
+                          src={gascylinder} 
+                          alt="Biogas Product" 
+                          className="checkoutOrderItemImg"
+                        />
+                      ) : item.productId?.type?.toLowerCase().includes('fertilizer') || 
+                              item.productId?.name?.toLowerCase().includes('fertilizer') ||
+                              item.productId?.type?.toLowerCase().includes('organic') ||
+                              item.productId?.name?.toLowerCase().includes('organic') ? (
+                        <img 
+                          src={organicfertilizer} 
+                          alt="Fertilizer Product" 
+                          className="checkoutOrderItemImg"
+                        />
+                      ) : (
+                        <div className="checkoutOrderItemNoImage">
+                          No Image
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
                 <div className="checkoutOrderItemInfo">
                   <span className="checkoutOrderItemName">{item.productId?.name || 'Product'}</span>
                   <span className="checkoutOrderItemQuantity">Qty: {item.quantity}</span>
                 </div>
-                <span className="checkoutOrderItemTotal">₹{(item.price * item.quantity).toLocaleString()}</span>
+                <span className="checkoutOrderItemTotal">Rs.{(item.price * item.quantity).toLocaleString()}</span>
               </div>
             ))}
           </div>
           <div className="checkoutTotalAmount">
             <span className="checkoutTotalAmountLabel">Total Amount:</span>
-            <span className="checkoutTotalAmountValue">₹{cart.totalAmount.toLocaleString()}</span>
+            <span className="checkoutTotalAmountValue">Rs.{cart.totalAmount.toLocaleString()}</span>
           </div>
           <div className="checkoutDeliveryInfo">
             <span className="checkoutDeliveryLabel">Delivery:</span>
@@ -259,15 +317,58 @@ const Checkout = () => {
         <div className="checkoutPaymentMethodCard">
           <h3 className="checkoutCardTitle">Payment Method</h3>
           
-          <div className="checkoutCodMessage">
-            <div className="checkoutCodMessageHeader">
-              <span className="checkoutCodMessageIcon">💵</span>
-              <span className="checkoutCodMessageText">Cash on Delivery</span>
-            </div>
-            <p className="checkoutCodMessageDescription">
-              Pay when you receive your order. Delivery typically takes 3-5 days.
-            </p>
+          <div className="checkoutPaymentOptions">
+            <label className="checkoutPaymentOption">
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="cod"
+                checked={paymentMethod === 'cod'}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="checkoutPaymentRadio"
+              />
+              <div className="checkoutPaymentOptionContent">
+                <div className="checkoutPaymentOptionHeader">
+                  <span className="checkoutPaymentOptionIcon">💵</span>
+                  <span className="checkoutPaymentOptionText">Cash on Delivery</span>
+                </div>
+                <p className="checkoutPaymentOptionDescription">
+                  Pay when you receive your order. Delivery typically takes 3-5 days.
+                </p>
+              </div>
+            </label>
+
+            <label className="checkoutPaymentOption">
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="stripe"
+                checked={paymentMethod === 'stripe'}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="checkoutPaymentRadio"
+              />
+              <div className="checkoutPaymentOptionContent">
+                <div className="checkoutPaymentOptionHeader">
+                  <span className="checkoutPaymentOptionIcon">💳</span>
+                  <span className="checkoutPaymentOptionText">Online Payment</span>
+                </div>
+                <p className="checkoutPaymentOptionDescription">
+                  Pay securely with credit/debit card via Stripe. Instant confirmation.
+                </p>
+              </div>
+            </label>
           </div>
+
+          {paymentMethod === 'stripe' && orderId && (
+            <div className="checkoutStripePayment">
+              <StripePayment
+                amount={cart.totalAmount}
+                orderId={orderId}
+                onPaymentSuccess={handlePaymentSuccess}
+                onPaymentError={handlePaymentError}
+              />
+            </div>
+          )}
         </div>
 
         <div className="checkoutShippingAddressFormCard">
@@ -367,20 +468,37 @@ const Checkout = () => {
               >
                 Back to Cart
               </button>
-              <button 
-                type="submit" 
-                disabled={loading}
-                className="checkoutBtnPrimary"
-              >
-                {loading ? (
-                  <>
-                    <span className="checkoutSpinner"></span>
-                    Processing...
-                  </>
-                ) : (
-                  `Place Order • ₹${cart.totalAmount.toLocaleString()}`
-                )}
-              </button>
+              {paymentMethod === 'cod' ? (
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="checkoutBtnPrimary"
+                >
+                  {loading ? (
+                    <>
+                      <span className="checkoutSpinner"></span>
+                      Processing...
+                    </>
+                  ) : (
+                    `Place Order • Rs.${cart.totalAmount.toLocaleString()}`
+                  )}
+                </button>
+              ) : paymentMethod === 'stripe' && !orderId ? (
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="checkoutBtnPrimary"
+                >
+                  {loading ? (
+                    <>
+                      <span className="checkoutSpinner"></span>
+                      Processing...
+                    </>
+                  ) : (
+                    `Proceed to Payment • Rs.${cart.totalAmount.toLocaleString()}`
+                  )}
+                </button>
+              ) : null}
             </div>
           </form>
         </div>

@@ -13,7 +13,7 @@ function ProductCard({ product, onEdit, onDelete }) {
 					</span>
 				</div>
 				<div className="text-xl font-bold text-gray-800">
-					₹{product.price.toLocaleString('en-IN')}
+					Rs.{product.price.toLocaleString()}
 				</div>
 			</div>
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { getOrderById, cancelOrder } from '../../api.js';
 import './Checkout.css'; // Import custom CSS
 
@@ -39,14 +40,14 @@ const OrderDetail = () => {
     try {
       const data = await cancelOrder(orderId);
       if (data.success) {
-        alert('Order cancelled successfully');
+        toast.success('Order cancelled successfully');
         fetchOrderDetails(); // Refresh order details
       } else {
-        alert(data.message || 'Failed to cancel order');
+        toast.error(data.message || 'Failed to cancel order');
       }
     } catch (err) {
       console.error('Error cancelling order:', err);
-      alert('Network error. Please try again.');
+      toast.error('Network error. Please try again.');
     }
   };
 
@@ -250,11 +251,11 @@ const OrderDetail = () => {
                   </div>
                   <div className="orderDetailProductPrice">
                     <label>Price:</label>
-                    <span>₹{product.price?.toLocaleString()}</span>
+                    <span>Rs.{product.price?.toLocaleString()}</span>
                   </div>
                   <div className="orderDetailProductSubtotal">
                     <label>Subtotal:</label>
-                    <span>₹{(product.price * product.quantity)?.toLocaleString()}</span>
+                    <span>Rs.{(product.price * product.quantity)?.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -268,7 +269,7 @@ const OrderDetail = () => {
           <div className="orderDetailSummaryItems">
             <div className="orderDetailSummaryRow">
               <span>Subtotal ({order.products.length} items):</span>
-              <span>₹{order.totalAmount?.toLocaleString()}</span>
+              <span>Rs.{order.totalAmount?.toLocaleString()}</span>
             </div>
             <div className="orderDetailSummaryRow">
               <span>Shipping:</span>
@@ -276,7 +277,7 @@ const OrderDetail = () => {
             </div>
             <div className="orderDetailSummaryRow orderDetailSummaryRow--total">
               <span>Total:</span>
-              <span>{order.formattedTotal || `₹${order.totalAmount?.toLocaleString()}`}</span>
+              <span>{order.formattedTotal || `Rs.${order.totalAmount?.toLocaleString()}`}</span>
             </div>
           </div>
         </div>
@@ -295,7 +296,7 @@ const OrderDetail = () => {
             </div>
             <div className="orderDetailPaymentItem">
               <label>Amount:</label>
-              <span>₹{order.totalAmount?.toLocaleString()}</span>
+              <span>Rs.{order.totalAmount?.toLocaleString()}</span>
             </div>
             <div className="orderDetailPaymentItem">
               <label>Payment Instructions:</label>
@@ -332,7 +333,7 @@ const OrderDetail = () => {
             </button>
             <button 
               className="orderDetailBtnAction orderDetailBtnAction--support"
-              onClick={() => alert('Contact support at support@example.com')}
+              onClick={() => toast.info('Contact support at support@example.com')}
             >
               Contact Support
             </button>

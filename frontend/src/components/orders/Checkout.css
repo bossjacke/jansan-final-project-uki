@@ -101,10 +101,38 @@
     align-items: center;
     padding: 10px 0;
     border-bottom: 1px solid #f0f0f0;
+    gap: 15px;
 }
 
 .checkoutOrderItem:last-child {
     border-bottom: none;
+}
+
+.checkoutOrderItemImage {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+}
+
+.checkoutOrderItemImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #eee;
+}
+
+.checkoutOrderItemNoImage {
+    width: 100%;
+    height: 100%;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9e9e9e;
+    font-size: 12px;
+    border: 1px solid #eee;
 }
 
 .checkoutOrderItemInfo {
@@ -1780,4 +1808,3 @@
         align-items: stretch;
     }
 }
-

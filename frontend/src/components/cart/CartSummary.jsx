@@ -14,7 +14,7 @@ const CartSummary = ({ totalAmount, onContinueShopping, onCheckout }) => {
       <div style={{ marginBottom: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
           <span style={{ color: '#666' }}>Total Amount:</span>
-          <span style={{ fontWeight: '500', color: '#333' }}>₹{totalAmount.toLocaleString()}</span>
+          <span style={{ fontWeight: '500', color: '#333' }}>Rs.{totalAmount.toLocaleString()}</span>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { getCart, updateCartItem, removeFromCart } from '../../api.js';
 import CartLayout from './CartLayout.jsx';
 import CartItem from './CartItem.jsx';
@@ -80,7 +81,10 @@ function Cart() {
 
     const handleCheckout = () => {
         if (!user) return navigate('/login');
-        if (!cart.items.length) return alert('Cart is empty');
+        if (!cart.items.length) {
+            toast.warning('Cart is empty');
+            return;
+        }
         navigate('/checkout');
     };
 
