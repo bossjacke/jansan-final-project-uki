@@ -1,6 +1,7 @@
 import logger from "../utils/logger.js";
 import Payment from "../models/payment.model.js";
 import Order from "../models/order.model.js";
+import User from "../models/user.model.js";
 import stripe from "stripe";
 
 const stripeInstance = stripe(process.env.STRIPE_SECRET_KEY);
@@ -18,8 +19,17 @@ export const createPaymentIntent = async (req, res) => {
       });
     }
 
+    // Fetch user data to get email
+    const user = await User.findById(req.user.id).select('email');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
     // Validate user email exists
-    if (!req.user.email) {
+    if (!user.email) {
       return res.status(400).json({
         success: false,
         message: "User email is required for payment processing"
@@ -33,7 +43,7 @@ export const createPaymentIntent = async (req, res) => {
       currency: currency,
       automatic_payment_methods: { enabled: true },
       metadata: { userId: req.user.id, orderId: orderId || "", ...metadata },
-      receipt_email: req.user.email
+      receipt_email: user.email
     });
 
     const payment = await Payment.create({
@@ -43,7 +53,7 @@ export const createPaymentIntent = async (req, res) => {
       amount: amountInPaise,
       currency: currency,
       status: "pending",
-      receiptEmail: req.user.email,
+      receiptEmail: user.email,
       metadata: new Map(Object.entries(paymentIntent.metadata))
     });
 
