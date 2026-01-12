@@ -43,7 +43,7 @@ const cartSchema = new mongoose.Schema({
 });
 
 // Calculate total amount before saving
-cartSchema.pre('save', function(next) {
+cartSchema.pre('save', function (next) {
     this.totalAmount = this.items.reduce((total, item) => {
         return total + (item.price * item.quantity);
     }, 0);
@@ -51,25 +51,25 @@ cartSchema.pre('save', function(next) {
 });
 
 // Static method to get or create cart
-cartSchema.statics.getOrCreateCart = async function(userId) {
+cartSchema.statics.getOrCreateCart = async function (userId) {
     try {
         console.log(`🔍 Looking for cart for userId: ${userId}`);
         let cart = await this.findOne({ userId, isActive: true })
             .populate('items.productId', 'name type description capacity warrantyPeriod images image');
-        
+
         console.log('🛒 Cart found:', cart);
-        
+
         if (!cart) {
             console.log('📝 Creating new cart for user');
             cart = new this({ userId, items: [] });
             await cart.save();
             console.log('✅ New cart saved:', cart);
-            
+
             cart = await this.findById(cart._id)
                 .populate('items.productId', 'name type description capacity warrantyPeriod images image');
             console.log('🛒 Populated cart:', cart);
         }
-        
+
         return cart;
     } catch (error) {
         console.error('❌ Error in getOrCreateCart:', error);

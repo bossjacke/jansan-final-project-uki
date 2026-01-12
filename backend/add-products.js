@@ -24,8 +24,7 @@ async function addSampleProducts() {
         price: 15000,
         warrantyPeriod: "2 years",
         description: "Small biogas unit suitable for household use with 1 cubic meter capacity",
-        stock: 10,
-        image: "https://via.placeholder.com/300x200?text=Biogas+1m³"
+        stock: 10
       },
       {
         name: "Bio-Gas Unit 2m³",
@@ -34,24 +33,21 @@ async function addSampleProducts() {
         price: 25000,
         warrantyPeriod: "3 years",
         description: "Medium biogas unit suitable for small businesses with 2 cubic meter capacity",
-        stock: 5,
-        image: "https://via.placeholder.com/300x200?text=Biogas+2m³"
+        stock: 5
       },
       {
         name: "Organic Fertilizer 5kg",
         type: "fertilizer",
         price: 500,
         description: "Premium organic fertilizer suitable for all types of crops, 5kg package",
-        stock: 50,
-        image: "https://via.placeholder.com/300x200?text=Fertilizer+5kg"
+        stock: 50
       },
       {
         name: "Organic Fertilizer 10kg",
         type: "fertilizer",
         price: 900,
         description: "Premium organic fertilizer suitable for all types of crops, 10kg package",
-        stock: 30,
-        image: "https://via.placeholder.com/300x200?text=Fertilizer+10kg"
+        stock: 30
       }
     ];
 

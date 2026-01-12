@@ -1,17 +1,29 @@
 import React from 'react';
 
 const EmptyCart = ({ onStartShopping }) => (
-	<div className="text-center py-16">
-		<div className="text-6xl mb-4">🛒</div>
-		<h3 className="text-xl font-semibold text-gray-700 mb-2">Your cart is empty</h3>
-		<p className="text-gray-500 mb-6">Add some products to get started!</p>
-		<button 
-			className="btn btn-primary"
-			onClick={onStartShopping}
-		>
-			Start Shopping
-		</button>
-	</div>
+    <div style={{
+        textAlign: 'center',
+        padding: '60px 20px'
+    }}>
+        <div style={{ fontSize: '60px', marginBottom: '20px' }}>🛒</div>
+        <h3 style={{ fontSize: '22px', fontWeight: '600', color: '#666', marginBottom: '10px' }}>Your cart is empty</h3>
+        <p style={{ color: '#999', marginBottom: '25px', fontSize: '16px' }}>Add some products to get started!</p>
+        <button 
+            style={{
+                padding: '12px 30px',
+                backgroundColor: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '16px',
+                fontWeight: '500',
+                cursor: 'pointer'
+            }}
+            onClick={onStartShopping}
+        >
+            Start Shopping
+        </button>
+    </div>
 );
 
 export default EmptyCart;

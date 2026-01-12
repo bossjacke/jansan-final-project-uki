@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCart, createOrder, confirmOrder } from '../../api.js';
+import { getCart, createOrder } from '../../api.js';
+import StripePayment from '../payment/StripePayment.jsx';
+import gascylinder from '../../assets/gascylinder.avif';
+import organicfertilizer from '../../assets/organicfertilizer.webp';
 import './Checkout.css';
 
 const Checkout = () => {
+  const navigate = useNavigate();
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('card');
   const [shippingAddress, setShippingAddress] = useState({
     fullName: '',
     phone: '',
@@ -17,18 +20,43 @@ const Checkout = () => {
     country: 'India'
   });
   const [user, setUser] = useState(null);
-  const navigate = useNavigate();
+  const [successMessage, setSuccessMessage] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [orderId, setOrderId] = useState(null);
+  const [showPayment, setShowPayment] = useState(false);
 
   useEffect(() => {
     fetchCart();
     fetchUserData();
   }, []);
 
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        navigate('/orders');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage, navigate]);
+
   const fetchCart = async () => {
     try {
       const data = await getCart();
+      
       if (data.success) {
-        setCart(data.data);
+        const validItems = data.data.items.filter(item => {
+          const hasProductId = item.productId && (item.productId._id || item.productId);
+          const hasQuantity = item.quantity > 0;
+          const hasPrice = item.price != null && item.price > 0;
+          return hasProductId && hasQuantity && hasPrice;
+        });
+
+        const validCart = {
+          ...data.data,
+          items: validItems,
+          totalAmount: validItems.reduce((total, item) => total + (item.price * item.quantity), 0)
+        };
+        setCart(validCart);
       } else {
         setError('Failed to fetch cart');
       }
@@ -40,29 +68,45 @@ const Checkout = () => {
   const fetchUserData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3003/api/user/profile', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const response = await fetch('http://localhost:3003/api/users/profile', {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type');
+      let data;
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        setError('Failed to fetch user data. Please login again.');
+        return;
+      }
+
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        setError('Unexpected response from server while fetching user data.');
+        return;
+      }
 
       if (data.success) {
-        setUser(data.data);
-        // Pre-fill shipping address with user data
+        setUser(data.user || data.data);
+        const userData = data.user || data.data;
         setShippingAddress(prev => ({
           ...prev,
-          fullName: data.data.fullName || data.data.name || '',
-          phone: data.data.phone || '',
-          addressLine1: data.data.location || '',
-          city: data.data.city || '',
-          postalCode: data.data.postalCode || '',
-          country: data.data.country || 'India'
+          fullName: (userData?.fullName || userData?.name) || '',
+          phone: userData?.phone || '',
+          addressLine1: userData?.location || '',
+          city: userData?.city || '',
+          postalCode: userData?.postalCode || '',
+          country: userData?.country || 'India'
         }));
+      } else {
+        setError(data.message || 'Failed to fetch user data');
       }
+
     } catch (err) {
-      console.error('Error fetching user data:', err);
+      setError('Error fetching user data');
     }
   };
 
@@ -91,152 +135,248 @@ const Checkout = () => {
     return true;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
+  const createOrderForPayment = async () => {
     if (!validateForm()) {
-      return;
+      return null;
     }
 
-    setLoading(true);
-    setError('');
+    if (!cart || !cart.items || cart.items.length === 0) {
+      setError('Your cart is empty. Please add items before checkout.');
+      return null;
+    }
 
     try {
-      const data = await createOrder({
-        paymentMethod,
-        shippingAddress
+      const validItems = cart.items.filter(item => {
+        const productId = item.productId?._id || item.productId;
+        const hasId = productId !== null && productId !== undefined;
+        const hasQty = item.quantity > 0;
+        const hasPrice = item.price > 0;
+        return hasId && hasQty && hasPrice;
       });
 
+      if (validItems.length === 0) {
+        throw new Error('No valid items in cart. Please refresh and try again.');
+      }
+
+      const orderData = {
+        items: validItems.map(item => {
+          let productId = item.productId;
+          if (typeof productId === 'object' && productId !== null) {
+            productId = productId._id || productId;
+          }
+          return {
+            productId: String(productId || ''),
+            quantity: item.quantity,
+            price: item.price
+          };
+        }),
+        shippingAddress: {
+          fullName: shippingAddress.fullName.trim(),
+          phone: shippingAddress.phone.trim(),
+          addressLine1: shippingAddress.addressLine1.trim(),
+          city: shippingAddress.city.trim(),
+          postalCode: shippingAddress.postalCode.trim(),
+          country: shippingAddress.country.trim()
+        },
+        totalAmount: cart.totalAmount,
+        paymentMethod: paymentMethod === 'stripe' ? 'online_payment' : 'cash_on_delivery',
+        paymentIntentId: paymentMethod === 'stripe' ? 'pending' : null
+      };
+      
+      const data = await createOrder(orderData);
+
       if (data.success) {
-        if (data.data.clientSecret) {
-          // Stripe payment - in a real app, you would redirect to Stripe Checkout
-          // For demo purposes, we'll simulate payment completion
-          alert('Redirecting to payment gateway...');
-          setTimeout(() => {
-            // Simulate successful payment
-            handlePaymentSuccess(data.data.order._id);
-          }, 2000);
-        } else {
-          // Cash on delivery or demo payment
-          alert('Order placed successfully!');
-          navigate('/orders');
-        }
+        setOrderId(data.data._id);
+        return data.data;
       } else {
-        setError(data.message || 'Failed to place order');
+        throw new Error(data.message || 'Failed to create order');
       }
     } catch (err) {
-      console.error('Error creating order:', err);
-      setError('Network error. Please try again.');
-    } finally {
-      setLoading(false);
+      setError(err.message || 'Failed to create order');
+      return null;
     }
   };
 
-  const handlePaymentSuccess = async (orderId) => {
-    try {
-      // In a real app, this would be handled by Stripe's webhook
-      // For demo, we'll simulate payment confirmation
-      const data = await confirmOrder('demo_payment_intent_' + orderId);
-
-      if (data.success) {
-        alert('Payment successful! Order confirmed.');
-        navigate('/orders');
-      } else {
-        alert('Payment confirmation failed. Please contact support.');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (paymentMethod === 'stripe') {
+      const order = await createOrderForPayment();
+      if (order) {
+        setShowPayment(true);
       }
-    } catch (err) {
-      console.error('Error confirming payment:', err);
-      alert('Payment confirmation error. Please contact support.');
+    } else {
+      const order = await createOrderForPayment();
+      if (order) {
+        setSuccessMessage('✅ Order placed successfully! Cash on delivery selected. Redirecting to orders...');
+      }
     }
+  };
+
+  const handlePaymentSuccess = (paymentIntent) => {
+    setSuccessMessage('✅ Payment successful! Order confirmed. Redirecting to orders...');
+  };
+
+  const handlePaymentError = (error) => {
+    setError(`Payment failed: ${error.message}`);
+    setShowPayment(false);
   };
 
   if (!cart || cart.items.length === 0) {
     return (
-      <div className="checkout-container">
-        <div className="empty-checkout">
-          <h2>Your cart is empty</h2>
-          <p>Add some products to get started!</p>
-          <button onClick={() => navigate('/products')}>
-            Continue Shopping
-          </button>
-        </div>
+      <div className="checkoutEmptyCart">
+        <h2 className="checkoutEmptyCartTitle">Your cart is empty</h2>
+        <p className="checkoutEmptyCartText">Add some products to get started!</p>
+        <button 
+          onClick={() => navigate('/products')}
+          className="checkoutBtnPrimary"
+        >
+          Continue Shopping
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="checkout-container">
-      <h1>Checkout</h1>
+    <div className="checkoutPage">
+      <h1 className="checkoutHeaderTitle">Checkout</h1>
       
       {error && (
-        <div className="error-message">
+        <div className="checkoutMessageError">
           {error}
-          <button onClick={() => setError('')} className="close-error">×</button>
+          <button onClick={() => setError('')} className="checkoutMessageCloseBtn">×</button>
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="checkoutMessageSuccess">
+          {successMessage}
+          <button onClick={() => setSuccessMessage('')} className="checkoutMessageCloseBtn">×</button>
         </div>
       )}
       
-      <div className="checkout-content">
-        <div className="order-summary">
-          <h3>Order Summary</h3>
-          <div className="summary-items">
+      <div className="checkoutLayoutGrid">
+        <div className="checkoutOrderSummaryCard">
+          <h3 className="checkoutCardTitle">Order Summary</h3>
+          <div className="checkoutOrderItems">
             {cart.items.map((item, index) => (
-              <div key={index} className="summary-item">
-                <div className="item-info">
-                  <span className="item-name">{item.productId?.name || 'Product'}</span>
-                  <span className="item-quantity">Qty: {item.quantity}</span>
+              <div key={index} className="checkoutOrderItem">
+                <div className="checkoutOrderItemImage">
+                  {item.productId?.image ? (
+                    <img 
+                      src={item.productId.image} 
+                      alt={item.productId?.name || 'Product'} 
+                      className="checkoutOrderItemImg"
+                    />
+                  ) : (
+                    <>
+                      {item.productId?.type?.toLowerCase().includes('biogas') || 
+                       item.productId?.name?.toLowerCase().includes('biogas') ||
+                       item.productId?.type?.toLowerCase().includes('gas') ||
+                       item.productId?.name?.toLowerCase().includes('gas') ? (
+                        <img 
+                          src={gascylinder} 
+                          alt="Biogas Product" 
+                          className="checkoutOrderItemImg"
+                        />
+                      ) : item.productId?.type?.toLowerCase().includes('fertilizer') || 
+                              item.productId?.name?.toLowerCase().includes('fertilizer') ||
+                              item.productId?.type?.toLowerCase().includes('organic') ||
+                              item.productId?.name?.toLowerCase().includes('organic') ? (
+                        <img 
+                          src={organicfertilizer} 
+                          alt="Fertilizer Product" 
+                          className="checkoutOrderItemImg"
+                        />
+                      ) : (
+                        <div className="checkoutOrderItemNoImage">
+                          No Image
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
-                <span className="item-price">₹{(item.price * item.quantity).toLocaleString()}</span>
+                <div className="checkoutOrderItemInfo">
+                  <span className="checkoutOrderItemName">{item.productId?.name || 'Product'}</span>
+                  <span className="checkoutOrderItemQuantity">Qty: {item.quantity}</span>
+                </div>
+                <span className="checkoutOrderItemTotal">Rs.{(item.price * item.quantity).toLocaleString()}</span>
               </div>
             ))}
           </div>
-          <div className="summary-total">
-            <span>Total Amount:</span>
-            <span className="total-amount">₹{cart.totalAmount.toLocaleString()}</span>
+          <div className="checkoutTotalAmount">
+            <span className="checkoutTotalAmountLabel">Total Amount:</span>
+            <span className="checkoutTotalAmountValue">Rs.{cart.totalAmount.toLocaleString()}</span>
           </div>
-          <div className="summary-delivery">
-            <span>Delivery:</span>
-            <span>Free (3-5 days)</span>
-          </div>
-        </div>
-
-        <div className="payment-section">
-          <h3>Payment Method</h3>
-          <div className="payment-options">
-            <label className="payment-option">
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="card"
-                checked={paymentMethod === 'card'}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-              />
-              <span className="payment-label">
-                <span className="payment-icon">💳</span>
-                Card Payment
-              </span>
-            </label>
-            <label className="payment-option">
-              <input
-                type="radio"
-                name="paymentMethod"
-                value="cash"
-                checked={paymentMethod === 'cash'}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-              />
-              <span className="payment-label">
-                <span className="payment-icon">💵</span>
-                Cash on Delivery
-              </span>
-            </label>
+          <div className="checkoutDeliveryInfo">
+            <span className="checkoutDeliveryLabel">Delivery:</span>
+            <span className="checkoutDeliveryValue">Free (3-5 days)</span>
           </div>
         </div>
 
-        <div className="shipping-section">
-          <h3>Shipping Address</h3>
+        <div className="checkoutPaymentMethodCard">
+          <h3 className="checkoutCardTitle">Payment Method</h3>
+          
+          <div className="checkoutPaymentOptions">
+            <label className="checkoutPaymentOption">
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="cod"
+                checked={paymentMethod === 'cod'}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="checkoutPaymentRadio"
+              />
+              <div className="checkoutPaymentOptionContent">
+                <div className="checkoutPaymentOptionHeader">
+                  <span className="checkoutPaymentOptionIcon">💵</span>
+                  <span className="checkoutPaymentOptionText">Cash on Delivery</span>
+                </div>
+                <p className="checkoutPaymentOptionDescription">
+                  Pay when you receive your order. Delivery typically takes 3-5 days.
+                </p>
+              </div>
+            </label>
+
+            <label className="checkoutPaymentOption">
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="stripe"
+                checked={paymentMethod === 'stripe'}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="checkoutPaymentRadio"
+              />
+              <div className="checkoutPaymentOptionContent">
+                <div className="checkoutPaymentOptionHeader">
+                  <span className="checkoutPaymentOptionIcon">💳</span>
+                  <span className="checkoutPaymentOptionText">Online Payment</span>
+                </div>
+                <p className="checkoutPaymentOptionDescription">
+                  Pay securely with credit/debit card via Stripe. Instant confirmation.
+                </p>
+              </div>
+            </label>
+          </div>
+
+          {paymentMethod === 'stripe' && orderId && (
+            <div className="checkoutStripePayment">
+              <StripePayment
+                amount={cart.totalAmount}
+                orderId={orderId}
+                onPaymentSuccess={handlePaymentSuccess}
+                onPaymentError={handlePaymentError}
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="checkoutShippingAddressFormCard">
+          <h3 className="checkoutCardTitle">Shipping Address</h3>
           <form onSubmit={handleSubmit}>
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="fullName">Full Name *</label>
+            <div className="checkoutFormGrid">
+              <div className="checkoutFormGroup">
+                <label htmlFor="fullName" className="checkoutFormLabel">Full Name *</label>
                 <input
                   id="fullName"
                   type="text"
@@ -245,13 +385,12 @@ const Checkout = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="Enter your full name"
+                  className="checkoutInputField"
                 />
               </div>
-            </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="phone">Phone Number *</label>
+              <div className="checkoutFormGroup">
+                <label htmlFor="phone" className="checkoutFormLabel">Phone Number *</label>
                 <input
                   id="phone"
                   type="tel"
@@ -261,13 +400,12 @@ const Checkout = () => {
                   required
                   placeholder="10-digit phone number"
                   pattern="[0-9]{10}"
+                  className="checkoutInputField"
                 />
               </div>
-            </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="addressLine1">Address Line 1 *</label>
+              <div className="checkoutFormGroup checkoutFormGroup--fullWidth">
+                <label htmlFor="addressLine1" className="checkoutFormLabel">Address Line 1 *</label>
                 <input
                   id="addressLine1"
                   type="text"
@@ -276,13 +414,12 @@ const Checkout = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="Street address, apartment, suite, etc."
+                  className="checkoutInputField"
                 />
               </div>
-            </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="city">City *</label>
+              <div className="checkoutFormGroup">
+                <label htmlFor="city" className="checkoutFormLabel">City *</label>
                 <input
                   id="city"
                   type="text"
@@ -291,13 +428,12 @@ const Checkout = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="City name"
+                  className="checkoutInputField"
                 />
               </div>
-            </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="postalCode">Postal Code *</label>
+              <div className="checkoutFormGroup">
+                <label htmlFor="postalCode" className="checkoutFormLabel">Postal Code *</label>
                 <input
                   id="postalCode"
                   type="text"
@@ -306,13 +442,12 @@ const Checkout = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="PIN code"
+                  className="checkoutInputField"
                 />
               </div>
-            </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="country">Country *</label>
+              <div className="checkoutFormGroup">
+                <label htmlFor="country" className="checkoutFormLabel">Country *</label>
                 <input
                   id="country"
                   type="text"
@@ -320,32 +455,50 @@ const Checkout = () => {
                   value={shippingAddress.country}
                   onChange={handleInputChange}
                   required
+                  className="checkoutInputField"
                 />
               </div>
             </div>
 
-            <div className="order-actions">
+            <div className="checkoutFormActions">
               <button 
                 type="button" 
-                className="back-btn"
                 onClick={() => navigate('/cart')}
+                className="checkoutBtnSecondary"
               >
                 Back to Cart
               </button>
-              <button 
-                type="submit" 
-                disabled={loading}
-                className="place-order-btn"
-              >
-                {loading ? (
-                  <>
-                    <span className="spinner"></span>
-                    Processing...
-                  </>
-                ) : (
-                  `Place Order • ₹${cart.totalAmount.toLocaleString()}`
-                )}
-              </button>
+              {paymentMethod === 'cod' ? (
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="checkoutBtnPrimary"
+                >
+                  {loading ? (
+                    <>
+                      <span className="checkoutSpinner"></span>
+                      Processing...
+                    </>
+                  ) : (
+                    `Place Order • Rs.${cart.totalAmount.toLocaleString()}`
+                  )}
+                </button>
+              ) : paymentMethod === 'stripe' && !orderId ? (
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="checkoutBtnPrimary"
+                >
+                  {loading ? (
+                    <>
+                      <span className="checkoutSpinner"></span>
+                      Processing...
+                    </>
+                  ) : (
+                    `Proceed to Payment • Rs.${cart.totalAmount.toLocaleString()}`
+                  )}
+                </button>
+              ) : null}
             </div>
           </form>
         </div>

@@ -3,7 +3,6 @@ import { authMiddleware } from '../middleware/auth.js';
 import { roleCheck } from '../middleware/roleCheck.js';
 import {
     createOrder,
-    confirmOrder,
     getMyOrders,
     getOrderById,
     updateOrderStatus,
@@ -15,9 +14,6 @@ const router = express.Router();
 
 // POST /api/order/create - Create order from cart
 router.post("/create", authMiddleware, createOrder);
-
-// POST /api/order/confirm - Confirm order after Stripe success
-router.post("/confirm", authMiddleware, confirmOrder);
 
 // GET /api/order/my - Get logged-in user's orders
 router.get("/my", authMiddleware, getMyOrders);

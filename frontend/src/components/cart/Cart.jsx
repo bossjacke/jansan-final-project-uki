@@ -1,117 +1,124 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { getCart, updateCartItem, removeFromCart } from '../../api.js';
-import CartItem from './CartItem';
-import CartSummary from './CartSummary';
-import './Cart.css';
+import CartLayout from './CartLayout.jsx';
+import CartItem from './CartItem.jsx';
+import CartSummary from './CartSummary.jsx';
+import EmptyCart from './EmptyCart.jsx';
+import LoadingCart from './LoadingCart.jsx';
+import CartError from './CartError.jsx';
 
-const Cart = () => {
-  const [cart, setCart] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchCart();
-  }, []);
+function Cart() {
+    const { user, token } = useAuth();
+    const navigate = useNavigate();
+    const [cart, setCart] = useState({ items: [], totalAmount: 0 });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  const fetchCart = async () => {
-    try {
-      const data = await getCart();
-      if (data.success) {
-        setCart(data.data);
-      } else {
-        setError('Failed to fetch cart');
-      }
-    } catch (err) {
-      setError('Network error. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    useEffect(() => {
+        if (user && token) fetchCart();
+        else setLoading(false);
+    }, [user, token]);
 
-  const updateQuantity = async (productId, newQuantity) => {
-    try {
-      const data = await updateCartItem(productId, newQuantity);
-      if (data.success) {
-        fetchCart(); // Refresh cart
-      } else {
-        alert(data.message || 'Failed to update quantity');
-      }
-    } catch (err) {
-      alert('Network error. Please try again.');
-    }
-  };
+    const fetchCart = async () => {
+        try {
+            const data = await getCart();
+            const validItems = data.data.items.filter(item =>
+                item.productId &&
+                item.quantity > 0 &&
+                item.price != null &&
+                item.price > 0
+            );
+            const validCart = {
+                ...data.data,
+                items: validItems,
+                totalAmount: validItems.reduce((total, item) => total + (item.price * item.quantity), 0)
+            };
+            setCart(validCart);
+        } catch (err) {
+            console.error('Error fetching cart:', err);
+            const errorMsg = err?.message || err?.response?.data?.message || 'Failed to fetch cart';
+            setError(errorMsg);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  const removeFromCart = async (productId) => {
-    try {
-      const data = await removeFromCart(productId);
-      if (data.success) {
-        fetchCart(); // Refresh cart
-      } else {
-        alert(data.message || 'Failed to remove item');
-      }
-    } catch (err) {
-      alert('Network error. Please try again.');
-    }
-  };
+    const updateQty = async (id, qty) => {
+        if (!user || !token) {
+            setError('Please login to update cart');
+            return;
+        }
+        if (qty < 1) return removeItem(id);
 
-  const proceedToCheckout = () => {
-    navigate('/checkout');
-  };
+        try {
+            const data = await updateCartItem(id, qty);
+            setCart({ ...data.data });
+            setError(null);
+        } catch (err) {
+            const errorMsg = err?.message || err?.response?.data?.message || 'Failed to update cart';
+            setError(errorMsg);
+        }
+    };
 
-  if (loading) {
+    const removeItem = async (id) => {
+        if (!user || !token) {
+            setError('Please login to remove items');
+            return;
+        }
+        try {
+            const data = await removeFromCart(id);
+            setCart({ ...data.data });
+            setError(null);
+        } catch (err) {
+            const errorMsg = err?.message || err?.response?.data?.message || 'Failed to remove item';
+            setError(errorMsg);
+        }
+    };
+
+    const handleCheckout = () => {
+        if (!user) return navigate('/login');
+        if (!cart.items.length) {
+            toast.warning('Cart is empty');
+            return;
+        }
+        navigate('/checkout');
+    };
+
+    if (loading) return <LoadingCart />;
+
     return (
-      <div className="cart-container">
-        <div className="loading">Loading cart...</div>
-      </div>
-    );
-  }
+        <CartLayout itemCount={cart.items.length}>
+            {error && <CartError error={error} />}
 
-  if (error) {
-    return (
-      <div className="cart-container">
-        <div className="error">{error}</div>
-      </div>
-    );
-  }
+            {!cart.items.length ? (
+                <EmptyCart onStartShopping={() => navigate('/products')} />
+            ) : (
+                <>
+                    <div className="cart-items">
+                        {cart.items.map(item => (
+                            <CartItem
+                                key={item.productId?._id || item.productId}
+                                item={item}
+                                onUpdateQuantity={updateQty}
+                                onRemove={removeItem}
+                            />
+                        ))}
+                    </div>
 
-  if (!cart || cart.items.length === 0) {
-    return (
-      <div className="cart-container">
-        <div className="empty-cart">
-          <h2>Your cart is empty</h2>
-          <p>Add some products to get started!</p>
-          <button onClick={() => navigate('/products')}>
-            Continue Shopping
-          </button>
-        </div>
-      </div>
+                    <CartSummary 
+                        totalAmount={cart.totalAmount}
+                        onContinueShopping={() => navigate('/products')}
+                        onCheckout={handleCheckout}
+                    />
+                </>
+            )}
+            
+        </CartLayout>
     );
-  }
-
-  return (
-    <div className="cart-container">
-      <h1>Shopping Cart</h1>
-      
-      <div className="cart-items">
-        {cart.items.map((item) => (
-          <CartItem
-            key={item.productId._id}
-            item={item}
-            onUpdateQuantity={updateQuantity}
-            onRemove={removeFromCart}
-          />
-        ))}
-      </div>
-      
-      <CartSummary 
-        totalAmount={cart.totalAmount}
-        itemCount={cart.items.length}
-        onCheckout={proceedToCheckout}
-      />
-    </div>
-  );
-};
+}
 
 export default Cart;
